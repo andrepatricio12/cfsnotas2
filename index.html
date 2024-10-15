@@ -128,7 +128,10 @@
             <label for="rank">Permitir exibir no ranking:</label>
             <input type="checkbox" id="rank" onchange="toggleRankingButton()">
         </div>
-
+<label>
+    <input type="checkbox" id="rank" onchange="toggleRankingButton()"> Aceito aparecer no ranking
+</label>
+<button id="ranking-btn" onclick="mostrarRanking()" disabled>Ver Ranking</button>
         <div class="button-group">
             <button id="salvarNotaBtn" onclick="salvarNota()">Salvar Nota</button>
         </div>
@@ -255,8 +258,16 @@
 
         // Função para mostrar o ranking
         function toggleRankingButton() {
-            const rankingBtn = document.getElementById("ranking-btn");
-            rankingBtn.disabled = !document.getElementById("rank").checked;
+    const checkbox = document.getElementById('rank');
+    const rankingButton = document.getElementById('ranking-btn');
+
+    if (checkbox.checked) {
+        rankingButton.disabled = false;  // Habilita o botão
+    } else {
+        rankingButton.disabled = true;   // Desabilita o botão
+    }
+}
+
     }
 
     function calcularMedia() {
