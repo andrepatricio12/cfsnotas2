@@ -66,7 +66,7 @@
     <div id="notas-form" class="hidden">
         <h2 id="aluno-nome"></h2>
         <label for="disciplina">Disciplina:</label>
-        <select id="disciplina" onchange="carregarNotas(matriculaAtual)">
+        <select id="disciplina" onchange="carregarNotas()">
             <!-- Disciplinas... -->
             <option value="ADP">Administração de Pessoal (ADP)</option>
             <option value="ALF">Administração Logística Financeira (ALF)</option>
@@ -119,7 +119,6 @@
         const app = firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        let matriculaAtual = null;
 
         const alunos = {
         "9287027": "ELIENAR FARIAS",
@@ -175,18 +174,18 @@
         }
 
         // Função para carregar notas salvas de uma disciplina
-        function carregarNotas(matricula) {
-            const notaInput = document.getElementById('nota');
-            const disciplinaSelect = document.getElementById('disciplina');
+       function carregarNotas() {
+    const matricula = matriculaAtual;
+    const notaInput = document.getElementById('nota');
+    const disciplinaSelect = document.getElementById('disciplina');
+    const disciplina = disciplinaSelect.value;
 
-            db.ref(`notas/${matricula}`).once('value').then(snapshot => {
-                const notas = snapshot.val();
-                if (notas) {
-                    const disciplina = disciplinaSelect.value;
-                    if (notas[disciplina]) {
-                        notaInput.value = notas[disciplina];
-                    } else {
-                        notaInput.value = '';
+    db.ref(`notas/${matricula}/${disciplina}`).once('value').then(snapshot => {
+        const nota = snapshot.val();
+        notaInput.value = nota ? nota : '';
+    });
+}
+
                     }
                 }
             });
@@ -233,9 +232,14 @@
 
         // Habilitar botão do ranking se o usuário aceitar
         function toggleRankingButton() {
-            const rankCheckbox = document.getElementById('rank');
-            const rankingBtn = document.getElementById('ranking-btn');
-            rankingBtn.disabled = !rankCheckbox.checked;
+    const rankCheckbox = document.getElementById('rank');
+    const rankingBtn = document.getElementById('ranking-btn');
+    rankingBtn.disabled = !rankCheckbox.checked;
+
+    // Salvar permissão no banco de dados
+    db.ref(`permissoesRanking/${matriculaAtual}`).set(rankCheckbox.checked);
+}
+
         }
 
         // Função para calcular média
@@ -254,37 +258,42 @@
 
         // Função para mostrar o ranking
         function mostrarRanking() {
-            const rankingLista = document.getElementById('ranking-lista');
-            rankingLista.innerHTML = '';
+    const rankingLista = document.getElementById('ranking-lista');
+    rankingLista.innerHTML = '';
 
-            db.ref('notas').once('value').then(snapshot => {
-                const notasAlunos = snapshot.val();
-                const ranking = [];
+    db.ref('notas').once('value').then(snapshot => {
+        const notasAlunos = snapshot.val();
+        const ranking = [];
 
-                Object.keys(notasAlunos).forEach(matricula => {
-                    db.ref(`notas/${matricula}`).once('value').then(snapshot => {
-                        const notas = snapshot.val();
-                        if (notas) {
-                            const total = Object.values(notas).reduce((acc, nota) => acc + nota, 0);
-                            const media = total / Object.keys(notas).length;
-                            ranking.push({ matricula, media });
-                        }
-                    }).then(() => {
-                        // Ordenar o ranking por média
-                        ranking.sort((a, b) => b.media - a.media);
-
-                        ranking.forEach(item => {
-                            const alunoNome = alunos[item.matricula];
-                            const rankingItem = document.createElement('div');
-                            rankingItem.innerText = `${alunoNome}: ${item.media.toFixed(2)}`;
-                            rankingLista.appendChild(rankingItem);
-                        });
-
-                        rankingLista.style.display = 'block';
-                    });
-                });
+        // Usar Promises para garantir que todos os alunos sejam processados
+        const promessas = Object.keys(notasAlunos).map(matricula => {
+            return db.ref(`permissoesRanking/${matricula}`).once('value').then(permSnapshot => {
+                if (permSnapshot.val() === true) {
+                    const notas = notasAlunos[matricula];
+                    const total = Object.values(notas).reduce((acc, nota) => acc + nota, 0);
+                    const media = total / Object.keys(notas).length;
+                    ranking.push({ nome: alunos[matricula], media });
+                }
             });
-        }
+        });
+
+        // Esperar que todas as promessas terminem
+        Promise.all(promessas).then(() => {
+            if (ranking.length > 0) {
+                ranking.sort((a, b) => b.media - a.media);
+                ranking.forEach(aluno => {
+                    const item = document.createElement('div');
+                    item.innerText = `${aluno.nome}: Média ${aluno.media.toFixed(2)}`;
+                    rankingLista.appendChild(item);
+                });
+                rankingLista.style.display = 'block';
+            } else {
+                alert('Nenhum aluno aceitou aparecer no ranking.');
+            }
+        });
+    });
+}
+
     </script>
 </body>
 </html>
