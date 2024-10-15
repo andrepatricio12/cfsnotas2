@@ -86,7 +86,7 @@
 
     <div id="login-form">
         <div class="form-group">
-            <label for="matricula">Digite sua matrícula:</label>
+            <label for="matricula">Digite sua matrícula:/label>
             <input type="text" id="matricula" placeholder="Digite sua matrícula">
         </div>
         <button onclick="login()">Entrar</button>
@@ -154,10 +154,11 @@
 </div>
 
 <!-- Adicione a configuração do Firebase -->
-<<!-- Import the Firebase SDK -->
-<script src="https://www.gstatic.com/firebasejs/9.1.2/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.1.2/firebase-firestore.js"></script>
-<script>
+<!-- Import Firebase SDKs compatíveis com o navegador -->
+<script src="https://www.gstatic.com/firebasejs/9.1.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.1.2/firebase-firestore-compat.js"></script>
+
+
     // Configuração Firebase
 const firebaseConfig = {
     apiKey: "AIzaSyDEvCDdX0LGjDMFpyxljj-4JTjZKtgooDM",
