@@ -67,8 +67,9 @@
         <h2 id="aluno-nome"></h2>
         <label for="disciplina">Disciplina:</label>
         <select id="disciplina" onchange="carregarNotas(matriculaAtual)">
+            <!-- Disciplinas... -->
             <option value="ADP">Administração de Pessoal (ADP)</option>
-                 <option value="ALF">Administração Logística Financeira (ALF)</option>
+            <option value="ALF">Administração Logística Financeira (ALF)</option>
                 <option value="AMTP">Armamento, Munição e Tiro Policial (AMTP)</option>
                 <option value="APHT">Atendimento Pré-Hospitalar Tático (APH)</option>
                 <option value="CCL">Comando Chefia e Liderança (CCL)</option>
@@ -119,6 +120,7 @@
         const db = firebase.database();
 
         let matriculaAtual = null;
+
         const alunos = {
         "9287027": "ELIENAR FARIAS",
         "9306820": "NAZARETH LIMA GOEDERT",
@@ -157,8 +159,6 @@
         "9329056": "VINICIUS JOVELINO COSTA",
         "9339477": "DANIEL SERAFIM PESSI"
         };
-
-         let matriculaAtual = null;
 
         // Função de login
         function login() {
@@ -262,25 +262,25 @@
                 const ranking = [];
 
                 Object.keys(notasAlunos).forEach(matricula => {
-                    db.ref(`permissoesRanking/${matricula}`).once('value').then(permSnapshot => {
-                        if (permSnapshot.val() === true) {
-                            const notas = notasAlunos[matricula];
+                    db.ref(`notas/${matricula}`).once('value').then(snapshot => {
+                        const notas = snapshot.val();
+                        if (notas) {
                             const total = Object.values(notas).reduce((acc, nota) => acc + nota, 0);
                             const media = total / Object.keys(notas).length;
-                            ranking.push({ nome: alunos[matricula], media });
+                            ranking.push({ matricula, media });
                         }
+                    }).then(() => {
+                        // Ordenar o ranking por média
+                        ranking.sort((a, b) => b.media - a.media);
 
-                        if (ranking.length > 0) {
-                            ranking.sort((a, b) => b.media - a.media);
-                            ranking.forEach(aluno => {
-                                const item = document.createElement('div');
-                                item.innerText = `${aluno.nome}: Média ${aluno.media.toFixed(2)}`;
-                                rankingLista.appendChild(item);
-                            });
-                            rankingLista.style.display = 'block';
-                        } else {
-                            alert('Nenhum aluno aceitou aparecer no ranking.');
-                        }
+                        ranking.forEach(item => {
+                            const alunoNome = alunos[item.matricula];
+                            const rankingItem = document.createElement('div');
+                            rankingItem.innerText = `${alunoNome}: ${item.media.toFixed(2)}`;
+                            rankingLista.appendChild(rankingItem);
+                        });
+
+                        rankingLista.style.display = 'block';
                     });
                 });
             });
@@ -288,4 +288,3 @@
     </script>
 </body>
 </html>
-    
