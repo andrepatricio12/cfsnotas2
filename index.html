@@ -97,7 +97,7 @@
             <label for="disciplina">Selecione a Disciplina:</label>
             <select id="disciplina">
                 <option value="ADP">Administração de Pessoal (ADP)</option>
-                 <option value="ALF">Administração Logística Financeira (ALF)</option>
+                <option value="ALF">Administração Logística Financeira (ALF)</option>
                 <option value="AMTP">Armamento, Munição e Tiro Policial (AMTP)</option>
                 <option value="APHT">Atendimento Pré-Hospitalar Tático (APH)</option>
                 <option value="CCL">Comando Chefia e Liderança (CCL)</option>
@@ -128,10 +128,7 @@
             <label for="rank">Permitir exibir no ranking:</label>
             <input type="checkbox" id="rank" onchange="toggleRankingButton()">
         </div>
-<label>
-    <input type="checkbox" id="rank" onchange="toggleRankingButton()"> Aceito aparecer no ranking
-</label>
-<button id="ranking-btn" onclick="mostrarRanking()" disabled>Ver Ranking</button>
+
         <div class="button-group">
             <button id="salvarNotaBtn" onclick="salvarNota()">Salvar Nota</button>
         </div>
@@ -141,7 +138,7 @@
         </div>
 
         <div class="form-group">
-            <button id="ranking-btn" onclick="window.location.href='ranking.html'" disabled>Ver Ranking</button>
+            <button id="ranking-btn" onclick="mostrarRanking()" disabled>Ver Ranking</button>
         </div>
 
         <div class="form-group">
@@ -155,7 +152,6 @@
 
 <script>
     const alunos = {
-        // Alunos cadastrados
         "9287027": "ELIENAR FARIAS",
         "9306820": "NAZARETH LIMA GOEDERT",
         "9303219": "CARLA DE LUCA LINHARES",
@@ -240,34 +236,8 @@
         }
     }
 
-   // Função para ver todas as notas
-        function verNotas() {
-            const matricula = document.getElementById("matricula").value;
-            db.ref("notas/" + matricula).once('value').then(snapshot => {
-                const notas = snapshot.val();
-                const listaNotas = document.getElementById("lista-notas");
-                listaNotas.innerHTML = "";
-                for (const disciplina in notas) {
-                    const item = document.createElement("div");
-                    item.innerText = `${disciplina}: ${notas[disciplina]}`;
-                    listaNotas.appendChild(item);
-                }
-                listaNotas.classList.remove("hidden");
-            });
-        }
-
-        // Função para mostrar o ranking
-        function toggleRankingButton() {
-    const checkbox = document.getElementById('rank');
-    const rankingButton = document.getElementById('ranking-btn');
-
-    if (checkbox.checked) {
-        rankingButton.disabled = false;  // Habilita o botão
-    } else {
-        rankingButton.disabled = true;   // Desabilita o botão
-    }
-}
-
+    function verNotas() {
+        // Sua lógica para mostrar todas as notas
     }
 
     function calcularMedia() {
@@ -282,32 +252,22 @@
         const media = totalDisciplinas > 0 ? soma / totalDisciplinas : 0;
         alert(`Sua média é: ${media.toFixed(2)}`);
     }
-// Função para mostrar ranking
-        function mostrarRanking() {
-            db.ref("notas").once('value').then(snapshot => {
-                const ranking = {};
-                snapshot.forEach(matriculaSnapshot => {
-                    const matricula = matriculaSnapshot.key;
-                    const notas = matriculaSnapshot.val();
-                    const totalNotas = Object.values(notas).reduce((acc, nota) => acc + nota, 0);
-                    const media = totalNotas / Object.keys(notas).length;
-                    ranking[matricula] = media;
-                });
 
-                const rankingList = Object.entries(ranking).sort((a, b) => b[1] - a[1]);
-                const rankingListaDiv = document.getElementById("ranking-lista");
-                rankingListaDiv.innerHTML = "<h3>Ranking:</h3>";
+    function toggleRankingButton() {
+        const checkbox = document.getElementById('rank');
+        const rankingButton = document.getElementById('ranking-btn');
 
-                rankingList.forEach(([matricula, media]) => {
-                    const item = document.createElement("div");
-                    item.innerText = `Matrícula: ${matricula}, Média: ${media.toFixed(2)}`;
-                    rankingListaDiv.appendChild(item);
-                });
-
-                rankingListaDiv.classList.remove("hidden");
-            });
+        if (checkbox.checked) {
+            rankingButton.disabled = false;  // Habilita o botão
+        } else {
+            rankingButton.disabled = true;   // Desabilita o botão
         }
-    </script>
+    }
+
+    function mostrarRanking() {
+        // Sua lógica para mostrar o ranking
+    }
+</script>
 
 </body>
 </html>
