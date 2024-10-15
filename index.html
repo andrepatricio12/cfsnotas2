@@ -242,41 +242,38 @@ const db = firebase.firestore();
     }
 
     function salvarNota() {
-        const disciplina = document.getElementById("disciplina").value;
-        const nota = parseFloat(document.getElementById("nota").value);
-
-        if (nota >= 0 && nota <= 10) {
-            const ref = database.ref(`notas/${matriculaAtual}/${disciplina}`);
-            ref.set(nota)
-                .then(() => {
-                    document.getElementById("nota-success").classList.remove("hidden");
-                    document.getElementById("nota-error").classList.add("hidden");
-                    setTimeout(() => {
-                        document.getElementById("nota-success").classList.add("hidden");
-                    }, 2000);
-                })
-                .catch((error) => {
-                    console.error("Erro ao salvar nota: ", error);
-                });
-        } else {
-            document.getElementById("nota-error").classList.remove("hidden");
-        }
-    }function salvarNota() {
     const disciplina = document.getElementById("disciplina").value;
     const notaInput = document.getElementById("nota");
     const nota = parseFloat(notaInput.value);
 
     if (nota >= 0 && nota <= 10) {
-        db.collection("notas").doc(alunoAtual).set({
+        db.collection("notas").doc(matriculaAtual).set({
             [disciplina]: nota
         }, { merge: true }).then(() => {
-            mostrarMensagemSucesso();
+            document.getElementById("nota-success").classList.remove("hidden");
+            setTimeout(() => {
+                document.getElementById("nota-success").classList.add("hidden");
+            }, 2000);
         }).catch((error) => {
             console.error("Erro ao salvar a nota: ", error);
         });
     } else {
-        mostrarMensagemErro();
+        document.getElementById("nota-error").classList.remove("hidden");
     }
+}
+
+function carregarNota(disciplina) {
+    db.collection("notas").doc(matriculaAtual).get().then((doc) => {
+        if (doc.exists && doc.data()[disciplina] !== undefined) {
+            document.getElementById("nota").value = doc.data()[disciplina];
+        } else {
+            document.getElementById("nota").value = ""; // Limpar se não houver nota
+        }
+    }).catch((error) => {
+        console.error("Erro ao buscar a nota: ", error);
+    });
+}
+
 }
 
 
