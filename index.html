@@ -3,67 +3,95 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema de Notas CFS</title>
-    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-database.js"></script>
+    <title>Sistema de Notas - Curso de Sargentos</title>
+
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
             margin: 0;
-            padding: 20px;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f5f5f5;
         }
-        h1, h2 {
+        .container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            width: 100%;
+        }
+        h1 {
+            text-align: center;
             color: #333;
         }
-        #login-form, #notas-form {
-            background-color: #fff;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            padding: 20px;
-            margin: 20px auto;
-            max-width: 400px;
+        .form-group {
+            margin-bottom: 15px;
         }
-        input, select, button {
-            width: 100%;
+        .form-group label {
+            display: block;
+        }
+        .form-group input, .form-group select {
             padding: 10px;
-            margin: 10px 0;
+            width: 100%;
             border-radius: 5px;
-            border: 1px solid #ccc;
+            border: 1px solid #ddd;
         }
         button {
-            background-color: #007BFF;
-            color: white;
+            padding: 10px;
+            width: 100%;
+            background-color: #007bff;
             border: none;
+            border-radius: 5px;
+            color: white;
+            font-size: 16px;
             cursor: pointer;
+            transition: background-color 0.3s;
         }
-        button:hover {
+        button:disabled {
+            background-color: #ccc;
+        }
+        button:hover:not(:disabled) {
             background-color: #0056b3;
+        }
+        #ranking-btn {
+            display: none;
+        }
+        .message {
+            margin-top: 20px;
+            text-align: center;
+            font-weight: bold;
+        }
+        .error {
+            color: red;
         }
         .hidden {
             display: none;
         }
-        #nota-success, #nota-error {
-            margin-top: 10px;
-        }
-        #ranking-lista div, #lista-notas div {
-            background-color: #e9ecef;
-            padding: 10px;
-            border-radius: 5px;
-            margin-top: 5px;
-        }
-        #salvar-nota-btn, #ver-notas-btn {
-            margin-right: 10px;
+        .button-group {
+            margin-top: 20px;
         }
     </style>
 </head>
 <body>
-    <h1>Sistema de Notas CFS</h1>
+
+<div class="container">
+    <h1>Sistema de Notas - Curso de Sargentos</h1>
+
     <div id="login-form">
-        <h2>Login</h2>
-        <input type="text" id="matricula" placeholder="Digite sua matrícula">
+        <div class="form-group">
+            <label for="matricula">Digite sua matrícula:</label>
+            <input type="text" id="matricula" placeholder="Digite sua matrícula">
+        </div>
         <button onclick="login()">Entrar</button>
-        <div id="login-error" style="display:none;color:red;">Matrícula inválida</div>
+        <div id="login-error" class="error hidden">Matrícula não encontrada. Por favor, tente novamente.</div>
+    </div>
+
+    <div id="notas-form" class="hidden">
+        <h2 id="aluno-nome"></h2>
     </div>
 
     <div id="notas-form" class="hidden">
