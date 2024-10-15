@@ -75,7 +75,8 @@
             margin-top: 20px;
         }
     </style>
-    <!-- Adicione a biblioteca Firebase -->
+
+    <!-- Adicione a biblioteca Firebase corretamente para o navegador -->
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database.js"></script>
 </head>
@@ -97,9 +98,9 @@
         <h2 id="aluno-nome"></h2>
         <label for="disciplina">Disciplina:</label>
         <select id="disciplina" onchange="carregarNotas()">
-            <!-- Adicione as opções aqui -->
+            <!-- Adicione as opções de disciplinas -->
             <option value="ADP">Administração de Pessoal (ADP)</option>
-                 <option value="ALF">Administração Logística Financeira (ALF)</option>
+           <option value="ALF">Administração Logística Financeira (ALF)</option>
                 <option value="AMTP">Armamento, Munição e Tiro Policial (AMTP)</option>
                 <option value="APHT">Atendimento Pré-Hospitalar Tático (APH)</option>
                 <option value="CCL">Comando Chefia e Liderança (CCL)</option>
@@ -146,6 +147,7 @@
             appId: "1:91086463856:web:6a16fb0b3abe04bbc425b5"
         };
 
+        // Initialize Firebase
         const app = firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
@@ -204,25 +206,21 @@
         }
 
         function carregarNotas() {
-            const matricula = matriculaAtual;
             const notaInput = document.getElementById('nota');
-            const disciplinaSelect = document.getElementById('disciplina');
-            const disciplina = disciplinaSelect.value;
+            const disciplina = document.getElementById('disciplina').value;
 
-            db.ref(`notas/${matricula}/${disciplina}`).once('value').then(snapshot => {
+            db.ref(`notas/${matriculaAtual}/${disciplina}`).once('value').then(snapshot => {
                 const nota = snapshot.val();
-                notaInput.value = nota ? nota : ''; // Limpar o campo se não houver nota
+                notaInput.value = nota ? nota : '';
             });
         }
 
         function salvarNota() {
-            const notaInput = document.getElementById('nota');
-            const disciplinaSelect = document.getElementById('disciplina');
-            const nota = parseFloat(notaInput.value);
-            const matricula = matriculaAtual;
+            const nota = parseFloat(document.getElementById('nota').value);
+            const disciplina = document.getElementById('disciplina').value;
 
             if (nota >= 1 && nota <= 10) {
-                db.ref(`notas/${matricula}/${disciplinaSelect.value}`).set(nota).then(() => {
+                db.ref(`notas/${matriculaAtual}/${disciplina}`).set(nota).then(() => {
                     document.getElementById('nota-success').style.display = 'block';
                     document.getElementById('nota-error').style.display = 'none';
                     setTimeout(() => {
@@ -231,7 +229,6 @@
                 });
             } else {
                 document.getElementById('nota-error').style.display = 'block';
-                document.getElementById('nota-success').style.display = 'none';
             }
         }
 
@@ -271,21 +268,26 @@
                 const ranking = [];
 
                 const promessas = Object.keys(notasAlunos).map(matricula => {
-                    return db.ref(`permissoesRanking/${matricula}`).once('value').then(permSnapshot => {
-                        if (permSnapshot.val() === true) {
-                            const notas = notasAlunos[matricula];
-                            const total = Object.values(notas).reduce((acc, nota) => acc + nota, 0);
-                            const media = total / Object.keys(notas).length;
-                            ranking.push({ matricula, media, nome: alunos[matricula] });
+                    return db.ref(`permissoesRanking/${matricula}`).once('value').then(permissionSnap => {
+                        if (permissionSnap.val()) {
+                            const alunoNotas = notasAlunos[matricula];
+                            let totalNotas = 0;
+                            let numDisciplinas = 0;
+                            Object.keys(alunoNotas).forEach(disciplina => {
+                                totalNotas += alunoNotas[disciplina];
+                                numDisciplinas++;
+                            });
+                            const media = totalNotas / numDisciplinas;
+                            ranking.push({ matricula, media });
                         }
                     });
                 });
 
                 Promise.all(promessas).then(() => {
                     ranking.sort((a, b) => b.media - a.media);
-                    ranking.forEach((aluno, index) => {
+                    ranking.forEach((entry, index) => {
                         const item = document.createElement('div');
-                        item.innerText = `${index + 1}º - ${aluno.nome}: ${aluno.media.toFixed(2)}`;
+                        item.innerText = `${index + 1}. ${alunos[entry.matricula]}: Média ${entry.media.toFixed(2)}`;
                         rankingLista.appendChild(item);
                     });
                     rankingLista.style.display = 'block';
@@ -297,11 +299,16 @@
             db.ref(`notas/${matriculaAtual}`).once('value').then(snapshot => {
                 const notas = snapshot.val();
                 if (notas) {
-                    const total = Object.values(notas).reduce((acc, nota) => acc + nota, 0);
-                    const media = total / Object.keys(notas).length;
-                    alert(`Sua média é ${media.toFixed(2)}`);
+                    let totalNotas = 0;
+                    let numDisciplinas = 0;
+                    Object.keys(notas).forEach(disciplina => {
+                        totalNotas += notas[disciplina];
+                        numDisciplinas++;
+                    });
+                    const media = totalNotas / numDisciplinas;
+                    alert(`Sua média geral é: ${media.toFixed(2)}`);
                 } else {
-                    alert('Nenhuma nota encontrada para calcular a média.');
+                    alert('Nenhuma nota disponível para cálculo de média.');
                 }
             });
         }
