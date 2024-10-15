@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistema de Notas - Curso de Sargentos</title>
 
-    <!-- Estilizações em CSS -->
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -73,13 +72,7 @@
             display: none;
         }
     </style>
-    <script>
     <script src="script.js"></script>
-
-</script>
-
-
-    <!-- Firebase (Versão 8 para compatibilidade com scripts não modulares) -->
     <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-database.js"></script>
 </head>
@@ -88,7 +81,6 @@
 <div class="container">
     <h1>Sistema de Notas - Curso de Sargentos</h1>
 
-    <!-- Formulário de Login -->
     <div id="login-form">
         <div class="form-group">
             <label for="matricula">Digite sua matrícula:</label>
@@ -98,7 +90,6 @@
         <div id="login-error" class="error hidden">Matrícula não encontrada. Por favor, tente novamente.</div>
     </div>
 
-    <!-- Formulário de Notas -->
     <div id="notas-form" class="hidden">
         <h2 id="aluno-nome"></h2>
 
@@ -106,7 +97,7 @@
             <label for="disciplina">Selecione a Disciplina:</label>
             <select id="disciplina">
                 <option value="ADP">Administração de Pessoal (ADP)</option>
-               <option value="ALF">Administração Logística Financeira (ALF)</option>
+                <option value="ALF">Administração Logística Financeira (ALF)</option>
                 <option value="AMTP">Armamento, Munição e Tiro Policial (AMTP)</option>
                 <option value="APHT">Atendimento Pré-Hospitalar Tático (APH)</option>
                 <option value="CCL">Comando Chefia e Liderança (CCL)</option>
@@ -138,7 +129,7 @@
             <input type="checkbox" id="rank" onchange="toggleRankingButton()">
         </div>
 
-        <button onclick="salvarNota()">Salvar Nota</button>
+        <button id="salvarNotaBtn" onclick="salvarNota()">Salvar Nota</button>
 
         <div class="form-group">
             <button onclick="verNotas()">Ver Todas as Notas</button>
@@ -148,7 +139,6 @@
             <button id="ranking-btn" onclick="window.location.href='ranking.html'" disabled>Ver Ranking</button>
         </div>
 
-        <!-- Botão para calcular média -->
         <div class="form-group">
             <button id="media-btn" onclick="calcularMedia()">Calcular Média</button>
         </div>
@@ -159,7 +149,6 @@
 </div>
 
 <script>
-    // Configuração Firebase
     const firebaseConfig = {
         apiKey: "AIzaSyDEvCDdX0LGjDMFpyxljj-4JTjZKtgooDM",
         authDomain: "notas-cfs.firebaseapp.com",
@@ -170,15 +159,13 @@
         databaseURL: "https://notas-cfs.firebaseio.com"
     };
 
-    // Inicializa Firebase
     const app = firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
     const alunos = {
-       "9287027": "ELIENAR FARIAS",
-          "9306820": "NAZARETH LIMA GOEDERT",
+        "9287027": "ELIENAR FARIAS",
+        "9306820": "NAZARETH LIMA GOEDERT",
         "9303219": "CARLA DE LUCA LINHARES",
-        "9287124": "LEANDRO GHELLERE",
         "9287124": "LEANDRO GHELLERE",
         "9300350": "TIAGO LUIZ CLEMES",
         "9288350": "MARCOS AURÉLIO LUIZ DUARTE",
@@ -193,7 +180,7 @@
         "9308652": "ANDERSON ROVEDA",
         "9333967": "MAYARA ZILI DA SILVA",
         "9316221": "MARCOS ADRIANO DAL PONT",
-        "9333860": "SARAH WAGNER ZANATTA",
+         "9333860": "SARAH WAGNER ZANATTA",
         "9329730": "FELIPE LUMERTZ DA SILVA",
         "9316116": "JAQUES ROCHA DE SOUZA",
         "9329340": "ÉZIO FRANCISCO FERNANDES",
@@ -213,110 +200,83 @@
         "9339477": "DANIEL SERAFIM PESSI"
     };
 
-    // Objeto para armazenar as notas salvas
-let notasSalvas = {};
-
-// Função chamada quando a matéria é alterada
-function aoSelecionarMateria(materiaSelecionada) {
-    // Verifica se já existe uma nota para a matéria selecionada
-    if (notasSalvas[materiaSelecionada]) {
-        // Se existe, preenche o campo de nota com a nota salva
-        document.getElementById('campoNota').value = notasSalvas[materiaSelecionada];
-    } else {
-        // Se não existe, limpa o campo de nota
-        document.getElementById('campoNota').value = '';
-    }
-}
-
-// Função para salvar a nota
-function salvarNota(materiaSelecionada) {
-    const nota = document.getElementById('campoNota').value;
-    // Salva a nota no objeto
-    notasSalvas[materiaSelecionada] = nota;
-}
-
-// Evento de alteração da matéria (pode ser select, por exemplo)
-document.getElementById('materiaSelect').addEventListener('change', function() {
-    const materiaSelecionada = this.value;
-    aoSelecionarMateria(materiaSelecionada);
-});
-
-// Evento de salvar nota (pode ser um botão)
-document.getElementById('salvarNotaBtn').addEventListener('click', function() {
-    const materiaSelecionada = document.getElementById('materiaSelect').value;
-    salvarNota(materiaSelecionada);
-});
+    let matriculaAtual = null;
 
     function login() {
-        const matricula = document.getElementById("matricula").value;
-        const alunoNome = alunos[matricula];
-        const loginError = document.getElementById("login-error");
-
-        if (alunoNome) {
-            document.getElementById("aluno-nome").textContent = "Bem-vindo, " + alunoNome;
-            document.getElementById("login-form").classList.add("hidden");
-            document.getElementById("notas-form").classList.remove("hidden");
-            loginError.classList.add("hidden");
+        const matricula = document.getElementById('matricula').value;
+        if (alunos[matricula]) {
+            matriculaAtual = matricula;
+            document.getElementById('aluno-nome').innerText = `Bem-vindo, ${alunos[matricula]}!`;
+            document.getElementById('login-form').classList.add('hidden');
+            document.getElementById('notas-form').classList.remove('hidden');
+            carregarNotas(matricula);
         } else {
-            loginError.classList.remove("hidden");
+            document.getElementById('login-error').classList.remove('hidden');
         }
+    }
+
+    function carregarNotas(matricula) {
+        const notaInput = document.getElementById('nota');
+        const disciplinaSelect = document.getElementById('disciplina');
+
+        db.ref(`notas/${matricula}`).once('value').then(snapshot => {
+            const notas = snapshot.val();
+            if (notas) {
+                const disciplina = disciplinaSelect.value;
+                if (notas[disciplina]) {
+                    notaInput.value = notas[disciplina];
+                }
+            }
+        });
     }
 
     function salvarNota() {
-        const matricula = document.getElementById("matricula").value;
-        const disciplina = document.getElementById("disciplina").value;
-        const nota = parseFloat(document.getElementById("nota").value);
-        const rank = document.getElementById("rank").checked;
-        const notaSuccess = document.getElementById("nota-success");
-        const notaError = document.getElementById("nota-error");
+        const notaInput = document.getElementById('nota');
+        const disciplinaSelect = document.getElementById('disciplina');
+        const nota = parseFloat(notaInput.value);
+        const matricula = matriculaAtual;
 
         if (nota >= 1 && nota <= 10) {
-            const notaRef = db.ref('notas/' + matricula + '/' + disciplina);
-            notaRef.set({
-                nota: nota,
-                rank: rank
+            db.ref(`notas/${matricula}/${disciplinaSelect.value}`).set(nota).then(() => {
+                document.getElementById('nota-success').classList.remove('hidden');
+                document.getElementById('nota-error').classList.add('hidden');
             });
-            notaSuccess.classList.remove("hidden");
-            notaError.classList.add("hidden");
         } else {
-            notaError.classList.remove("hidden");
-            notaSuccess.classList.add("hidden");
+            document.getElementById('nota-error').classList.remove('hidden');
+            document.getElementById('nota-success').classList.add('hidden');
         }
-    }
-
-    function verNotas() {
-        const matricula = document.getElementById("matricula").value;
-        const notasRef = db.ref('notas/' + matricula);
-        notasRef.once('value', (snapshot) => {
-            const notas = snapshot.val();
-            console.log(notas);  // Aqui você pode exibir as notas no console ou na tela.
-        });
-    }
-
-    function calcularMedia() {
-        const matricula = document.getElementById("matricula").value;
-        const notasRef = db.ref('notas/' + matricula);
-        notasRef.once('value', (snapshot) => {
-            const notas = snapshot.val();
-            let soma = 0, count = 0;
-            for (let disciplina in notas) {
-                soma += notas[disciplina].nota;
-                count++;
-            }
-            const media = (soma / count).toFixed(2);
-            alert('Média: ' + media);
-        });
     }
 
     function toggleRankingButton() {
-        const rank = document.getElementById("rank").checked;
-        const rankingBtn = document.getElementById("ranking-btn");
-        if (rank) {
-            rankingBtn.removeAttribute('disabled');
-        } else {
-            rankingBtn.setAttribute('disabled', true);
+        const rankCheckbox = document.getElementById('rank');
+        const rankingBtn = document.getElementById('ranking-btn');
+        rankingBtn.disabled = !rankCheckbox.checked;
+    }
+
+    function verNotas() {
+        if (matriculaAtual) {
+            window.location.href = `verNotas.html?matricula=${matriculaAtual}`;
         }
     }
+
+    function calcularMedia() {
+        const matricula = matriculaAtual;
+        db.ref(`notas/${matricula}`).once('value').then(snapshot => {
+            const notas = snapshot.val();
+            if (notas) {
+                const media = Object.values(notas).reduce((acc, val) => acc + val, 0) / Object.keys(notas).length;
+                alert(`Sua média é: ${media.toFixed(2)}`);
+            } else {
+                alert('Nenhuma nota encontrada para calcular a média.');
+            }
+        });
+    }
+
+    // Adiciona um evento para atualizar a nota ao selecionar uma disciplina
+    document.getElementById('disciplina').addEventListener('change', () => {
+        carregarNotas(matriculaAtual);
+    });
+
 </script>
 
 </body>
