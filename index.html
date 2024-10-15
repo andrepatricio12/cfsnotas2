@@ -259,8 +259,32 @@
         const media = totalDisciplinas > 0 ? soma / totalDisciplinas : 0;
         alert(`Sua média é: ${media.toFixed(2)}`);
     }
+// Função para mostrar ranking
+        function mostrarRanking() {
+            db.ref("notas").once('value').then(snapshot => {
+                const ranking = {};
+                snapshot.forEach(matriculaSnapshot => {
+                    const matricula = matriculaSnapshot.key;
+                    const notas = matriculaSnapshot.val();
+                    const totalNotas = Object.values(notas).reduce((acc, nota) => acc + nota, 0);
+                    const media = totalNotas / Object.keys(notas).length;
+                    ranking[matricula] = media;
+                });
 
-</script>
+                const rankingList = Object.entries(ranking).sort((a, b) => b[1] - a[1]);
+                const rankingListaDiv = document.getElementById("ranking-lista");
+                rankingListaDiv.innerHTML = "<h3>Ranking:</h3>";
+
+                rankingList.forEach(([matricula, media]) => {
+                    const item = document.createElement("div");
+                    item.innerText = `Matrícula: ${matricula}, Média: ${media.toFixed(2)}`;
+                    rankingListaDiv.appendChild(item);
+                });
+
+                rankingListaDiv.classList.remove("hidden");
+            });
+        }
+    </script>
 
 </body>
 </html>
