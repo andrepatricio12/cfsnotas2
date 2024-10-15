@@ -1,11 +1,9 @@
 <!DOCTYPE html>
-
-<!DOCTYPE html>
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema de Notas</title>
+    <title>Sistema de Notas - Curso de Sargentos</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -17,156 +15,17 @@
             height: 100vh;
             background-color: #f5f5f5;
         }
-
         .container {
             background-color: white;
             padding: 20px;
             border-radius: 10px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            max-width: 400px;
+            max-width: 600px;
             width: 100%;
         }
-
         h1 {
             text-align: center;
             color: #333;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 10px;
-            font-weight: bold;
-            color: #555;
-        }
-
-        input[type="text"], input[type="number"] {
-            width: 100%;
-            padding: 10px;
-            margin-bottom: 15px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            box-sizing: border-box;
-        }
-
-        button {
-            width: 100%;
-            padding: 10px;
-            background-color: #007bff;
-            border: none;
-            border-radius: 5px;
-            color: white;
-            font-size: 16px;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-
-        button:hover {
-            background-color: #0056b3;
-        }
-
-        .message {
-            margin-top: 20px;
-            text-align: center;
-            font-weight: bold;
-            color: green;
-        }
-
-        .error {
-            color: red;
-        }
-
-        .hidden {
-            display: none;
-        }
-
-        @media screen and (max-width: 600px) {
-            .container {
-                padding: 15px;
-            }
-
-            button {
-                font-size: 14px;
-            }
-        }
-    </style>
-</head>
-<body>
-
-    <div class="container">
-        <h1>Sistema de Notas</h1>
-        
-        <!-- Formulário de Login -->
-        <div id="login-form">
-            <label for="matricula">Matrícula (Numérica)</label>
-            <input type="number" id="matricula" placeholder="Digite sua matrícula">
-
-            <button onclick="login()">Entrar</button>
-
-            <div id="login-error" class="error hidden">Matrícula não encontrada. Por favor, tente novamente.</div>
-        </div>
-
-        <!-- Formulário de Notas -->
-        <div id="notas-form" class="hidden">
-            <div id="aluno-nome" class="message"></div>
-
-            <label for="nota">Nota (1 a 10, com até duas casas decimais)</label>
-            <input type="number" id="nota" step="0.01" min="1" max="10" placeholder="Digite a nota">
-
-            <button onclick="salvarNota()">Salvar Nota</button>
-
-            <div id="nota-success" class="message hidden">Nota salva com sucesso!</div>
-            <div id="nota-error" class="error hidden">A nota deve estar entre 1 e 10.</div>
-        </div>
-    </div>
-
-    <script>
-        const alunos = {
-            12345: 'João Silva',
-            67890: 'Maria Souza',
-            11223: 'Ana Pereira'
-        };
-
-        function login() {
-            const matricula = document.getElementById("matricula").value;
-            const alunoNome = alunos[matricula];
-            
-            const loginError = document.getElementById("login-error");
-
-            if (alunoNome) {
-                document.getElementById("aluno-nome").textContent = "Bem-vindo, " + alunoNome;
-                document.getElementById("login-form").classList.add("hidden");
-                document.getElementById("notas-form").classList.remove("hidden");
-                loginError.classList.add("hidden");
-            } else {
-                loginError.classList.remove("hidden");
-            }
-        }
-
-        function salvarNota() {
-            const nota = parseFloat(document.getElementById("nota").value);
-            const notaSuccess = document.getElementById("nota-success");
-            const notaError = document.getElementById("nota-error");
-
-            if (nota >= 1 && nota <= 10) {
-                notaSuccess.classList.remove("hidden");
-                notaError.classList.add("hidden");
-            } else {
-                notaError.classList.remove("hidden");
-                notaSuccess.classList.add("hidden");
-            }
-        }
-    </script>
-</body>
-</html>
-
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema de Notas - Curso de Sargentos</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
         }
         .form-group {
             margin-bottom: 15px;
@@ -175,34 +34,41 @@
             display: block;
         }
         .form-group input, .form-group select {
-            padding: 8px;
+            padding: 10px;
             width: 100%;
-            max-width: 300px;
-        }
-        .container {
-            width: 50%;
-            margin: auto;
-            padding-top: 50px;
-        }
-        #ranking-btn {
-            display: none;
-        }
-        #ranking-btn[disabled] {
-            opacity: 0.5;
+            border-radius: 5px;
+            border: 1px solid #ddd;
         }
         button {
             padding: 10px;
+            width: 100%;
             background-color: #007bff;
-            color: white;
             border: none;
+            border-radius: 5px;
+            color: white;
+            font-size: 16px;
             cursor: pointer;
-            margin-top: 10px;
+            transition: background-color 0.3s;
         }
         button:disabled {
             background-color: #ccc;
         }
         button:hover:not(:disabled) {
             background-color: #0056b3;
+        }
+        #ranking-btn {
+            display: none;
+        }
+        .message {
+            margin-top: 20px;
+            text-align: center;
+            font-weight: bold;
+        }
+        .error {
+            color: red;
+        }
+        .hidden {
+            display: none;
         }
     </style>
     <!-- Firebase (Versão 8 para compatibilidade com scripts não modulares) -->
@@ -221,10 +87,11 @@
             <input type="text" id="matricula" placeholder="Digite sua matrícula">
         </div>
         <button onclick="login()">Entrar</button>
+        <div id="login-error" class="error hidden">Matrícula não encontrada. Por favor, tente novamente.</div>
     </div>
 
     <!-- Formulário de Notas -->
-    <div id="notas-form" style="display:none;">
+    <div id="notas-form" class="hidden">
         <h2 id="aluno-nome"></h2>
         
         <div class="form-group">
@@ -277,6 +144,9 @@
         <div class="form-group">
             <button id="media-btn" onclick="calcularMedia()">Calcular Média</button>
         </div>
+        
+        <div id="nota-success" class="message hidden">Nota salva com sucesso!</div>
+        <div id="nota-error" class="error hidden">A nota deve estar entre 1 e 10.</div>
     </div>
 </div>
 
@@ -338,37 +208,16 @@
     function login() {
         const matricula = document.getElementById("matricula").value;
         const alunoNome = alunos[matricula];
+        const loginError = document.getElementById("login-error");
 
         if (alunoNome) {
             document.getElementById("aluno-nome").textContent = "Bem-vindo, " + alunoNome;
-            document.getElementById("login-form").style.display = "none";
-            document.getElementById("notas-form").style.display = "block";
+            document.getElementById("login-form").classList.add("hidden");
+            document.getElementById("notas-form").classList.remove("hidden");
+            loginError.classList.add("hidden");
         } else {
-            alert("Matrícula não encontrada.");
+            loginError.classList.remove("hidden");
         }
-    }
-
-    function selecionarDisciplina() {
-        const matricula = document.getElementById("matricula").value;
-        const disciplina = document.getElementById("disciplina").value;
-
-        if (!matricula) {
-            alert("Por favor, digite sua matrícula.");
-            return;
-        }
-
-        const ref = db.ref('notas/' + matricula + '/' + disciplina);
-
-        ref.once('value', (snapshot) => {
-            const nota = snapshot.val();
-            if (nota) {
-                document.getElementById("nota").value = nota.nota;
-                document.getElementById("rank").checked = nota.rank || false;
-            } else {
-                document.getElementById("nota").value = '';
-                document.getElementById("rank").checked = false;
-            }
-        });
     }
 
     function salvarNota() {
@@ -376,66 +225,35 @@
         const disciplina = document.getElementById("disciplina").value;
         const nota = parseFloat(document.getElementById("nota").value);
         const rank = document.getElementById("rank").checked;
+        const notaSuccess = document.getElementById("nota-success");
+        const notaError = document.getElementById("nota-error");
 
-        if (!matricula || isNaN(nota) || nota < 1 || nota > 10) {
-            alert("Matrícula e nota são obrigatórios. Nota deve estar entre 1 e 10.");
-            return;
+        if (nota >= 1 && nota <= 10) {
+            db.ref('notas/' + matricula + '/' + disciplina).set({
+                nota: nota,
+                rank: rank
+            });
+            notaSuccess.classList.remove("hidden");
+            notaError.classList.add("hidden");
+        } else {
+            notaError.classList.remove("hidden");
+            notaSuccess.classList.add("hidden");
         }
-
-        const ref = db.ref('notas/' + matricula + '/' + disciplina);
-
-        ref.set({
-            nota: nota,
-            rank: rank
-        }).then(() => {
-            alert("Nota salva com sucesso!");
-        }).catch((error) => {
-            console.error("Erro ao salvar a nota:", error);
-        });
     }
 
     function verNotas() {
-        const matricula = document.getElementById("matricula").value;
-        const ref = db.ref('notas/' + matricula);
-
-        ref.once('value', (snapshot) => {
-            const notas = snapshot.val();
-            let notasStr = "";
-
-            for (let disciplina in notas) {
-                notasStr += `${disciplina}: ${notas[disciplina].nota}\n`;
-            }
-
-            alert("Suas notas:\n" + notasStr);
-        });
+        window.location.href = 'notas.html';
     }
 
     function toggleRankingButton() {
-        const rankingBtn = document.getElementById('ranking-btn');
-        rankingBtn.disabled = !document.getElementById('rank').checked;
+        const rankingBtn = document.getElementById("ranking-btn");
+        const rankChecked = document.getElementById("rank").checked;
+        rankingBtn.disabled = !rankChecked;
     }
 
     function calcularMedia() {
-        const matricula = document.getElementById("matricula").value;
-        const ref = db.ref('notas/' + matricula);
-
-        ref.once('value', (snapshot) => {
-            const notas = snapshot.val();
-            let total = 0;
-            let count = 0;
-
-            for (let disciplina in notas) {
-                total += notas[disciplina].nota;
-                count++;
-            }
-
-            if (count > 0) {
-                const media = (total / count).toFixed(2);
-                alert(`Sua média é: ${media}`);
-            } else {
-                alert("Nenhuma nota encontrada.");
-            }
-        });
+        // Lógica para calcular a média das notas
+        alert('Função de cálculo de média ainda não implementada.');
     }
 </script>
 </body>
