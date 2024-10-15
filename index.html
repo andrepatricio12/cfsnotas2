@@ -75,10 +75,6 @@
             margin-top: 20px;
         }
     </style>
-
-    <!-- Firebase JS SDK -->
-    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database.js"></script>
 </head>
 <body>
 
@@ -96,80 +92,86 @@
 
     <div id="notas-form" class="hidden">
         <h2 id="aluno-nome"></h2>
-        <label for="disciplina">Disciplina:</label>
-        <select id="disciplina" onchange="carregarNotas()">
-            <option value="ADP">Administração de Pessoal (ADP)</option>
-            <option value="ALF">Administração Logística Financeira (ALF)</option>
-            <option value="AMTP">Armamento, Munição e Tiro Policial (AMTP)</option>
-            <option value="APHT">Atendimento Pré-Hospitalar Tático (APH)</option>
-            <option value="CCL">Comando Chefia e Liderança (CCL)</option>
-            <option value="DPE">Defesa Pessoal Policial (DPE)</option>
-            <option value="DAD">Direito Administrativo Disciplinar (DAD)</option>
-            <option value="DPPM">Direito Penal Militar, Processual Penal Militar (DPPM)</option>
-            <option value="EFPM">Educação Física Policial Militar (EFPM)</option>
-            <option value="DDPH">Ética e Direitos Humanos na Atividade Policial (DDPH)</option>
-            <option value="GAO">Gerenciamento de Atividade Operacional (GAO)</option>
-            <option value="INP">Inteligência Policial (INP)</option>
-            <option value="LET">Legislação de Trânsito e Operações (LET)</option>
-            <option value="LEI">Legislação Institucional (LEI)</option>
-            <option value="OUD">Ordem Unida (OUD)</option>
-            <option value="PDP">Polícia de Proximidade (PDP)</option>
-            <option value="POS">Polícia Ostensiva (POS)</option>
-            <option value="SCOH">Sistema de Comando e Operações de Ajuda Humanitária (SCOH)</option>
-            <option value="TPO">Técnicas E Operações De Polícia Militar (TPO)</option>
-            <option value="TELA">Tópicos Especiais de Legislação Aplicáveis à Atividade (TELA)</option>
-        </select>
-        <input type="number" id="nota" placeholder="Digite sua nota">
-        <button id="salvar-nota-btn" onclick="salvarNota()">Salvar Nota</button>
-        <div id="nota-success" style="display:none;color:green;">Nota salva com sucesso!</div>
-        <div id="nota-error" style="display:none;color:red;">Nota inválida! Digite um valor entre 1 e 10.</div>
 
-        <button id="ver-notas-btn" onclick="verNotas()">Ver Todas as Notas</button>
-        <div id="lista-notas" class="hidden"></div>
+        <div class="form-group">
+            <label for="disciplina">Selecione a Disciplina:</label>
+            <select id="disciplina">
+                <option value="ADP">Administração de Pessoal (ADP)</option>
+                 <option value="ALF">Administração Logística Financeira (ALF)</option>
+                <option value="AMTP">Armamento, Munição e Tiro Policial (AMTP)</option>
+                <option value="APHT">Atendimento Pré-Hospitalar Tático (APH)</option>
+                <option value="CCL">Comando Chefia e Liderança (CCL)</option>
+                <option value="DPE">Defesa Pessoal Policial (DPE)</option>
+                <option value="DAD">Direito Administrativo Disciplinar (DAD)</option>
+                <option value="DPPM">Direito Penal Militar, Processual Penal Militar (DPPM)</option>
+                <option value="EFPM">Educação Física Policial Militar (EFPM)</option>
+                <option value="DDPH">Ética e Direitos Humanos na Atividade Policial (DDPH)</option>
+                <option value="GAO">Gerenciamento de Atividade Operacional (GAO)</option>
+                <option value="INP">Inteligência Policial (INP)</option>
+                <option value="LET">Legislação de Trânsito e Operações (LET)</option>
+                <option value="LEI">Legislação Institucional (LEI)</option>
+                <option value="OUD">Ordem Unida (OUD)</option>
+                <option value="PDP">Polícia de Proximidade (PDP)</option>
+                <option value="POS">Polícia Ostensiva (POS)</option>
+                <option value="SCOH">Sistema de Comando e Operações de Ajuda Humanitária (SCOH)</option>
+                <option value="TPO">Técnicas E Operações De Polícia Militar (TPO)</option>
+                <option value="TELA">Tópicos Especiais de Legislação Aplicáveis à Atividade (TELA)</option>
+            </select>
+        </div>
 
-        <label><input type="checkbox" id="rank" onchange="toggleRankingButton()"> Aceito aparecer no ranking</label>
-        <button id="ranking-btn" onclick="mostrarRanking()" disabled>Ver Ranking</button>
+        <div class="form-group">
+            <label for="nota">Insira sua nota (entre 1 e 10):</label>
+            <input type="number" id="nota" min="1" max="10" step="0.01">
+        </div>
 
-        <button onclick="calcularMedia()">Calcular Média</button>
-        <div id="ranking-lista" class="hidden"></div>
+        <div class="form-group">
+            <label for="rank">Permitir exibir no ranking:</label>
+            <input type="checkbox" id="rank" onchange="toggleRankingButton()">
+        </div>
+
+        <div class="button-group">
+            <button id="salvarNotaBtn" onclick="salvarNota()">Salvar Nota</button>
+        </div>
+
+        <div class="button-group">
+            <button onclick="verNotas()">Ver Todas as Notas</button>
+        </div>
+
+        <div class="form-group">
+            <button id="ranking-btn" onclick="window.location.href='ranking.html'" disabled>Ver Ranking</button>
+        </div>
+
+        <div class="form-group">
+            <button id="media-btn" onclick="calcularMedia()">Calcular Média</button>
+        </div>
+
+        <div id="nota-success" class="message hidden">Nota salva com sucesso!</div>
+        <div id="nota-error" class="error hidden">A nota deve estar entre 1 e 10.</div>
     </div>
+</div>
 
-    <script>
-        // Configuração Firebase
-        const firebaseConfig = {
-  apiKey: "AIzaSyDEvCDdX0LGjDMFpyxljj-4JTjZKtgooDM",
-  authDomain: "notas-cfs.firebaseapp.com",
-  projectId: "notas-cfs",
-  storageBucket: "notas-cfs.appspot.com",
-  messagingSenderId: "91086463856",
-  appId: "1:91086463856:web:6a16fb0b3abe04bbc425b5"
-};
-        };
-
-        // Initialize Firebase
-        const app = firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
-
-        // Definição dos alunos
-        const alunos = {
-            "9287027": "ELIENAR FARIAS",
-            "9306820": "NAZARETH LIMA GOEDERT",
-            "9303219": "CARLA DE LUCA LINHARES",
-            "9287124": "LEANDRO GHELLERE",
-            "9300350": "TIAGO LUIZ CLEMES",
-            "9288350": "MARCOS AURÉLIO LUIZ DUARTE",
-            "9320547": "ANDRÉ LUIS PATRÍCIO",
-            "9288520": "MATHEUS ROSSI LONGO",
-            "9320555": "RICARDO MESQUITA DE MEDEIROS",
-            "9320601": "JOSÉ RENATO COSTA",
-            "9307800": "JEAN CARLOS PEREIRA MACHADO",
-            "9300600": "AILTON BOZELLO DE BITTENCOURT",
-            "9300341": "TIAGO SANTOS DE SOUZA",
-            "9316230": "RODRIGO SILVA DOS SANTOS",
-            "9308652": "ANDERSON ROVEDA",
-            "9333967": "MAYARA ZILI DA SILVA",
-            "9316221": "MARCOS ADRIANO DAL PONT",
-            "9333860": "SARAH WAGNER ZANATTA",
+<script>
+    const alunos = {
+        // Alunos cadastrados
+        "9287027": "ELIENAR FARIAS",
+        "9306820": "NAZARETH LIMA GOEDERT",
+        "9303219": "CARLA DE LUCA LINHARES",
+        "9287124": "LEANDRO GHELLERE",
+        "9287124": "LEANDRO GHELLERE",
+        "9300350": "TIAGO LUIZ CLEMES",
+        "9288350": "MARCOS AURÉLIO LUIZ DUARTE",
+        "9320547": "ANDRÉ LUIS PATRÍCIO",
+        "9288520": "MATHEUS ROSSI LONGO",
+        "9320555": "RICARDO MESQUITA DE MEDEIROS",
+        "9320601": "JOSÉ RENATO COSTA",
+        "9307800": "JEAN CARLOS PEREIRA MACHADO",
+        "9300600": "AILTON BOZELLO DE BITTENCOURT",
+        "9300341": "TIAGO SANTOS DE SOUZA",
+        "9316230": "RODRIGO SILVA DOS SANTOS",
+        "9308652": "ANDERSON ROVEDA",
+        "9333967": "MAYARA ZILI DA SILVA",
+        "9316221": "MARCOS ADRIANO DAL PONT",
+        "9333860": "SARAH WAGNER ZANATTA",
         "9329730": "FELIPE LUMERTZ DA SILVA",
         "9316116": "JAQUES ROCHA DE SOUZA",
         "9329340": "ÉZIO FRANCISCO FERNANDES",
@@ -187,119 +189,78 @@
         "3847446": "DAIANA PEREIRA",
         "9329056": "VINICIUS JOVELINO COSTA",
         "9339477": "DANIEL SERAFIM PESSI"
-        };
+    };
 
-        // Função de login
-        function login() {
-            const matricula = document.getElementById("matricula").value;
-            const nome = alunos[matricula];
+    let matriculaAtual = null;
+    let notasSalvas = {}; // Armazena as notas salvas
 
-            if (nome) {
-                document.getElementById("aluno-nome").innerText = nome;
-                document.getElementById("login-form").classList.add("hidden");
-                document.getElementById("notas-form").classList.remove("hidden");
+    function login() {
+        const matricula = document.getElementById('matricula').value;
+        if (alunos[matricula]) {
+            matriculaAtual = matricula;
+            document.getElementById('aluno-nome').innerText = `Bem-vindo, ${alunos[matricula]}!`;
+            document.getElementById('login-form').classList.add('hidden');
+            document.getElementById('notas-form').classList.remove('hidden');
+            carregarNotas(matricula);
+        } else {
+            document.getElementById('login-error').classList.remove('hidden');
+        }
+    }
+
+    function carregarNotas(matricula) {
+        const disciplinaSelect = document.getElementById('disciplina');
+        const notaInput = document.getElementById('nota');
+
+        disciplinaSelect.addEventListener('change', () => {
+            const disciplinaSelecionada = disciplinaSelect.value;
+            if (notasSalvas[disciplinaSelecionada]) {
+                notaInput.value = notasSalvas[disciplinaSelecionada]; // Exibe nota salva
             } else {
-                document.getElementById("login-error").classList.remove("hidden");
+                notaInput.value = ''; // Limpa campo se não houver nota salva
             }
+        });
+    }
+
+    function salvarNota() {
+        const notaInput = document.getElementById('nota');
+        const disciplinaSelect = document.getElementById('disciplina');
+        const nota = parseFloat(notaInput.value);
+        const disciplina = disciplinaSelect.value;
+
+        if (nota >= 1 && nota <= 10) {
+            notasSalvas[disciplina] = nota; // Salva a nota
+            document.getElementById('nota-success').classList.remove('hidden');
+            document.getElementById('nota-error').classList.add('hidden');
+        } else {
+            document.getElementById('nota-error').classList.remove('hidden');
+            document.getElementById('nota-success').classList.add('hidden');
+        }
+    }
+
+    function toggleRankingButton() {
+        const rankCheckbox = document.getElementById('rank');
+        const rankingBtn = document.getElementById('ranking-btn');
+        rankingBtn.disabled = !rankCheckbox.checked;
+    }
+
+    function verNotas() {
+        alert('Função para exibir todas as notas.');
+    }
+
+    function calcularMedia() {
+        let soma = 0;
+        let totalDisciplinas = 0;
+
+        for (let disciplina in notasSalvas) {
+            soma += notasSalvas[disciplina];
+            totalDisciplinas++;
         }
 
-        // Função para carregar notas
-        function carregarNotas() {
-            const disciplina = document.getElementById("disciplina").value;
-            const matricula = document.getElementById("matricula").value;
+        const media = totalDisciplinas > 0 ? soma / totalDisciplinas : 0;
+        alert(`Sua média é: ${media.toFixed(2)}`);
+    }
 
-            db.ref("notas/" + matricula + "/" + disciplina).once('value').then(snapshot => {
-                const nota = snapshot.val();
-                document.getElementById("nota").value = nota ? nota : "";
-            });
-        }
-
-        // Função para salvar nota
-        function salvarNota() {
-            const nota = parseFloat(document.getElementById("nota").value);
-            const disciplina = document.getElementById("disciplina").value;
-            const matricula = document.getElementById("matricula").value;
-
-            if (nota >= 1 && nota <= 10) {
-                db.ref("notas/" + matricula + "/" + disciplina).set(nota)
-                    .then(() => {
-                        document.getElementById("nota-success").style.display = "block";
-                        setTimeout(() => {
-                            document.getElementById("nota-success").style.display = "none";
-                        }, 2000);
-                    });
-            } else {
-                document.getElementById("nota-error").style.display = "block";
-                setTimeout(() => {
-                    document.getElementById("nota-error").style.display = "none";
-                }, 2000);
-            }
-        }
-
-        // Função para ver todas as notas
-        function verNotas() {
-            const matricula = document.getElementById("matricula").value;
-            db.ref("notas/" + matricula).once('value').then(snapshot => {
-                const notas = snapshot.val();
-                const listaNotas = document.getElementById("lista-notas");
-                listaNotas.innerHTML = "";
-                for (const disciplina in notas) {
-                    const item = document.createElement("div");
-                    item.innerText = `${disciplina}: ${notas[disciplina]}`;
-                    listaNotas.appendChild(item);
-                }
-                listaNotas.classList.remove("hidden");
-            });
-        }
-
-        // Função para mostrar o ranking
-        function toggleRankingButton() {
-            const rankingBtn = document.getElementById("ranking-btn");
-            rankingBtn.disabled = !document.getElementById("rank").checked;
-        }
-
-        // Função para calcular média
-        function calcularMedia() {
-            const matricula = document.getElementById("matricula").value;
-            db.ref("notas/" + matricula).once('value').then(snapshot => {
-                const notas = snapshot.val();
-                if (notas) {
-                    const totalNotas = Object.values(notas).reduce((acc, nota) => acc + nota, 0);
-                    const media = totalNotas / Object.keys(notas).length;
-                    alert(`A média das notas é: ${media.toFixed(2)}`);
-                } else {
-                    alert("Nenhuma nota encontrada para calcular a média.");
-                }
-            });
-        }
-
-        // Função para mostrar ranking
-        function mostrarRanking() {
-            db.ref("notas").once('value').then(snapshot => {
-                const ranking = {};
-                snapshot.forEach(matriculaSnapshot => {
-                    const matricula = matriculaSnapshot.key;
-                    const notas = matriculaSnapshot.val();
-                    const totalNotas = Object.values(notas).reduce((acc, nota) => acc + nota, 0);
-                    const media = totalNotas / Object.keys(notas).length;
-                    ranking[matricula] = media;
-                });
-
-                const rankingList = Object.entries(ranking).sort((a, b) => b[1] - a[1]);
-                const rankingListaDiv = document.getElementById("ranking-lista");
-                rankingListaDiv.innerHTML = "<h3>Ranking:</h3>";
-
-                rankingList.forEach(([matricula, media]) => {
-                    const item = document.createElement("div");
-                    item.innerText = `Matrícula: ${matricula}, Média: ${media.toFixed(2)}`;
-                    rankingListaDiv.appendChild(item);
-                });
-
-                rankingListaDiv.classList.remove("hidden");
-            });
-        }
-    </script>
-</div>
+</script>
 
 </body>
 </html>
