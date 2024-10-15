@@ -98,27 +98,26 @@
         <h2 id="aluno-nome"></h2>
         <label for="disciplina">Disciplina:</label>
         <select id="disciplina" onchange="carregarNotas()">
-            <!-- Adicione as opções de disciplinas -->
             <option value="ADP">Administração de Pessoal (ADP)</option>
-           <option value="ALF">Administração Logística Financeira (ALF)</option>
-                <option value="AMTP">Armamento, Munição e Tiro Policial (AMTP)</option>
-                <option value="APHT">Atendimento Pré-Hospitalar Tático (APH)</option>
-                <option value="CCL">Comando Chefia e Liderança (CCL)</option>
-                <option value="DPE">Defesa Pessoal Policial (DPE)</option>
-                <option value="DAD">Direito Administrativo Disciplinar (DAD)</option>
-                <option value="DPPM">Direito Penal Militar, Processual Penal Militar (DPPM)</option>
-                <option value="EFPM">Educação Física Policial Militar (EFPM)</option>
-                <option value="DDPH">Ética e Direitos Humanos na Atividade Policial (DDPH)</option>
-                <option value="GAO">Gerenciamento de Atividade Operacional (GAO)</option>
-                <option value="INP">Inteligência Policial (INP)</option>
-                <option value="LET">Legislação de Trânsito e Operações (LET)</option>
-                <option value="LEI">Legislação Institucional (LEI)</option>
-                <option value="OUD">Ordem Unida (OUD)</option>
-                <option value="PDP">Polícia de Proximidade (PDP)</option>
-                <option value="POS">Polícia Ostensiva (POS)</option>
-                <option value="SCOH">Sistema de Comando e Operações de Ajuda Humanitária (SCOH)</option>
-                <option value="TPO">Técnicas E Operações De Polícia Militar (TPO)</option>
-                <option value="TELA">Tópicos Especiais de Legislação Aplicáveis à Atividade (TELA)</option>
+            <option value="ALF">Administração Logística Financeira (ALF)</option>
+            <option value="AMTP">Armamento, Munição e Tiro Policial (AMTP)</option>
+            <option value="APHT">Atendimento Pré-Hospitalar Tático (APH)</option>
+            <option value="CCL">Comando Chefia e Liderança (CCL)</option>
+            <option value="DPE">Defesa Pessoal Policial (DPE)</option>
+            <option value="DAD">Direito Administrativo Disciplinar (DAD)</option>
+            <option value="DPPM">Direito Penal Militar, Processual Penal Militar (DPPM)</option>
+            <option value="EFPM">Educação Física Policial Militar (EFPM)</option>
+            <option value="DDPH">Ética e Direitos Humanos na Atividade Policial (DDPH)</option>
+            <option value="GAO">Gerenciamento de Atividade Operacional (GAO)</option>
+            <option value="INP">Inteligência Policial (INP)</option>
+            <option value="LET">Legislação de Trânsito e Operações (LET)</option>
+            <option value="LEI">Legislação Institucional (LEI)</option>
+            <option value="OUD">Ordem Unida (OUD)</option>
+            <option value="PDP">Polícia de Proximidade (PDP)</option>
+            <option value="POS">Polícia Ostensiva (POS)</option>
+            <option value="SCOH">Sistema de Comando e Operações de Ajuda Humanitária (SCOH)</option>
+            <option value="TPO">Técnicas E Operações De Polícia Militar (TPO)</option>
+            <option value="TELA">Tópicos Especiais de Legislação Aplicáveis à Atividade (TELA)</option>
         </select>
         <input type="number" id="nota" placeholder="Digite sua nota">
         <button id="salvar-nota-btn" onclick="salvarNota()">Salvar Nota</button>
@@ -147,38 +146,37 @@
             appId: "1:91086463856:web:6a16fb0b3abe04bbc425b5"
         };
 
-        // Initialize Firebase
+        // Inicializa o Firebase
         const app = firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
         const alunos = {
             "9287027": "ELIENAR FARIAS",
             "9306820": "NAZARETH LIMA GOEDERT",
-        "9303219": "CARLA DE LUCA LINHARES",
-        "9287124": "LEANDRO GHELLERE",
-        "9287124": "LEANDRO GHELLERE",
-        "9300350": "TIAGO LUIZ CLEMES",
-        "9288350": "MARCOS AURÉLIO LUIZ DUARTE",
-        "9320547": "ANDRÉ LUIS PATRÍCIO",
-        "9288520": "MATHEUS ROSSI LONGO",
-        "9320555": "RICARDO MESQUITA DE MEDEIROS",
-        "9320601": "JOSÉ RENATO COSTA",
-        "9307800": "JEAN CARLOS PEREIRA MACHADO",
-        "9300600": "AILTON BOZELLO DE BITTENCOURT",
-        "9300341": "TIAGO SANTOS DE SOUZA",
-        "9316230": "RODRIGO SILVA DOS SANTOS",
-        "9308652": "ANDERSON ROVEDA",
-        "9333967": "MAYARA ZILI DA SILVA",
-        "9316221": "MARCOS ADRIANO DAL PONT",
-        "9333860": "SARAH WAGNER ZANATTA",
-        "9329730": "FELIPE LUMERTZ DA SILVA",
-        "9316116": "JAQUES ROCHA DE SOUZA",
-        "9329340": "ÉZIO FRANCISCO FERNANDES",
-        "9329382": "EDERSON FRANÇA DE MACHADO",
-        "6606032": "ROBSON GOMES HAHN",
-        "9339558": "EVANDRO ANASTÁCIO TEIXEIRA",
-        "9339329": "TIAGO ANSELMO VALNIER",
-        "9287205": "ALEXANDRE DA LUZ",
+            "9303219": "CARLA DE LUCA LINHARES",
+            "9287124": "LEANDRO GHELLERE",
+            "9300350": "TIAGO LUIZ CLEMES",
+            "9288350": "MARCOS AURÉLIO LUIZ DUARTE",
+            "9320547": "ANDRÉ LUIS PATRÍCIO",
+            "9288520": "MATHEUS ROSSI LONGO",
+            "9320555": "RICARDO MESQUITA DE MEDEIROS",
+            "9320601": "JOSÉ RENATO COSTA",
+            "9307800": "JEAN CARLOS PEREIRA MACHADO",
+            "9300600": "AILTON BOZELLO DE BITTENCOURT",
+            "9300341": "TIAGO SANTOS DE SOUZA",
+            "9316230": "RODRIGO SILVA DOS SANTOS",
+            "9308652": "ANDERSON ROVEDA",
+            "9333967": "MAYARA ZILI DA SILVA",
+            "9316221": "MARCOS ADRIANO DAL PONT",
+            "9333860": "SARAH WAGNER ZANATTA",
+            "9329730": "FELIPE LUMERTZ DA SILVA",
+            "9316116": "JAQUES ROCHA DE SOUZA",
+            "9329340": "ÉZIO FRANCISCO FERNANDES",
+            "9329382": "EDERSON FRANÇA DE MACHADO",
+            "6606032": "ROBSON GOMES HAHN",
+            "9339558": "EVANDRO ANASTÁCIO TEIXEIRA",
+            "9339329": "TIAGO ANSELMO VALNIER",
+            "9287205": "ALEXANDRE DA LUZ",
         "9307745": "WANDERSON RICARDO DE CARVALHO",
         "9316159": "ANDERSON DOS SANTOS ROSA",
         "9320563": "IURI CÚRCIO CARRER",
@@ -191,126 +189,119 @@
         };
 
         let matriculaAtual = '';
+        let notas = {};
 
         function login() {
-            const matricula = document.getElementById('matricula').value;
+            const matricula = document.getElementById('matricula').value.trim();
+            if (!matricula) {
+                document.getElementById('login-error').innerText = 'Por favor, insira sua matrícula.';
+                document.getElementById('login-error').style.display = 'block';
+                return;
+            }
             if (alunos[matricula]) {
                 matriculaAtual = matricula;
+                localStorage.setItem('matricula', matricula); // Salvar matrícula no localStorage
                 document.getElementById('login-form').style.display = 'none';
                 document.getElementById('notas-form').style.display = 'block';
                 document.getElementById('aluno-nome').innerText = alunos[matricula];
                 carregarNotas();
             } else {
+                document.getElementById('login-error').innerText = 'Matrícula não encontrada. Por favor, tente novamente.';
                 document.getElementById('login-error').style.display = 'block';
             }
         }
 
-        function carregarNotas() {
-            const notaInput = document.getElementById('nota');
-            const disciplina = document.getElementById('disciplina').value;
+        // Ao carregar a página, verificar se a matrícula está no localStorage
+        window.onload = function() {
+            const storedMatricula = localStorage.getItem('matricula');
+            if (storedMatricula && alunos[storedMatricula]) {
+                matriculaAtual = storedMatricula;
+                document.getElementById('login-form').style.display = 'none';
+                document.getElementById('notas-form').style.display = 'block';
+                document.getElementById('aluno-nome').innerText = alunos[storedMatricula];
+                carregarNotas();
+            }
+        };
 
-            db.ref(`notas/${matriculaAtual}/${disciplina}`).once('value').then(snapshot => {
-                const nota = snapshot.val();
-                notaInput.value = nota ? nota : '';
+        function carregarNotas() {
+            const disciplina = document.getElementById('disciplina').value;
+            const referenciaNotas = db.ref('notas/' + matriculaAtual + '/' + disciplina);
+            referenciaNotas.on('value', (snapshot) => {
+                notas[disciplina] = snapshot.val() || [];
+                document.getElementById('nota').value = notas[disciplina][0] || ''; // Preencher o campo com a nota salva
             });
         }
 
         function salvarNota() {
-            const nota = parseFloat(document.getElementById('nota').value);
             const disciplina = document.getElementById('disciplina').value;
-
-            if (nota >= 1 && nota <= 10) {
-                db.ref(`notas/${matriculaAtual}/${disciplina}`).set(nota).then(() => {
-                    document.getElementById('nota-success').style.display = 'block';
-                    document.getElementById('nota-error').style.display = 'none';
-                    setTimeout(() => {
-                        document.getElementById('nota-success').style.display = 'none';
-                    }, 3000);
-                });
-            } else {
+            const nota = parseFloat(document.getElementById('nota').value);
+            if (isNaN(nota) || nota < 1 || nota > 10) {
                 document.getElementById('nota-error').style.display = 'block';
+                document.getElementById('nota-success').style.display = 'none';
+                return;
             }
-        }
 
-        function verNotas() {
-            const listaNotas = document.getElementById('lista-notas');
-            listaNotas.innerHTML = ''; // Limpa a lista anterior
-            db.ref(`notas/${matriculaAtual}`).once('value').then(snapshot => {
-                const notas = snapshot.val();
-                if (notas) {
-                    Object.keys(notas).forEach(disciplina => {
-                        const nota = notas[disciplina];
-                        const item = document.createElement('div');
-                        item.innerText = `${disciplina}: ${nota}`;
-                        listaNotas.appendChild(item);
-                    });
-                    listaNotas.style.display = 'block';
-                } else {
-                    alert('Nenhuma nota encontrada.');
-                }
+            // Salva a nota no Firebase
+            db.ref('notas/' + matriculaAtual + '/' + disciplina).set([nota]).then(() => {
+                document.getElementById('nota-success').style.display = 'block';
+                document.getElementById('nota-error').style.display = 'none';
+                carregarNotas(); // Atualiza as notas após salvar
             });
         }
 
-        function toggleRankingButton() {
-            const rankCheckbox = document.getElementById('rank');
-            const rankingBtn = document.getElementById('ranking-btn');
-            rankingBtn.disabled = !rankCheckbox.checked;
+        function verNotas() {
+            const listaNotasDiv = document.getElementById('lista-notas');
+            const disciplina = document.getElementById('disciplina').value;
+            listaNotasDiv.innerHTML = ''; // Limpa a lista
 
-            db.ref(`permissoesRanking/${matriculaAtual}`).set(rankCheckbox.checked);
+            if (notas[disciplina] && notas[disciplina].length > 0) {
+                notas[disciplina].forEach(nota => {
+                    const notaElement = document.createElement('div');
+                    notaElement.innerText = `Nota: ${nota}`;
+                    listaNotasDiv.appendChild(notaElement);
+                });
+            } else {
+                listaNotasDiv.innerText = 'Nenhuma nota salva para esta disciplina.';
+            }
+
+            listaNotasDiv.classList.toggle('hidden', !listaNotasDiv.innerHTML);
+        }
+
+        function toggleRankingButton() {
+            const rankingBtn = document.getElementById('ranking-btn');
+            rankingBtn.disabled = !document.getElementById('rank').checked;
+            rankingBtn.style.display = rankingBtn.disabled ? 'none' : 'block';
         }
 
         function mostrarRanking() {
             const rankingLista = document.getElementById('ranking-lista');
-            rankingLista.innerHTML = ''; // Limpa o ranking anterior
+            rankingLista.innerHTML = '';
+            const alunosRanking = [];
 
-            db.ref('notas').once('value').then(snapshot => {
-                const notasAlunos = snapshot.val();
-                const ranking = [];
+            for (const matricula in alunos) {
+                if (notas[matricula]) {
+                    const media = calcularMedia(matricula);
+                    if (document.getElementById('rank').checked) {
+                        alunosRanking.push({ nome: alunos[matricula], media });
+                    }
+                }
+            }
 
-                const promessas = Object.keys(notasAlunos).map(matricula => {
-                    return db.ref(`permissoesRanking/${matricula}`).once('value').then(permissionSnap => {
-                        if (permissionSnap.val()) {
-                            const alunoNotas = notasAlunos[matricula];
-                            let totalNotas = 0;
-                            let numDisciplinas = 0;
-                            Object.keys(alunoNotas).forEach(disciplina => {
-                                totalNotas += alunoNotas[disciplina];
-                                numDisciplinas++;
-                            });
-                            const media = totalNotas / numDisciplinas;
-                            ranking.push({ matricula, media });
-                        }
-                    });
-                });
+            alunosRanking.sort((a, b) => b.media - a.media);
 
-                Promise.all(promessas).then(() => {
-                    ranking.sort((a, b) => b.media - a.media);
-                    ranking.forEach((entry, index) => {
-                        const item = document.createElement('div');
-                        item.innerText = `${index + 1}. ${alunos[entry.matricula]}: Média ${entry.media.toFixed(2)}`;
-                        rankingLista.appendChild(item);
-                    });
-                    rankingLista.style.display = 'block';
-                });
+            alunosRanking.forEach(aluno => {
+                const alunoElement = document.createElement('div');
+                alunoElement.innerText = `${aluno.nome}: ${aluno.media.toFixed(2)}`;
+                rankingLista.appendChild(alunoElement);
             });
+
+            rankingLista.classList.toggle('hidden', alunosRanking.length === 0);
         }
 
-        function calcularMedia() {
-            db.ref(`notas/${matriculaAtual}`).once('value').then(snapshot => {
-                const notas = snapshot.val();
-                if (notas) {
-                    let totalNotas = 0;
-                    let numDisciplinas = 0;
-                    Object.keys(notas).forEach(disciplina => {
-                        totalNotas += notas[disciplina];
-                        numDisciplinas++;
-                    });
-                    const media = totalNotas / numDisciplinas;
-                    alert(`Sua média geral é: ${media.toFixed(2)}`);
-                } else {
-                    alert('Nenhuma nota disponível para cálculo de média.');
-                }
-            });
+        function calcularMedia(matricula) {
+            const notasDisciplina = notas[matricula] || [];
+            const total = notasDisciplina.reduce((acc, nota) => acc + nota, 0);
+            return total / notasDisciplina.length || 0;
         }
     </script>
 </div>
