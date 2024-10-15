@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistema de Notas - Curso de Sargentos</title>
+
+    <!-- Estilizações em CSS -->
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -71,6 +73,7 @@
             display: none;
         }
     </style>
+
     <!-- Firebase (Versão 8 para compatibilidade com scripts não modulares) -->
     <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-database.js"></script>
@@ -79,7 +82,7 @@
 
 <div class="container">
     <h1>Sistema de Notas - Curso de Sargentos</h1>
-    
+
     <!-- Formulário de Login -->
     <div id="login-form">
         <div class="form-group">
@@ -93,12 +96,12 @@
     <!-- Formulário de Notas -->
     <div id="notas-form" class="hidden">
         <h2 id="aluno-nome"></h2>
-        
+
         <div class="form-group">
             <label for="disciplina">Selecione a Disciplina:</label>
-            <select id="disciplina" onchange="selecionarDisciplina()">
+            <select id="disciplina">
                 <option value="ADP">Administração de Pessoal (ADP)</option>
-                <option value="ALF">Administração Logística Financeira (ALF)</option>
+               <option value="ALF">Administração Logística Financeira (ALF)</option>
                 <option value="AMTP">Armamento, Munição e Tiro Policial (AMTP)</option>
                 <option value="APHT">Atendimento Pré-Hospitalar Tático (APH)</option>
                 <option value="CCL">Comando Chefia e Liderança (CCL)</option>
@@ -144,7 +147,7 @@
         <div class="form-group">
             <button id="media-btn" onclick="calcularMedia()">Calcular Média</button>
         </div>
-        
+
         <div id="nota-success" class="message hidden">Nota salva com sucesso!</div>
         <div id="nota-error" class="error hidden">A nota deve estar entre 1 e 10.</div>
     </div>
@@ -153,7 +156,7 @@
 <script>
     // Configuração Firebase
     const firebaseConfig = {
-        apiKey: "API_KEY_AQUI",
+        apiKey: "AIzaSyDEvCDdX0LGjDMFpyxljj-4JTjZKtgooDM",
         authDomain: "notas-cfs.firebaseapp.com",
         projectId: "notas-cfs",
         storageBucket: "notas-cfs.appspot.com",
@@ -168,7 +171,7 @@
 
     const alunos = {
         "9287027": "ELIENAR FARIAS",
-        "9306820": "NAZARETH LIMA GOEDERT",
+          "9306820": "NAZARETH LIMA GOEDERT",
         "9303219": "CARLA DE LUCA LINHARES",
         "9287124": "LEANDRO GHELLERE",
         "9287124": "LEANDRO GHELLERE",
@@ -229,7 +232,8 @@
         const notaError = document.getElementById("nota-error");
 
         if (nota >= 1 && nota <= 10) {
-            db.ref('notas/' + matricula + '/' + disciplina).set({
+            const notaRef = db.ref('notas/' + matricula + '/' + disciplina);
+            notaRef.set({
                 nota: nota,
                 rank: rank
             });
@@ -242,19 +246,39 @@
     }
 
     function verNotas() {
-        window.location.href = 'notas.html';
-    }
-
-    function toggleRankingButton() {
-        const rankingBtn = document.getElementById("ranking-btn");
-        const rankChecked = document.getElementById("rank").checked;
-        rankingBtn.disabled = !rankChecked;
+        const matricula = document.getElementById("matricula").value;
+        const notasRef = db.ref('notas/' + matricula);
+        notasRef.once('value', (snapshot) => {
+            const notas = snapshot.val();
+            console.log(notas);  // Aqui você pode exibir as notas no console ou na tela.
+        });
     }
 
     function calcularMedia() {
-        // Lógica para calcular a média das notas
-        alert('Função de cálculo de média ainda não implementada.');
+        const matricula = document.getElementById("matricula").value;
+        const notasRef = db.ref('notas/' + matricula);
+        notasRef.once('value', (snapshot) => {
+            const notas = snapshot.val();
+            let soma = 0, count = 0;
+            for (let disciplina in notas) {
+                soma += notas[disciplina].nota;
+                count++;
+            }
+            const media = (soma / count).toFixed(2);
+            alert('Média: ' + media);
+        });
+    }
+
+    function toggleRankingButton() {
+        const rank = document.getElementById("rank").checked;
+        const rankingBtn = document.getElementById("ranking-btn");
+        if (rank) {
+            rankingBtn.removeAttribute('disabled');
+        } else {
+            rankingBtn.setAttribute('disabled', true);
+        }
     }
 </script>
+
 </body>
 </html>
