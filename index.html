@@ -58,7 +58,7 @@
             background-color: #0056b3;
         }
         #ranking-btn {
-            display: none;
+            display: none; /* Inicialmente escondido */
         }
         .message {
             margin-top: 20px;
@@ -187,85 +187,67 @@
         "9330356": "BRUNA DA SILVA PIRES",
         "3847446": "DAIANA PEREIRA",
         "9329056": "VINICIUS JOVELINO COSTA",
-        "9339477": "DANIEL SERAFIM PESSI"
-    };
+        "9339477": "DANIEL SERAFIM PESSI"    };
 
-    let matriculaAtual = null;
-    let notasSalvas = {}; // Armazena as notas salvas
+    let notas = {};
+    let mostrarRanking = false;
 
     function login() {
-        const matricula = document.getElementById('matricula').value;
+        const matricula = document.getElementById("matricula").value;
+        const alunoNome = document.getElementById("aluno-nome");
+        const loginError = document.getElementById("login-error");
+        const notasForm = document.getElementById("notas-form");
+
         if (alunos[matricula]) {
-            matriculaAtual = matricula;
-            document.getElementById('aluno-nome').innerText = `Bem-vindo, ${alunos[matricula]}!`;
-            document.getElementById('login-form').classList.add('hidden');
-            document.getElementById('notas-form').classList.remove('hidden');
-            carregarNotas(matricula);
+            alunoNome.textContent = alunos[matricula];
+            loginError.classList.add("hidden");
+            notasForm.classList.remove("hidden");
         } else {
-            document.getElementById('login-error').classList.remove('hidden');
+            loginError.classList.remove("hidden");
         }
-    }
-
-    function carregarNotas(matricula) {
-        const disciplinaSelect = document.getElementById('disciplina');
-        const notaInput = document.getElementById('nota');
-
-        disciplinaSelect.addEventListener('change', () => {
-            const disciplinaSelecionada = disciplinaSelect.value;
-            if (notasSalvas[disciplinaSelecionada]) {
-                notaInput.value = notasSalvas[disciplinaSelecionada]; // Exibe nota salva
-            } else {
-                notaInput.value = ''; // Limpa campo se não houver nota salva
-            }
-        });
     }
 
     function salvarNota() {
-        const notaInput = document.getElementById('nota');
-        const disciplinaSelect = document.getElementById('disciplina');
-        const nota = parseFloat(notaInput.value);
-        const disciplina = disciplinaSelect.value;
+        const disciplina = document.getElementById("disciplina").value;
+        const notaInput = document.getElementById("nota").value;
+        const notaError = document.getElementById("nota-error");
+        const notaSuccess = document.getElementById("nota-success");
 
-        if (nota >= 1 && nota <= 10) {
-            notasSalvas[disciplina] = nota; // Salva a nota
-            document.getElementById('nota-success').classList.remove('hidden');
-            document.getElementById('nota-error').classList.add('hidden');
-        } else {
-            document.getElementById('nota-error').classList.remove('hidden');
-            document.getElementById('nota-success').classList.add('hidden');
+        if (notaInput < 1 || notaInput > 10) {
+            notaError.classList.remove("hidden");
+            notaSuccess.classList.add("hidden");
+            return;
         }
+
+        notaError.classList.add("hidden");
+        notaSuccess.classList.remove("hidden");
+
+        notas[disciplina] = notaInput;
+        document.getElementById("nota").value = ''; // Limpa o campo de nota
+
+        // Salvar no Local Storage
+        localStorage.setItem("notas", JSON.stringify(notas));
     }
 
     function verNotas() {
-        // Sua lógica para mostrar todas as notas
+        const notas = JSON.parse(localStorage.getItem("notas")) || {};
+        let mensagem = "Notas Salvas:\n";
+        for (let disciplina in notas) {
+            mensagem += `${disciplina}: ${notas[disciplina]}\n`;
+        }
+        alert(mensagem);
     }
 
     function calcularMedia() {
-        let soma = 0;
-        let totalDisciplinas = 0;
-
-        for (let disciplina in notasSalvas) {
-            soma += notasSalvas[disciplina];
-            totalDisciplinas++;
-        }
-
-        const media = totalDisciplinas > 0 ? soma / totalDisciplinas : 0;
-        alert(`Sua média é: ${media.toFixed(2)}`);
+        const notas = JSON.parse(localStorage.getItem("notas")) || {};
+        const media = Object.values(notas).reduce((sum, nota) => sum + parseFloat(nota), 0) / Object.values(notas).length;
+        alert(`A média é: ${media.toFixed(2)}`);
     }
 
     function toggleRankingButton() {
-        const checkbox = document.getElementById('rank');
-        const rankingButton = document.getElementById('ranking-btn');
-
-        if (checkbox.checked) {
-            rankingButton.disabled = false;  // Habilita o botão
-        } else {
-            rankingButton.disabled = true;   // Desabilita o botão
-        }
-    }
-
-    function mostrarRanking() {
-        // Sua lógica para mostrar o ranking
+        const rankingCheckbox = document.getElementById("rank");
+        const rankingButton = document.getElementById("ranking-btn");
+        rankingButton.style.display = rankingCheckbox.checked ? 'block' : 'none';
     }
 </script>
 
