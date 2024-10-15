@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema de Notas</title>
-    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database.js"></script>
+    <title>Sistema de Notas CFS</title>
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-database.js"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -13,7 +13,7 @@
             margin: 0;
             padding: 20px;
         }
-        h2 {
+        h1, h2 {
             color: #333;
         }
         #login-form, #notas-form {
@@ -55,6 +55,7 @@
     </style>
 </head>
 <body>
+    <h1>Sistema de Notas CFS</h1>
     <div id="login-form">
         <h2>Login</h2>
         <input type="text" id="matricula" placeholder="Digite sua matrícula">
@@ -117,6 +118,7 @@
         const app = firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
+        let matriculaAtual = null;
         const alunos = {
         "9287027": "ELIENAR FARIAS",
         "9306820": "NAZARETH LIMA GOEDERT",
@@ -156,7 +158,7 @@
         "9339477": "DANIEL SERAFIM PESSI"
         };
 
-        let matriculaAtual = null;
+         let matriculaAtual = null;
 
         // Função de login
         function login() {
@@ -286,3 +288,4 @@
     </script>
 </body>
 </html>
+    
