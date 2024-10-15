@@ -75,6 +75,9 @@
             margin-top: 20px;
         }
     </style>
+    <!-- Adicione a biblioteca Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database.js"></script>
 </head>
 <body>
 
@@ -92,32 +95,29 @@
 
     <div id="notas-form" class="hidden">
         <h2 id="aluno-nome"></h2>
-    </div>
-
-    <div id="notas-form" class="hidden">
-        <h2 id="aluno-nome"></h2>
         <label for="disciplina">Disciplina:</label>
         <select id="disciplina" onchange="carregarNotas()">
+            <!-- Adicione as opções aqui -->
             <option value="ADP">Administração de Pessoal (ADP)</option>
-            <option value="ALF">Administração Logística Financeira (ALF)</option>
-            <option value="AMTP">Armamento, Munição e Tiro Policial (AMTP)</option>
-            <option value="APHT">Atendimento Pré-Hospitalar Tático (APH)</option>
-            <option value="CCL">Comando Chefia e Liderança (CCL)</option>
-            <option value="DPE">Defesa Pessoal Policial (DPE)</option>
-            <option value="DAD">Direito Administrativo Disciplinar (DAD)</option>
-            <option value="DPPM">Direito Penal Militar, Processual Penal Militar (DPPM)</option>
-            <option value="EFPM">Educação Física Policial Militar (EFPM)</option>
-            <option value="DDPH">Ética e Direitos Humanos na Atividade Policial (DDPH)</option>
-            <option value="GAO">Gerenciamento de Atividade Operacional (GAO)</option>
-            <option value="INP">Inteligência Policial (INP)</option>
-            <option value="LET">Legislação de Trânsito e Operações (LET)</option>
-            <option value="LEI">Legislação Institucional (LEI)</option>
-            <option value="OUD">Ordem Unida (OUD)</option>
-            <option value="PDP">Polícia de Proximidade (PDP)</option>
-            <option value="POS">Polícia Ostensiva (POS)</option>
-            <option value="SCOH">Sistema de Comando e Operações de Ajuda Humanitária (SCOH)</option>
-            <option value="TPO">Técnicas E Operações De Polícia Militar (TPO)</option>
-            <option value="TELA">Tópicos Especiais de Legislação Aplicáveis à Atividade (TELA)</option>
+                 <option value="ALF">Administração Logística Financeira (ALF)</option>
+                <option value="AMTP">Armamento, Munição e Tiro Policial (AMTP)</option>
+                <option value="APHT">Atendimento Pré-Hospitalar Tático (APH)</option>
+                <option value="CCL">Comando Chefia e Liderança (CCL)</option>
+                <option value="DPE">Defesa Pessoal Policial (DPE)</option>
+                <option value="DAD">Direito Administrativo Disciplinar (DAD)</option>
+                <option value="DPPM">Direito Penal Militar, Processual Penal Militar (DPPM)</option>
+                <option value="EFPM">Educação Física Policial Militar (EFPM)</option>
+                <option value="DDPH">Ética e Direitos Humanos na Atividade Policial (DDPH)</option>
+                <option value="GAO">Gerenciamento de Atividade Operacional (GAO)</option>
+                <option value="INP">Inteligência Policial (INP)</option>
+                <option value="LET">Legislação de Trânsito e Operações (LET)</option>
+                <option value="LEI">Legislação Institucional (LEI)</option>
+                <option value="OUD">Ordem Unida (OUD)</option>
+                <option value="PDP">Polícia de Proximidade (PDP)</option>
+                <option value="POS">Polícia Ostensiva (POS)</option>
+                <option value="SCOH">Sistema de Comando e Operações de Ajuda Humanitária (SCOH)</option>
+                <option value="TPO">Técnicas E Operações De Polícia Militar (TPO)</option>
+                <option value="TELA">Tópicos Especiais de Legislação Aplicáveis à Atividade (TELA)</option>
         </select>
         <input type="number" id="nota" placeholder="Digite sua nota">
         <button id="salvar-nota-btn" onclick="salvarNota()">Salvar Nota</button>
@@ -152,44 +152,44 @@
         const alunos = {
             "9287027": "ELIENAR FARIAS",
             "9306820": "NAZARETH LIMA GOEDERT",
-            "9303219": "CARLA DE LUCA LINHARES",
-            "9287124": "LEANDRO GHELLERE",
-            "9300350": "TIAGO LUIZ CLEMES",
-            "9288350": "MARCOS AURÉLIO LUIZ DUARTE",
-            "9320547": "ANDRÉ LUIS PATRÍCIO",
-            "9288520": "MATHEUS ROSSI LONGO",
-            "9320555": "RICARDO MESQUITA DE MEDEIROS",
-            "9320601": "JOSÉ RENATO COSTA",
-            "9307800": "JEAN CARLOS PEREIRA MACHADO",
-            "9300600": "AILTON BOZELLO DE BITTENCOURT",
-            "9300341": "TIAGO SANTOS DE SOUZA",
-            "9316230": "RODRIGO SILVA DOS SANTOS",
-            "9308652": "ANDERSON ROVEDA",
-            "9333967": "MAYARA ZILI DA SILVA",
-            "9316221": "MARCOS ADRIANO DAL PONT",
-            "9333860": "SARAH WAGNER ZANATTA",
-            "9329730": "FELIPE LUMERTZ DA SILVA",
-            "9316116": "JAQUES ROCHA DE SOUZA",
-            "9329340": "ÉZIO FRANCISCO FERNANDES",
-            "9329382": "EDERSON FRANÇA DE MACHADO",
-            "6606032": "ROBSON GOMES HAHN",
-            "9339558": "EVANDRO ANASTÁCIO TEIXEIRA",
-            "9339329": "TIAGO ANSELMO VALNIER",
-            "9287205": "ALEXANDRE DA LUZ",
-            "9307745": "WANDERSON RICARDO DE CARVALHO",
-            "9316159": "ANDERSON DOS SANTOS ROSA",
-            "9320563": "IURI CÚRCIO CARRER",
-            "6718680": "LAURO TOGNON NETO",
-            "9330097": "PATRICK CARDOSO DE RAMOS",
-            "9330356": "BRUNA DA SILVA PIRES",
-            "3847446": "DAIANA PEREIRA",
-            "9329056": "VINICIUS JOVELINO COSTA",
-            "9339477": "DANIEL SERAFIM PESSI"
+        "9303219": "CARLA DE LUCA LINHARES",
+        "9287124": "LEANDRO GHELLERE",
+        "9287124": "LEANDRO GHELLERE",
+        "9300350": "TIAGO LUIZ CLEMES",
+        "9288350": "MARCOS AURÉLIO LUIZ DUARTE",
+        "9320547": "ANDRÉ LUIS PATRÍCIO",
+        "9288520": "MATHEUS ROSSI LONGO",
+        "9320555": "RICARDO MESQUITA DE MEDEIROS",
+        "9320601": "JOSÉ RENATO COSTA",
+        "9307800": "JEAN CARLOS PEREIRA MACHADO",
+        "9300600": "AILTON BOZELLO DE BITTENCOURT",
+        "9300341": "TIAGO SANTOS DE SOUZA",
+        "9316230": "RODRIGO SILVA DOS SANTOS",
+        "9308652": "ANDERSON ROVEDA",
+        "9333967": "MAYARA ZILI DA SILVA",
+        "9316221": "MARCOS ADRIANO DAL PONT",
+        "9333860": "SARAH WAGNER ZANATTA",
+        "9329730": "FELIPE LUMERTZ DA SILVA",
+        "9316116": "JAQUES ROCHA DE SOUZA",
+        "9329340": "ÉZIO FRANCISCO FERNANDES",
+        "9329382": "EDERSON FRANÇA DE MACHADO",
+        "6606032": "ROBSON GOMES HAHN",
+        "9339558": "EVANDRO ANASTÁCIO TEIXEIRA",
+        "9339329": "TIAGO ANSELMO VALNIER",
+        "9287205": "ALEXANDRE DA LUZ",
+        "9307745": "WANDERSON RICARDO DE CARVALHO",
+        "9316159": "ANDERSON DOS SANTOS ROSA",
+        "9320563": "IURI CÚRCIO CARRER",
+        "6718680": "LAURO TOGNON NETO",
+        "9330097": "PATRICK CARDOSO DE RAMOS",
+        "9330356": "BRUNA DA SILVA PIRES",
+        "3847446": "DAIANA PEREIRA",
+        "9329056": "VINICIUS JOVELINO COSTA",
+        "9339477": "DANIEL SERAFIM PESSI"
         };
 
         let matriculaAtual = '';
 
-        // Função de login
         function login() {
             const matricula = document.getElementById('matricula').value;
             if (alunos[matricula]) {
@@ -203,7 +203,6 @@
             }
         }
 
-        // Função para carregar notas
         function carregarNotas() {
             const matricula = matriculaAtual;
             const notaInput = document.getElementById('nota');
@@ -216,7 +215,6 @@
             });
         }
 
-        // Função para salvar a nota
         function salvarNota() {
             const notaInput = document.getElementById('nota');
             const disciplinaSelect = document.getElementById('disciplina');
@@ -229,7 +227,7 @@
                     document.getElementById('nota-error').style.display = 'none';
                     setTimeout(() => {
                         document.getElementById('nota-success').style.display = 'none';
-                    }, 3000); // Mensagem some após 3 segundos
+                    }, 3000);
                 });
             } else {
                 document.getElementById('nota-error').style.display = 'block';
@@ -237,7 +235,6 @@
             }
         }
 
-        // Função para ver todas as notas
         function verNotas() {
             const listaNotas = document.getElementById('lista-notas');
             listaNotas.innerHTML = ''; // Limpa a lista anterior
@@ -257,17 +254,14 @@
             });
         }
 
-        // Função para habilitar/desabilitar o botão de ranking
         function toggleRankingButton() {
             const rankCheckbox = document.getElementById('rank');
             const rankingBtn = document.getElementById('ranking-btn');
             rankingBtn.disabled = !rankCheckbox.checked;
 
-            // Salvar permissão no banco de dados
             db.ref(`permissoesRanking/${matriculaAtual}`).set(rankCheckbox.checked);
         }
 
-        // Função para mostrar o ranking
         function mostrarRanking() {
             const rankingLista = document.getElementById('ranking-lista');
             rankingLista.innerHTML = ''; // Limpa o ranking anterior
@@ -282,26 +276,37 @@
                             const notas = notasAlunos[matricula];
                             const total = Object.values(notas).reduce((acc, nota) => acc + nota, 0);
                             const media = total / Object.keys(notas).length;
-                            ranking.push({ nome: alunos[matricula], media });
+                            ranking.push({ matricula, media, nome: alunos[matricula] });
                         }
                     });
                 });
 
                 Promise.all(promessas).then(() => {
-                    if (ranking.length > 0) {
-                        ranking.sort((a, b) => b.media - a.media); // Ordenar por média
-                        ranking.forEach(aluno => {
-                            const item = document.createElement('div');
-                            item.innerText = `${aluno.nome}: Média ${aluno.media.toFixed(2)}`;
-                            rankingLista.appendChild(item);
-                        });
-                        rankingLista.style.display = 'block';
-                    } else {
-                        alert('Nenhum aluno aceitou aparecer no ranking.');
-                    }
+                    ranking.sort((a, b) => b.media - a.media);
+                    ranking.forEach((aluno, index) => {
+                        const item = document.createElement('div');
+                        item.innerText = `${index + 1}º - ${aluno.nome}: ${aluno.media.toFixed(2)}`;
+                        rankingLista.appendChild(item);
+                    });
+                    rankingLista.style.display = 'block';
                 });
             });
         }
+
+        function calcularMedia() {
+            db.ref(`notas/${matriculaAtual}`).once('value').then(snapshot => {
+                const notas = snapshot.val();
+                if (notas) {
+                    const total = Object.values(notas).reduce((acc, nota) => acc + nota, 0);
+                    const media = total / Object.keys(notas).length;
+                    alert(`Sua média é ${media.toFixed(2)}`);
+                } else {
+                    alert('Nenhuma nota encontrada para calcular a média.');
+                }
+            });
+        }
     </script>
+</div>
+
 </body>
 </html>
