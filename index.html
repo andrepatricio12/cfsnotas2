@@ -154,23 +154,25 @@
 </div>
 
 <!-- Adicione a configuração do Firebase -->
-<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js"></script>
+<<!-- Import the Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/9.1.2/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.1.2/firebase-firestore.js"></script>
 <script>
-    // Configuração do Firebase
-    const firebaseConfig = {
-        apiKey: "AIzaSyDEvCDdX0LGjDMFpyxljj-4JTjZKtgooDM",
-        authDomain: "notas-cfs.firebaseapp.com",
-        projectId: "notas-cfs",
-        storageBucket: "notas-cfs.appspot.com",
-        messagingSenderId: "91086463856",
-        appId: "1:91086463856:web:6a16fb0b3abe04bbc425b5"
-    };
+    // Configuração Firebase
+const firebaseConfig = {
+    apiKey: "AIzaSyDEvCDdX0LGjDMFpyxljj-4JTjZKtgooDM",
+    authDomain: "notas-cfs.firebaseapp.com",
+    projectId: "notas-cfs",
+    storageBucket: "notas-cfs.appspot.com",
+    messagingSenderId: "91086463856",
+    appId: "1:91086463856:web:6a16fb0b3abe04bbc425b5"
+};
 
-    // Inicialize o Firebase
-    const app = firebase.initializeApp(firebaseConfig);
-    const database = firebase.database();
-</script>
+// Inicialize o Firebase
+firebase.initializeApp(firebaseConfig);
+
+// Inicialize o Firestore
+const db = firebase.firestore();
 
 <script>
     const alunos = {
@@ -259,7 +261,24 @@
         } else {
             document.getElementById("nota-error").classList.remove("hidden");
         }
+    }function salvarNota() {
+    const disciplina = document.getElementById("disciplina").value;
+    const notaInput = document.getElementById("nota");
+    const nota = parseFloat(notaInput.value);
+
+    if (nota >= 0 && nota <= 10) {
+        db.collection("notas").doc(alunoAtual).set({
+            [disciplina]: nota
+        }, { merge: true }).then(() => {
+            mostrarMensagemSucesso();
+        }).catch((error) => {
+            console.error("Erro ao salvar a nota: ", error);
+        });
+    } else {
+        mostrarMensagemErro();
     }
+}
+
 
     function carregarNota(disciplina) {
         const ref = database.ref(`notas/${matriculaAtual}/${disciplina}`);
@@ -281,7 +300,21 @@
                 }
                 alert(notasText);
             });
-    }
+    }function atualizarNota() {
+    const disciplina = document.getElementById("disciplina").value;
+    const notaInput = document.getElementById("nota");
+
+    db.collection("notas").doc(alunoAtual).get().then((doc) => {
+        if (doc.exists && doc.data()[disciplina] !== undefined) {
+            notaInput.value = doc.data()[disciplina];
+        } else {
+            notaInput.value = ""; // Limpar se não houver nota
+        }
+    }).catch((error) => {
+        console.error("Erro ao buscar a nota: ", error);
+    });
+}
+
 
     function calcularMedia() {
         const ref = database.ref(`notas/${matriculaAtual}`);
