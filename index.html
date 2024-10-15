@@ -6,6 +6,53 @@
     <title>Sistema de Notas</title>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+        h2 {
+            color: #333;
+        }
+        #login-form, #notas-form {
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin: 20px auto;
+            max-width: 400px;
+        }
+        input, select, button {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+        button {
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .hidden {
+            display: none;
+        }
+        #nota-success, #nota-error {
+            margin-top: 10px;
+        }
+        #ranking-lista div, #lista-notas div {
+            background-color: #e9ecef;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 5px;
+        }
+    </style>
 </head>
 <body>
     <div id="login-form">
@@ -40,18 +87,17 @@
                 <option value="TPO">Técnicas E Operações De Polícia Militar (TPO)</option>
                 <option value="TELA">Tópicos Especiais de Legislação Aplicáveis à Atividade (TELA)</option>
         </select>
-        <br>
         <input type="number" id="nota" placeholder="Digite sua nota">
         <button onclick="salvarNota()">Salvar Nota</button>
         <div id="nota-success" style="display:none;color:green;">Nota salva com sucesso!</div>
         <div id="nota-error" style="display:none;color:red;">Nota inválida! Digite um valor entre 1 e 10.</div>
-        <br>
+
         <button onclick="verNotas()">Ver Todas as Notas</button>
         <div id="lista-notas" class="hidden"></div>
-        <br>
+
         <label><input type="checkbox" id="rank" onchange="toggleRankingButton()"> Aceito aparecer no ranking</label>
         <button id="ranking-btn" onclick="mostrarRanking()" disabled>Ver Ranking</button>
-        <br>
+
         <button onclick="calcularMedia()">Calcular Média</button>
         <div id="ranking-lista" class="hidden"></div>
     </div>
