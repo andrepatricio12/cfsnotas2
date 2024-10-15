@@ -101,7 +101,7 @@
             <label for="disciplina">Selecione a Disciplina:</label>
             <select id="disciplina">
                 <option value="ADP">Administração de Pessoal (ADP)</option>
-               <option value="ALF">Administração Logística Financeira (ALF)</option>
+                <option value="ALF">Administração Logística Financeira (ALF)</option>
                 <option value="AMTP">Armamento, Munição e Tiro Policial (AMTP)</option>
                 <option value="APHT">Atendimento Pré-Hospitalar Tático (APH)</option>
                 <option value="CCL">Comando Chefia e Liderança (CCL)</option>
@@ -118,7 +118,7 @@
                 <option value="PDP">Polícia de Proximidade (PDP)</option>
                 <option value="POS">Polícia Ostensiva (POS)</option>
                 <option value="SCOH">Sistema de Comando e Operações de Ajuda Humanitária (SCOH)</option>
-                <option value="TPO">Técnicas E Operações De Polícia Militar (TPO)</option>
+                <option value="TPO">Técnicas e Operações de Polícia Militar (TPO)</option>
                 <option value="TELA">Tópicos Especiais de Legislação Aplicáveis à Atividade (TELA)</option>
             </select>
         </div>
@@ -156,7 +156,7 @@
 <script>
     // Configuração Firebase
     const firebaseConfig = {
-        apiKey: "AIzaSyDEvCDdX0LGjDMFpyxljj-4JTjZKtgooDM",
+        apiKey: "YOUR_API_KEY_HERE", // Substitua pela sua chave de API
         authDomain: "notas-cfs.firebaseapp.com",
         projectId: "notas-cfs",
         storageBucket: "notas-cfs.appspot.com",
@@ -171,16 +171,15 @@
 
     const alunos = {
         "9287027": "ELIENAR FARIAS",
-          "9306820": "NAZARETH LIMA GOEDERT",
+        "9306820": "NAZARETH LIMA GOEDERT",
         "9303219": "CARLA DE LUCA LINHARES",
-        "9287124": "LEANDRO GHELLERE",
         "9287124": "LEANDRO GHELLERE",
         "9300350": "TIAGO LUIZ CLEMES",
         "9288350": "MARCOS AURÉLIO LUIZ DUARTE",
         "9320547": "ANDRÉ LUIS PATRÍCIO",
         "9288520": "MATHEUS ROSSI LONGO",
         "9320555": "RICARDO MESQUITA DE MEDEIROS",
-        "9320601": "JOSÉ RENATO COSTA",
+         "9320601": "JOSÉ RENATO COSTA",
         "9307800": "JEAN CARLOS PEREIRA MACHADO",
         "9300600": "AILTON BOZELLO DE BITTENCOURT",
         "9300341": "TIAGO SANTOS DE SOUZA",
@@ -208,77 +207,86 @@
         "9339477": "DANIEL SERAFIM PESSI"
     };
 
-    function login() {
-        const matricula = document.getElementById("matricula").value;
-        const alunoNome = alunos[matricula];
-        const loginError = document.getElementById("login-error");
+    let matriculaAtual = "";
+    let nomeAtual = "";
 
-        if (alunoNome) {
-            document.getElementById("aluno-nome").textContent = "Bem-vindo, " + alunoNome;
-            document.getElementById("login-form").classList.add("hidden");
+    // Função de login
+    function login() {
+        matriculaAtual = document.getElementById("matricula").value;
+        nomeAtual = alunos[matriculaAtual];
+
+        if (nomeAtual) {
+            document.getElementById("aluno-nome").innerText = nomeAtual;
             document.getElementById("notas-form").classList.remove("hidden");
-            loginError.classList.add("hidden");
+            document.getElementById("login-form").classList.add("hidden");
         } else {
-            loginError.classList.remove("hidden");
+            document.getElementById("login-error").classList.remove("hidden");
         }
     }
 
+    // Função para salvar a nota
     function salvarNota() {
-        const matricula = document.getElementById("matricula").value;
-        const disciplina = document.getElementById("disciplina").value;
         const nota = parseFloat(document.getElementById("nota").value);
+        const disciplina = document.getElementById("disciplina").value;
         const rank = document.getElementById("rank").checked;
-        const notaSuccess = document.getElementById("nota-success");
-        const notaError = document.getElementById("nota-error");
 
         if (nota >= 1 && nota <= 10) {
-            const notaRef = db.ref('notas/' + matricula + '/' + disciplina);
-            notaRef.set({
+            const referencia = db.ref(`notas/${matriculaAtual}/${disciplina}`);
+            referencia.set({
                 nota: nota,
                 rank: rank
+            })
+            .then(() => {
+                document.getElementById("nota-success").classList.remove("hidden");
+                document.getElementById("nota-error").classList.add("hidden");
+            })
+            .catch(() => {
+                document.getElementById("nota-error").innerText = "Erro ao salvar a nota.";
+                document.getElementById("nota-error").classList.remove("hidden");
             });
-            notaSuccess.classList.remove("hidden");
-            notaError.classList.add("hidden");
         } else {
-            notaError.classList.remove("hidden");
-            notaSuccess.classList.add("hidden");
+            document.getElementById("nota-error").classList.remove("hidden");
+            document.getElementById("nota-success").classList.add("hidden");
         }
     }
 
+    // Função para ver todas as notas
     function verNotas() {
-        const matricula = document.getElementById("matricula").value;
-        const notasRef = db.ref('notas/' + matricula);
-        notasRef.once('value', (snapshot) => {
-            const notas = snapshot.val();
-            console.log(notas);  // Aqui você pode exibir as notas no console ou na tela.
+        const referencia = db.ref(`notas/${matriculaAtual}`);
+        referencia.once("value").then((snapshot) => {
+            let notas = "";
+            snapshot.forEach((childSnapshot) => {
+                const key = childSnapshot.key;
+                const data = childSnapshot.val();
+                notas += `${key}: Nota: ${data.nota}, Rank: ${data.rank ? 'Sim' : 'Não'}\n`;
+            });
+            alert(`Notas:\n${notas}`);
         });
     }
 
-    function calcularMedia() {
-        const matricula = document.getElementById("matricula").value;
-        const notasRef = db.ref('notas/' + matricula);
-        notasRef.once('value', (snapshot) => {
-            const notas = snapshot.val();
-            let soma = 0, count = 0;
-            for (let disciplina in notas) {
-                soma += notas[disciplina].nota;
-                count++;
-            }
-            const media = (soma / count).toFixed(2);
-            alert('Média: ' + media);
-        });
-    }
-
+    // Função para habilitar ou desabilitar o botão de ranking
     function toggleRankingButton() {
-        const rank = document.getElementById("rank").checked;
-        const rankingBtn = document.getElementById("ranking-btn");
-        if (rank) {
-            rankingBtn.removeAttribute('disabled');
-        } else {
-            rankingBtn.setAttribute('disabled', true);
-        }
+        const rankButton = document.getElementById("ranking-btn");
+        rankButton.disabled = !document.getElementById("rank").checked;
+    }
+
+    // Função para calcular média
+    function calcularMedia() {
+        const referencia = db.ref(`notas/${matriculaAtual}`);
+        referencia.once("value").then((snapshot) => {
+            let totalNotas = 0;
+            let count = 0;
+
+            snapshot.forEach((childSnapshot) => {
+                const data = childSnapshot.val();
+                totalNotas += data.nota;
+                count++;
+            });
+
+            const media = count > 0 ? (totalNotas / count).toFixed(2) : 0;
+            alert(`A média de notas é: ${media}`);
+        });
     }
 </script>
-
 </body>
 </html>
