@@ -237,14 +237,26 @@
         }
     }
 
-    function toggleRankingButton() {
-        const rankCheckbox = document.getElementById('rank');
-        const rankingBtn = document.getElementById('ranking-btn');
-        rankingBtn.disabled = !rankCheckbox.checked;
-    }
+   // Função para ver todas as notas
+        function verNotas() {
+            const matricula = document.getElementById("matricula").value;
+            db.ref("notas/" + matricula).once('value').then(snapshot => {
+                const notas = snapshot.val();
+                const listaNotas = document.getElementById("lista-notas");
+                listaNotas.innerHTML = "";
+                for (const disciplina in notas) {
+                    const item = document.createElement("div");
+                    item.innerText = `${disciplina}: ${notas[disciplina]}`;
+                    listaNotas.appendChild(item);
+                }
+                listaNotas.classList.remove("hidden");
+            });
+        }
 
-    function verNotas() {
-        alert('Função para exibir todas as notas.');
+        // Função para mostrar o ranking
+        function toggleRankingButton() {
+            const rankingBtn = document.getElementById("ranking-btn");
+            rankingBtn.disabled = !document.getElementById("rank").checked;
     }
 
     function calcularMedia() {
