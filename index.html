@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistema de Notas - Curso de Sargentos</title>
     <style>
+        /* Seus estilos permanecem aqui... */
         #loading {
             text-align: center;
             font-weight: bold;
@@ -50,13 +51,12 @@
             padding: 10px;
             border-radius: 5px;
             border: 1px solid #ddd;
-            width: 100%; /* Definir largura completa para matrícula e disciplina */
+            width: 100%;
         }
 
-        /* Ajuste apenas para o campo de nota */
         #nota {
-            width: 80px; /* Define um tamanho fixo apenas para o campo de nota */
-            padding: 8px; /* Ajuste do padding para o campo de nota */
+            width: 80px;
+            padding: 8px;
         }
 
         button {
@@ -69,7 +69,7 @@
             font-size: 16px;
             cursor: pointer;
             transition: background-color 0.3s;
-            margin: 5px 0; /* Espaçamento padrão entre os botões */
+            margin: 5px 0;
         }
 
         button:disabled {
@@ -91,26 +91,29 @@
 
         .button-group {
             margin-top: 20px;
-            display: flex; /* Para alinhar botões lado a lado */
-            justify-content: space-between; /* Para criar espaço entre os botões */
+            display: flex;
+            justify-content: space-between;
         }
 
         .button-group button {
-            width: 48%; /* Largura dos botões lado a lado */
+            width: 48%;
         }
         /* Animação ao clicar nos botões */
 button:active {
   transform: scale(0.95);
   transition: transform 0.1s;
 }
-        
 
+        button:active {
+            transform: scale(0.95);
+            transition: transform 0.1s;
+        }
     </style>
 
     <!-- Importar as bibliotecas do Firebase -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-        import { getFirestore, doc, setDoc, getDoc, updateDoc, deleteField, collection, getDocs } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, getDoc, updateDoc, deleteField } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDEvCDdX0LGjDMFpyxljj-4JTjZKtgooDM",
@@ -121,51 +124,49 @@ button:active {
             appId: "1:91086463856:web:6a16fb0b3abe04bbc425b5"
         };
 
-        // Inicializar o Firebase
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
         const alunos = {
+            // Seu mapeamento de alunos permanece aqui...
             "9287027": "ELIENAR FARIAS",
             "9306820": "NAZARETH LIMA GOEDERT",
             "9303219": "CARLA DE LUCA LINHARES",
-            "9287124": "LEANDRO GHELLERE",
-            "9300350": "TIAGO LUIZ CLEMES",
-            "9288350": "MARCOS AURÉLIO LUIZ DUARTE",
-            "9320547": "ANDRÉ LUIS PATRÍCIO",
-            "9288520": "MATHEUS ROSSI LONGO",
-            "9320555": "RICARDO MESQUITA DE MEDEIROS",
-            "9320601": "JOSÉ RENATO COSTA",
-            "9307800": "JEAN CARLOS PEREIRA MACHADO",
-            "9300600": "AILTON BOZELLO DE BITTENCOURT",
-            "9300341": "TIAGO SANTOS DE SOUZA",
-            "9316230": "RODRIGO SILVA DOS SANTOS",
-            "9308652": "ANDERSON ROVEDA",
-            "9333967": "MAYARA ZILI DA SILVA",
-            "9316221": "MARCOS ADRIANO DAL PONT",
-            "9333860": "SARAH WAGNER ZANATTA",
-            "9329730": "FELIPE LUMERTZ DA SILVA",
-            "9316116": "JAQUES ROCHA DE SOUZA",
-            "9329340": "ÉZIO FRANCISCO FERNANDES",
-            "9329382": "EDERSON FRANÇA DE MACHADO",
-            "6606032": "ROBSON GOMES HAHN",
-            "9339558": "EVANDRO ANASTÁCIO TEIXEIRA",
-            "9339329": "TIAGO ANSELMO VALNIER",
-            "9287205": "ALEXANDRE DA LUZ",
-            "9307745": "WANDERSON RICARDO DE CARVALHO",
-            "9316159": "ANDERSON DOS SANTOS ROSA",
-            "9320563": "IURI CÚRCIO CARRER",
-            "6718680": "LAURO TOGNON NETO",
-            "9330097": "PATRICK CARDOSO DE RAMOS",
-            "9330356": "BRUNA DA SILVA PIRES",
-            "3847446": "DAIANA PEREIRA",
-            "9329056": "VINICIUS JOVELINO COSTA",
-            "9339477": "DANIEL SERAFIM PESSI"
+           "9287124": "LEANDRO GHELLERE",
+        "9300350": "TIAGO LUIZ CLEMES",
+        "9288350": "MARCOS AURÉLIO LUIZ DUARTE",
+        "9320547": "ANDRÉ LUIS PATRÍCIO",
+        "9288520": "MATHEUS ROSSI LONGO",
+        "9320555": "RICARDO MESQUITA DE MEDEIROS",
+        "9320601": "JOSÉ RENATO COSTA",
+        "9307800": "JEAN CARLOS PEREIRA MACHADO",
+        "9300600": "AILTON BOZELLO DE BITTENCOURT",
+        "9300341": "TIAGO SANTOS DE SOUZA",
+        "9316230": "RODRIGO SILVA DOS SANTOS",
+        "9308652": "ANDERSON ROVEDA",
+        "9333967": "MAYARA ZILI DA SILVA",
+        "9316221": "MARCOS ADRIANO DAL PONT",
+        "9333860": "SARAH WAGNER ZANATTA",
+        "9329730": "FELIPE LUMERTZ DA SILVA",
+        "9316116": "JAQUES ROCHA DE SOUZA",
+        "9329340": "ÉZIO FRANCISCO FERNANDES",
+        "9329382": "EDERSON FRANÇA DE MACHADO",
+        "6606032": "ROBSON GOMES HAHN",
+        "9339558": "EVANDRO ANASTÁCIO TEIXEIRA",
+        "9339329": "TIAGO ANSELMO VALNIER",
+        "9287205": "ALEXANDRE DA LUZ",
+        "9307745": "WANDERSON RICARDO DE CARVALHO",
+        "9316159": "ANDERSON DOS SANTOS ROSA",
+        "9320563": "IURI CÚRCIO CARRER",
+        "6718680": "LAURO TOGNON NETO",
+        "9330097": "PATRICK CARDOSO DE RAMOS",
+        "9330356": "BRUNA DA SILVA PIRES",
+        "3847446": "DAIANA PEREIRA",
+        "9329056": "VINICIUS JOVELINO COSTA",
+        "9339477": "DANIEL SERAFIM PESSI"
         };
 
         let alunoAtual = null;
-        let disciplinas = {};
-        let rankingExibido = false; // Para controlar a exibição do ranking
 
         window.login = function () {
             const matricula = document.getElementById("matricula").value.trim();
@@ -177,7 +178,6 @@ button:active {
                 document.getElementById("login-form").classList.add("hidden");
                 document.getElementById("notas-form").classList.remove("hidden");
                 carregarNotas();
-                carregarPreferencias();
             } else {
                 document.getElementById("login-error").classList.remove("hidden");
             }
@@ -202,242 +202,83 @@ button:active {
                     document.getElementById("nota-success").classList.add("hidden");
                 }, 3000);
                 carregarNotas();
-                calcularMedia(); // Atualiza a média ao salvar a nota
+                calcularMedia();
             }).catch((error) => {
                 console.error("Erro ao salvar nota: ", error);
             });
         }
-// Função para habilitar/desabilitar o botão de salvar nota
-function toggleSalvarNotaButton() {
-    const disciplina = document.getElementById("disciplina").value;
-    const nota = document.getElementById("nota").value;
-    const salvarNotaButton = document.getElementById("salvarNota");
 
-    // Desabilita o botão se qualquer campo estiver vazio
-    if (disciplina === "" || nota === "") {
-        salvarNotaButton.disabled = true;
-    } else {
-        salvarNotaButton.disabled = false;
-    }
-}
+        function toggleSalvarNotaButton() {
+            const disciplina = document.getElementById("disciplina").value;
+            const nota = document.getElementById("nota").value;
+            const salvarNotaButton = document.getElementById("salvarNota");
 
-// Chama essa função toda vez que o campo de disciplina ou nota mudar
-document.getElementById("disciplina").addEventListener("input", toggleSalvarNotaButton);
-document.getElementById("nota").addEventListener("input", toggleSalvarNotaButton);
+            salvarNotaButton.disabled = (disciplina === "" || nota === "");
+        }
 
-// Inicia a página com o botão desabilitado, caso os campos estejam vazios
-window.onload = toggleSalvarNotaButton;
+        document.getElementById("disciplina").addEventListener("input", toggleSalvarNotaButton);
+        document.getElementById("nota").addEventListener("input", toggleSalvarNotaButton);
+        window.onload = toggleSalvarNotaButton;
 
-        // Função para excluir nota com confirmação
-function excluirNota(matricula, disciplina) {
-  // Exibe uma caixa de confirmação antes de excluir a nota
-  if (confirm(`Tem certeza que deseja excluir a nota da disciplina ${disciplina}?`)) {
-    // Exclui a nota da disciplina para a matrícula específica
-    firebase.firestore().collection('notas').doc(matricula).update({
-      [disciplina]: firebase.firestore.FieldValue.delete()
-    })
-    .then(() => {
-      console.log('Nota excluída com sucesso!');
+        function excluirNota(matricula, disciplina) {
+            if (confirm(`Tem certeza que deseja excluir a nota da disciplina ${disciplina}?`)) {
+                updateDoc(doc(db, "notas", matricula), {
+                    [disciplina]: deleteField()
+                }).then(() => {
+                    console.log('Nota excluída com sucesso!');
+                    carregarNotas();
+                    calcularMedia();
+                }).catch((error) => {
+                    console.error('Erro ao excluir a nota:', error);
+                });
+            }
+        }
 
-      // Atualiza a média do aluno
-      atualizarMedia(matricula);
+        window.carregarNotas = function () {
+            if (!alunoAtual) return;
 
-      // Atualiza o ranking após a exclusão
-      atualizarRanking();
+            getDoc(doc(db, "notas", alunoAtual)).then((docSnap) => {
+                let notasDisplay = "";
+                let quantidadeNotas = 0;
+                let totalNotas = 0;
 
-      // Atualize a UI se necessário (por exemplo, limpando a nota da tela)
-    })
-    .catch((error) => {
-      console.error('Erro ao excluir a nota:', error);
-    });
-  }
-}
-
-
-       window.carregarNotas = function () {
-    if (!alunoAtual) return; // Verifica se alunoAtual está definido
-
-    getDoc(doc(db, "notas", alunoAtual)).then((docSnap) => {
-        // (restante do código permanece o mesmo)
-    }).catch((error) => {
-        console.error("Erro ao carregar notas: ", error);
-    });
-}
-
-
-
-                    document.getElementById("notas-salvas").innerHTML = notasDisplay;
-                    document.getElementById("notas-vazias").classList.toggle("hidden", notasDisplay.length > 0);
-
-                    if (quantidadeNotas > 0) {
-                        calcularMedia(totalNotas, quantidadeNotas); // Atualiza a média ao carregar as notas
-                    } else {
-                        document.getElementById("media").innerText = "sua média é: -";
+                if (docSnap.exists()) {
+                    const notas = docSnap.data();
+                    for (const [disciplina, nota] of Object.entries(notas)) {
+                        notasDisplay += `<p>${disciplina}: ${nota.toFixed(2)} <button onclick="excluirNota('${alunoAtual}', '${disciplina}')">Excluir</button></p>`;
+                        totalNotas += nota;
+                        quantidadeNotas++;
                     }
+                }
+
+                document.getElementById("notas-salvas").innerHTML = notasDisplay;
+                document.getElementById("notas-vazias").classList.toggle("hidden", notasDisplay.length > 0);
+
+                if (quantidadeNotas > 0) {
+                    calcularMedia(totalNotas, quantidadeNotas);
                 } else {
-                    document.getElementById("notas-salvas").innerHTML = "";
-                    document.getElementById("notas-vazias").classList.remove("hidden");
+                    document.getElementById("media").innerText = "sua média é: -";
                 }
             }).catch((error) => {
                 console.error("Erro ao carregar notas: ", error);
             });
         }
 
-        window.calcularMedia = function (totalNotas = 0, quantidadeNotas = 0) {
+        window.calcularMedia = function () {
             getDoc(doc(db, "notas", alunoAtual)).then((docSnap) => {
                 if (docSnap.exists()) {
                     const notas = docSnap.data();
-                    totalNotas = 0;
-                    quantidadeNotas = 0;
-
-                    for (const nota of Object.values(notas)) {
-                        if (typeof nota === "number") {
-                            totalNotas += nota;
-                            quantidadeNotas++;
-                        }
-                    }
+                    const totalNotas = Object.values(notas).reduce((sum, nota) => sum + nota, 0);
+                    const quantidadeNotas = Object.values(notas).length;
 
                     const media = quantidadeNotas > 0 ? (totalNotas / quantidadeNotas).toFixed(2) : 0;
                     document.getElementById("media").innerText = `sua média é: ${media}`;
+                } else {
+                    document.getElementById("media").innerText = "sua média é: -";
                 }
             }).catch((error) => {
                 console.error("Erro ao calcular média: ", error);
             });
-        }
-
-        window.carregarPreferencias = function () {
-    getDoc(doc(db, "preferencias", alunoAtual)).then((docSnap) => {
-        if (docSnap.exists()) {
-            const preferencias = docSnap.data();
-            document.getElementById("mostrar-ranking").checked = preferencias.mostrarRanking || false;
-            rankingExibido = preferencias.mostrarRanking || false;
-        } else {
-            document.getElementById("mostrar-ranking").checked = false; // Define padrão se não houver preferências
-        }
-    }).catch((error) => {
-        console.error("Erro ao carregar preferências: ", error);
-    });
-}
-
-
-window.atualizarNota = function() {
-    const disciplina = document.getElementById("disciplina").value;
-    getDoc(doc(db, "notas", alunoAtual)).then((docSnap) => {
-        if (docSnap.exists()) {
-            const notas = docSnap.data();
-            if (notas[disciplina] !== undefined) {
-                document.getElementById("nota").value = notas[disciplina].toFixed(2);
-            } else {
-                document.getElementById("nota").value = ''; // Limpa o campo se não houver nota
-            }
-        }
-    }).catch((error) => {
-        console.error("Erro ao carregar nota: ", error);
-    });
-}
-        function atualizarMedia(matricula) {
-  firebase.firestore().collection('notas').doc(matricula).get()
-    .then((doc) => {
-      if (doc.exists) {
-        const notas = doc.data();
-        const valores = Object.values(notas);
-
-        // Calcula a média apenas se houver notas
-        if (valores.length > 0) {
-          const soma = valores.reduce((acc, nota) => acc + nota, 0);
-          const media = soma / valores.length;
-
-          // Exibe a nova média na tela
-          document.getElementById('media').innerText = `Sua média é: ${media.toFixed(2)}`;
-        } else {
-          document.getElementById('media').innerText = 'Sua média é: N/A';
-        }
-      }
-    })
-    .catch((error) => {
-      console.error('Erro ao calcular a média:', error);
-    });
-}
-function atualizarRanking() {
-  getDocs(collection(db, 'notas'))
-    .then((snapshot) => {
-      const alunos = [];
-      
-      snapshot.forEach((doc) => {
-        const notas = doc.data();
-        const valores = Object.values(notas);
-
-        if (valores.length > 0) {
-          const soma = valores.reduce((acc, nota) => acc + nota, 0);
-          const media = soma / valores.length;
-
-          alunos.push({ matricula: doc.id, media: media });
-        }
-      });
-
-      // Ordena por média (decrescente) e exibe o ranking
-      alunos.sort((a, b) => b.media - a.media);
-
-      // Atualiza o ranking na tela
-      const rankingElement = document.getElementById('ranking');
-      rankingElement.innerHTML = '';
-
-      alunos.forEach((aluno, index) => {
-        rankingElement.innerHTML += `<p>${index + 1}º - Matrícula: ${aluno.matricula}, Média: ${aluno.media.toFixed(2)}</p>`;
-      });
-    })
-    .catch((error) => {
-      console.error('Erro ao atualizar o ranking:', error);
-    });
-}
-);
-
-      // Ordena por média (decrescente) e exibe o ranking
-      alunos.sort((a, b) => b.media - a.media);
-
-      // Atualiza o ranking na tela
-      const rankingElement = document.getElementById('ranking');
-      rankingElement.innerHTML = '';
-
-      alunos.forEach((aluno, index) => {
-        rankingElement.innerHTML += `<p>${index + 1}º - Matrícula: ${aluno.matricula}, Média: ${aluno.media.toFixed(2)}</p>`;
-      });
-    })
-    .catch((error) => {
-      console.error('Erro ao atualizar o ranking:', error);
-    });
-}
-        window.verificarMostrarRanking = function(checked) {
-    document.getElementById("mostrar-ranking").checked = checked;
-    atualizarPreferencias();
-}
-
-       window.atualizarPreferencias = function () {
-    const mostrarRanking = document.getElementById("mostrar-ranking").checked;
-    const mensagens = mostrarRanking ? 
-        "Você deseja ser exibido no ranking?" : 
-        "Você não deseja mais aparecer no ranking?";
-
-    if (confirm(mensagens)) {
-        rankingExibido = mostrarRanking;
-        setDoc(doc(db, "preferencias", alunoAtual), {
-            mostrarRanking: rankingExibido
-        }, { merge: true })
-        .then(() => {
-            atualizarRanking(); // Atualiza o ranking após salvar preferências
-        })
-        .catch((error) => {
-            console.error("Erro ao atualizar preferências: ", error);
-        });
-    } else {
-        document.getElementById("mostrar-ranking").checked = !mostrarRanking; // Restaura o checkbox
-    }
-}
-
-            <label>
-    <input type="checkbox" id="opcaoRanking" onchange="verificarMostrarRanking(this.checked)">
-    Desejo aparecer no ranking
-</label>
         }
     </script>
 </head>
@@ -447,10 +288,10 @@ function atualizarRanking() {
         <div id="login-form">
             <div class="form-group">
                 <label for="matricula">Matrícula:</label>
-                <input type="text" id="matricula" placeholder="Digite sua matrícula">
-                <div class="error hidden" id="login-error">Matrícula inválida!</div>
+                <input type="text" id="matricula">
+                <span id="login-error" class="error">Matrícula inválida.</span>
             </div>
-            <button onclick="login()">Entrar</button>
+            <button onclick="login()">Login</button>
         </div>
         <div id="notas-form" class="hidden">
             <h2 id="aluno-nome"></h2>
@@ -481,69 +322,23 @@ function atualizarRanking() {
             </div>
             <div class="form-group">
                 <label for="nota">Nota:</label>
-                <input type="number" id="nota" placeholder="0.00" step="0.01" min="0" max="10">
-                <div class="error hidden" id="nota-error">A nota deve estar entre 0 e 10!</div>
+                <input type="number" id="nota" step="0.01" min="0" max="10" oninput="toggleSalvarNotaButton()">
+                <span id="nota-error" class="error">Nota deve ser entre 0 e 10.</span>
+                <span id="nota-success" class="error">Nota salva com sucesso!</span>
             </div>
-            <div id="loading" class="hidden">Salvando...</div>
-            <div class="form-group">
-                <div class="button-group">
-                    <button onclick="salvarNota()">Salvar Nota</button>
-                    <button onclick="excluirNota()">Excluir Nota</button>
-                </div>
-                <div class="success hidden" id="nota-success">Nota salva com sucesso!</div>
-            </div>
+            <div id="loading" class="hidden">Carregando...</div>
             <div id="notas-salvas"></div>
-            <div id="notas-vazias" class="error hidden">Você não possui notas salvas.</div>
-            <div id="media" style="font-weight: bold;">sua média é: -</div>
-            <div class="form-group">
-                <label for="mostrar-ranking">Mostrar no ranking:</label>
-                <input type="checkbox" id="mostrar-ranking" onchange="atualizarPreferencias()">
+            <div id="notas-vazias" class="hidden">Nenhuma nota salva.</div>
+            <p id="media">sua média é: -</p>
+            <div class="button-group">
+                <button id="salvarNota" onclick="salvarNota()" disabled>Salvar Nota</button>
+                <button onclick="atualizarPreferencias()">Salvar Preferências</button>
             </div>
-            <script>
-    // Referências para os botões
-    const visualizarRankingBtn = document.getElementById('visualizarRanking');
-    const ocultarRankingBtn = document.getElementById('ocultarRanking');
-    const rankingContainer = document.getElementById('rankingContainer');
-
-    // Evento que verifica se o aluno escolheu aparecer no ranking
-    function verificarMostrarRanking(opcao) {
-        if (opcao) {
-            // Habilita o botão de visualizar ranking se a pessoa optar por aparecer no ranking
-            visualizarRankingBtn.disabled = false;
-            visualizarRankingBtn.style.opacity = '1';  // Torna o botão visível
-        } else {
-            // Desabilita o botão se a pessoa não quiser aparecer no ranking
-            visualizarRankingBtn.disabled = true;
-            visualizarRankingBtn.style.opacity = '0.5';  // Torna o botão apagado
-            rankingContainer.style.display = 'none';  // Oculta o ranking se estiver visível
-            ocultarRankingBtn.style.display = 'none';  // Oculta o botão de ocultar ranking
-        }
-    }
-
-    // Evento para exibir o ranking quando clicar no botão
-    visualizarRankingBtn.addEventListener('click', function() {
-        rankingContainer.style.display = 'block';  // Exibe o ranking
-        ocultarRankingBtn.style.display = 'inline';  // Exibe o botão para ocultar o ranking
-    });
-
-    // Evento para ocultar o ranking
-    ocultarRankingBtn.addEventListener('click', function() {
-        rankingContainer.style.display = 'none';  // Oculta o ranking
-        ocultarRankingBtn.style.display = 'none';  // Oculta o botão de ocultar
-
-    document.addEventListener('DOMContentLoaded', function () {
-    const loginButton = document.getElementById('loginButton');
-    if (loginButton) {
-        loginButton.addEventListener('click', login);
-    }
-});
-
-    });
-</script>
-
-            
+            <div class="form-group">
+                <input type="checkbox" id="ranking" onchange="atualizarPreferencias()">
+                <label for="ranking">Mostrar Ranking</label>
+            </div>
         </div>
-        
     </div>
-</body> 
+</body>
 </html>
