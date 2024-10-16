@@ -167,8 +167,8 @@
             </div>
 
             <div class="form-group">
-                <label for="nota">Insira sua nota (entre 1 e 10):</label>
-                <input type="number" id="nota" min="1" max="10" step="0.01">
+                <label for="nota">Insira sua nota (entre 0 e 10):</label>
+                <input type="number" id="nota" min="0" max="10" step="0.01">
             </div>
 
             <div class="form-group">
@@ -310,12 +310,16 @@
         }
 
         async function carregarNotas() {
-            const querySnapshot = await db.collection('notas').where("matricula", "==", matriculaAtual).get();
-            const notasContainer = document.getElementById('notas-container');
-            notasContainer.innerHTML = '';
-            querySnapshot.forEach((doc) => {
-                notasContainer.innerHTML += `<p>${doc.id.split('_')[1]}: ${doc.data().nota}</p>`;
-            });
+    const querySnapshot = await db.collection('notas').get(); // Busca todas as notas
+    const notasContainer = document.getElementById('notas-container');
+    notasContainer.innerHTML = '';
+    querySnapshot.forEach((doc) => {
+        const [matricula, disciplina] = doc.id.split('_');
+        if (matricula === matriculaAtual) { // Filtra pelo aluno atual
+            notasContainer.innerHTML += `<p>${disciplina}: ${doc.data().nota}</p>`;
+        }
+    });
+;
         }
 
         function toggleRankingButton() {
@@ -344,14 +348,22 @@
         }
 
         async function calcularMedia() {
-            const querySnapshot = await db.collection('notas').where("matricula", "==", matriculaAtual).get();
-            let soma = 0;
-            let count = 0;
+    const querySnapshot = await db.collection('notas').get(); // Busca todas as notas
+    let soma = 0;
+    let count = 0;
 
-            querySnapshot.forEach((doc) => {
-                soma += doc.data().nota;
-                count++;
-            });
+    querySnapshot.forEach((doc) => {
+        const [matricula] = doc.id.split('_');
+        if (matricula === matriculaAtual) { // Filtra pelo aluno atual
+            soma += doc.data().nota;
+            count++;
+        }
+    });
+
+    const media = (count > 0) ? (soma / count) : 0;
+    alert(`A média das suas notas é: ${media.toFixed(2)}`);
+}
+);
 
             const media = (count > 0) ? (soma / count) : 0;
             alert(`A média das suas notas é: ${media.toFixed(2)}`);
