@@ -256,6 +256,7 @@ button:active {
 
                 if (quantidadeNotas > 0) {
                     calcularMedia(totalNotas, quantidadeNotas);
+            
                 } else {
                     document.getElementById("media").innerText = "sua média é: -";
                 }
@@ -264,21 +265,26 @@ button:active {
             });
         }
 
-        window.calcularMedia = function () {
-            getDoc(doc(db, "notas", alunoAtual)).then((docSnap) => {
-                if (docSnap.exists()) {
-                    const notas = docSnap.data();
-                    const totalNotas = Object.values(notas).reduce((sum, nota) => sum + nota, 0);
-                    const quantidadeNotas = Object.values(notas).length;
+       window.calcularMedia = function () {
+    getDoc(doc(db, "notas", alunoAtual)).then((docSnap) => {
+        if (docSnap.exists()) {
+            const notas = docSnap.data();
+            console.log("Notas:", notas); // Log das notas
+            const totalNotas = Object.values(notas).reduce((sum, nota) => sum + nota, 0);
+            console.log("Total das notas:", totalNotas); // Log do total das notas
+            const quantidadeNotas = Object.values(notas).length;
+            console.log("Quantidade de notas:", quantidadeNotas); // Log da quantidade de notas
 
-                    const media = quantidadeNotas > 0 ? (totalNotas / quantidadeNotas).toFixed(2) : 0;
-                    document.getElementById("media").innerText = `sua média é: ${media}`;
-                } else {
-                    document.getElementById("media").innerText = "sua média é: -";
-                }
-            }).catch((error) => {
-                console.error("Erro ao calcular média: ", error);
-            });
+            const media = quantidadeNotas > 0 ? (totalNotas / quantidadeNotas).toFixed(2) : 0;
+            document.getElementById("media").innerText = `sua média é: ${media}`;
+        } else {
+            document.getElementById("media").innerText = "sua média é: -";
+        }
+    }).catch((error) => {
+        console.error("Erro ao calcular média: ", error);
+    });
+}
+
         }
     </script>
 </head>
