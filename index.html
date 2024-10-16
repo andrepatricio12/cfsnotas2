@@ -351,7 +351,51 @@
     rankingContainer.style.backgroundColor = 'white'; // Adiciona fundo
     rankingContainer.style.padding = '20px';
     rankingContainer.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.1)';
-    
+
+            async function mostrarRanking() {
+    const rankingContainer = document.createElement('div');
+    rankingContainer.id = 'ranking-container';
+    document.body.appendChild(rankingContainer);
+
+    const ranking = [];
+
+    const querySnapshot = await db.collection("notas")
+        .where("aluno", "in", Object.keys(alunos))
+        .get();
+
+    querySnapshot.forEach(doc => {
+        const data = doc.data();
+        ranking.push({ disciplina: data.disciplina, nota: data.nota, aluno: data.aluno });
+    });
+
+    ranking.sort((a, b) => b.nota - a.nota);
+
+    rankingContainer.innerHTML = "<h2>Ranking de Notas</h2>";
+    ranking.forEach(item => {
+        rankingContainer.innerHTML += `<div>${alunos[item.aluno]} - ${item.disciplina}: ${item.nota}</div>`;
+    });
+
+    // Botão para fechar
+    const closeButton = document.createElement('button');
+    closeButton.innerText = 'Fechar';
+    closeButton.onclick = () => document.body.removeChild(rankingContainer);
+    rankingContainer.appendChild(closeButton);
+}
+
+async function calcularMedia() {
+    const disciplinas = Object.keys(notas);
+    if (disciplinas.length === 0) {
+        alert("Nenhuma nota salva para calcular a média.");
+        return;
+    }
+
+    const total = disciplinas.reduce((acc, key) => acc + parseFloat(notas[key]), 0);
+    const media = total / disciplinas.length;
+
+    const mediaContainer = document.createElement('div');
+    mediaContainer.innerHTML = `A média das notas é: ${media.toFixed(2)}`;
+    document.body.appendChild(mediaContainer);
+}
     const ranking = [];
 
     const querySnapshot = await db.collection("notas")
