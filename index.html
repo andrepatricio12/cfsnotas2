@@ -106,13 +106,13 @@
     <script>
         // Configuração do Firebase
         const firebaseConfig = {
-            apiKey: "SUA_API_KEY",
-            authDomain: "SEU_AUTH_DOMAIN",
-            databaseURL: "SUA_DATABASE_URL",
-            projectId: "SEU_PROJECT_ID",
-            storageBucket: "SEU_STORAGE_BUCKET",
-            messagingSenderId: "SEU_MESSAGING_SENDER_ID",
-            appId: "SEU_APP_ID"
+  apiKey: "AIzaSyDEvCDdX0LGjDMFpyxljj-4JTjZKtgooDM",
+  authDomain: "notas-cfs.firebaseapp.com",
+  projectId: "notas-cfs",
+  storageBucket: "notas-cfs.appspot.com",
+  messagingSenderId: "91086463856",
+  appId: "1:91086463856:web:6a16fb0b3abe04bbc425b5"
+            
         };
 
         // Inicializa o Firebase
@@ -171,7 +171,7 @@
             <label>
                 <input type="checkbox" id="ranking-checkbox" onchange="atualizarRankingCheckbox()"> Desejo aparecer no ranking
             </label>
-            <div id="ranking-confirmacao" class="hidden">Seu nome ficará visível para todos que optarem pelo ranking.</div>
+            <span id="ranking-confirmacao" class="hidden"> Você está certo disso?</span>
         </div>
 
         <div class="button-group">
@@ -184,7 +184,7 @@
         <div class="error hidden" id="nota-error">A nota deve estar entre 0 e 10.</div>
 
         <div class="button-group spacing">
-            <button id="ranking-button" disabled onmouseover="mostrarTooltipRanking()" onmouseout="esconderTooltipRanking()" onclick="mostrarRanking()">Ver Ranking</button>
+            <button id="ranking-button" disabled onclick="mostrarRanking()">Ver Ranking</button>
         </div>
 
         <div class="message hidden" id="media-container">Sua média é: <span id="media-value"></span></div>
@@ -374,8 +374,28 @@
 
     function atualizarRankingCheckbox() {
         const checkbox = document.getElementById('ranking-checkbox');
-        document.getElementById('ranking-confirmacao').classList.toggle('hidden', !checkbox.checked);
-        document.getElementById('ranking-button').disabled = !checkbox.checked;
+        const confirmacao = document.getElementById('ranking-confirmacao');
+        confirmacao.classList.toggle('hidden', !checkbox.checked);
+        
+        if (checkbox.checked) {
+            // Mensagem de confirmação
+            const confirmButton = document.createElement('button');
+            confirmButton.textContent = "OK";
+            confirmButton.onclick = function() {
+                alert("Você aceitou aparecer no ranking!");
+                document.getElementById('ranking-button').disabled = false;
+                confirmacao.classList.add('hidden');
+                confirmButton.remove(); // Remove o botão de confirmação
+            };
+            document.querySelector('.button-group').appendChild(confirmButton);
+        } else {
+            // Se o checkbox for desmarcado, desabilita o botão de ranking
+            document.getElementById('ranking-button').disabled = true;
+            const confirmButton = document.querySelector('.button-group button:last-child');
+            if (confirmButton) {
+                confirmButton.remove(); // Remove o botão de confirmação se existir
+            }
+        }
     }
 
     function mostrarTooltipRanking() {
