@@ -63,6 +63,7 @@
             font-size: 16px;
             cursor: pointer;
             transition: background-color 0.3s;
+            margin: 5px 0; /* Espaçamento padrão entre os botões */
         }
 
         button:disabled {
@@ -110,10 +111,12 @@
 
         .button-group {
             margin-top: 20px;
+            display: flex; /* Para alinhar botões lado a lado */
+            justify-content: space-between; /* Para criar espaço entre os botões */
         }
 
-        .spacing {
-            margin-top: 10px;
+        .button-group button {
+            width: 48%; /* Largura dos botões lado a lado */
         }
 
         @media (max-width: 600px) {
@@ -183,11 +186,11 @@
                 <button id="excluirNotaBtn" onclick="excluirNota()">Excluir Nota</button>
             </div>
 
-            <div class="button-group spacing">
+            <div class="button-group">
                 <button onclick="carregarNotas()">Ver Todas as Notas</button>
             </div>
 
-            <div class="button-group spacing">
+            <div class="button-group">
                 <button id="ranking-btn" onclick="mostrarRanking()" disabled>Ver Ranking
                     <span class="tooltip hidden">Selecione para aparecer no ranking!</span>
                 </button>
@@ -203,10 +206,23 @@
         </div>
 
         <div id="loading" class="hidden">Salvando...</div>
-
     </div>
 
     <script>
+        // Configurações do Firebase
+        const firebaseConfig = {
+  apiKey: "AIzaSyDEvCDdX0LGjDMFpyxljj-4JTjZKtgooDM",
+  authDomain: "notas-cfs.firebaseapp.com",
+  projectId: "notas-cfs",
+  storageBucket: "notas-cfs.appspot.com",
+  messagingSenderId: "91086463856",
+  appId: "1:91086463856:web:6a16fb0b3abe04bbc425b5"
+}
+            // suas credenciais do Firebase aqui
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
         const alunos = {
             "9287027": "ELIENAR FARIAS",
             "9306820": "NAZARETH LIMA GOEDERT",
@@ -245,148 +261,111 @@
         "9339477": "DANIEL SERAFIM PESSI"
         };
 
-        const notasPorAluno = {};
-        let alunoAtual = null;
-
-       const firebaseConfig = {
-  apiKey: "AIzaSyDEvCDdX0LGjDMFpyxljj-4JTjZKtgooDM",
-  authDomain: "notas-cfs.firebaseapp.com",
-  projectId: "notas-cfs",
-  storageBucket: "notas-cfs.appspot.com",
-  messagingSenderId: "91086463856",
-  appId: "1:91086463856:web:6a16fb0b3abe04bbc425b5"
-}
-
-        // Initialize Firebase
-        const app = firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
+        let matriculaAtual = null;
 
         function login() {
-            const matriculaInput = document.getElementById('matricula');
-            const matricula = matriculaInput.value;
-
+            const matricula = document.getElementById("matricula").value;
             if (alunos[matricula]) {
-                alunoAtual = matricula;
-                document.getElementById('aluno-nome').innerText = alunos[matricula];
-                document.getElementById('login-form').classList.add('hidden');
-                document.getElementById('notas-form').classList.remove('hidden');
+                matriculaAtual = matricula;
+                document.getElementById("aluno-nome").innerText = alunos[matricula];
+                document.getElementById("login-form").classList.add("hidden");
+                document.getElementById("notas-form").classList.remove("hidden");
                 carregarNotas();
             } else {
-                document.getElementById('login-error').classList.remove('hidden');
+                document.getElementById("login-error").classList.remove("hidden");
             }
         }
 
         function atualizarNota() {
-            const disciplina = document.getElementById('disciplina').value;
-            const notaInput = document.getElementById('nota');
-            const notaSalva = notasPorAluno[alunoAtual]?.[disciplina];
+            const disciplina = document.getElementById("disciplina").value;
+            const notaInput = document.getElementById("nota");
+            const notasSalvas = JSON.parse(localStorage.getItem(`notas_${matriculaAtual}`)) || {};
 
-            if (notaSalva !== undefined) {
-                notaInput.value = notaSalva;
-            } else {
-                notaInput.value = '';
-            }
+            notaInput.value = notasSalvas[disciplina] || '';
         }
 
-        function toggleRankingButton() {
-            const rankCheckbox = document.getElementById('rank');
-            const rankingButton = document.getElementById('ranking-btn');
-            rankingButton.disabled = !rankCheckbox.checked;
-        }
-
-        async function salvarNota() {
-            const notaInput = document.getElementById('nota');
-            const disciplina = document.getElementById('disciplina').value;
+        function salvarNota() {
+            const disciplina = document.getElementById("disciplina").value;
+            const notaInput = document.getElementById("nota");
             const nota = parseFloat(notaInput.value);
+            const notasSalvas = JSON.parse(localStorage.getItem(`notas_${matriculaAtual}`)) || {};
 
-            if (nota >= 0 && nota <= 10) {
-                document.getElementById('loading').classList.remove('hidden');
-                const alunoNotasRef = db.collection('notas').doc(alunoAtual);
-                const alunoNotaData = await alunoNotasRef.get();
-                
-                if (!alunoNotaData.exists) {
-                    await alunoNotasRef.set({ nome: alunos[alunoAtual], notas: {} });
-                }
-
-                await alunoNotasRef.update({
-                    [`notas.${disciplina}`]: nota
-                });
-
-                notasPorAluno[alunoAtual] = { ...notasPorAluno[alunoAtual], [disciplina]: nota };
-                notaInput.value = nota; // Mantém a nota no campo
-                document.getElementById('nota-success').classList.remove('hidden');
-                document.getElementById('nota-error').classList.add('hidden');
-                carregarNotas();
-            } else {
-                document.getElementById('nota-error').classList.remove('hidden');
+            if (nota < 0 || nota > 10) {
+                document.getElementById("nota-error").classList.remove("hidden");
+                setTimeout(() => {
+                    document.getElementById("nota-error").classList.add("hidden");
+                }, 3000);
+                return;
             }
 
-            document.getElementById('loading').classList.add('hidden');
+            notasSalvas[disciplina] = nota;
+            localStorage.setItem(`notas_${matriculaAtual}`, JSON.stringify(notasSalvas));
+            document.getElementById("nota-success").classList.remove("hidden");
+            setTimeout(() => {
+                document.getElementById("nota-success").classList.add("hidden");
+            }, 3000);
+            document.getElementById("nota-error").classList.add("hidden");
+
+            atualizarNota();
+            mostrarNotas();
+            toggleRankingButton();
         }
 
-        async function excluirNota() {
-            const disciplina = document.getElementById('disciplina').value;
-            const alunoNotasRef = db.collection('notas').doc(alunoAtual);
+        function excluirNota() {
+            const disciplina = document.getElementById("disciplina").value;
+            const notasSalvas = JSON.parse(localStorage.getItem(`notas_${matriculaAtual}`)) || {};
 
-            await alunoNotasRef.update({
-                [`notas.${disciplina}`]: firebase.firestore.FieldValue.delete()
-            });
-
-            delete notasPorAluno[alunoAtual][disciplina]; // Remove do objeto local
-            carregarNotas(); // Atualiza a exibição
+            delete notasSalvas[disciplina];
+            localStorage.setItem(`notas_${matriculaAtual}`, JSON.stringify(notasSalvas));
+            document.getElementById("nota-success").classList.remove("hidden");
+            setTimeout(() => {
+                document.getElementById("nota-success").classList.add("hidden");
+            }, 3000);
+            mostrarNotas();
+            atualizarNota();
+            toggleRankingButton();
         }
 
-        async function carregarNotas() {
-            const alunoNotasRef = db.collection('notas').doc(alunoAtual);
-            const alunoNotaData = await alunoNotasRef.get();
+        function carregarNotas() {
+            const notasSalvas = JSON.parse(localStorage.getItem(`notas_${matriculaAtual}`)) || {};
+            mostrarNotas(notasSalvas);
+        }
 
-            if (alunoNotaData.exists) {
-                notasPorAluno[alunoAtual] = alunoNotaData.data().notas || {};
-                const notasContainer = document.getElementById('notas-container');
-                notasContainer.innerHTML = '';
-                
-                for (const [disciplina, nota] of Object.entries(notasPorAluno[alunoAtual])) {
-                    notasContainer.innerHTML += `<p>${disciplina}: ${nota}</p>`;
-                }
-            } else {
-                document.getElementById('notas-container').innerText = 'Nenhuma nota salva.';
+        function mostrarNotas() {
+            const notasContainer = document.getElementById("notas-container");
+            const notasSalvas = JSON.parse(localStorage.getItem(`notas_${matriculaAtual}`)) || {};
+            notasContainer.innerHTML = "";
+
+            for (const disciplina in notasSalvas) {
+                notasContainer.innerHTML += `${disciplina}: ${notasSalvas[disciplina]}<br>`;
             }
         }
 
         function calcularMedia() {
-            const notas = Object.values(notasPorAluno[alunoAtual]);
-            if (notas.length > 0) {
-                const soma = notas.reduce((acc, nota) => acc + nota, 0);
-                const media = soma / notas.length;
-                alert(`A média das notas é: ${media.toFixed(2)}`);
-            } else {
-                alert('Nenhuma nota para calcular a média.');
-            }
+            const notasSalvas = JSON.parse(localStorage.getItem(`notas_${matriculaAtual}`)) || {};
+            const totalNotas = Object.values(notasSalvas).reduce((total, nota) => total + nota, 0);
+            const media = totalNotas / Object.keys(notasSalvas).length;
+
+            alert(`A média das suas notas é: ${media.toFixed(2)}`);
         }
 
         function mostrarRanking() {
-            const alunosRank = Object.entries(notasPorAluno)
-                .filter(([_, notas]) => notas.length > 0 && notasPorAluno[alunoAtual]?.[disciplina])
-                .map(([matricula, notas]) => ({
-                    matricula,
-                    nome: alunos[matricula],
-                    media: calcularMediaNotas(notas)
-                }))
-                .sort((a, b) => b.media - a.media);
+            const notasSalvas = JSON.parse(localStorage.getItem(`notas_${matriculaAtual}`)) || {};
+            const rank = [];
 
-            let rankingHTML = '<h2>Ranking de Alunos</h2>';
-            alunosRank.forEach(aluno => {
-                rankingHTML += `<p>${aluno.nome} (${aluno.matricula}): ${aluno.media.toFixed(2)}</p>`;
-            });
+            if (document.getElementById("rank").checked) {
+                const media = Object.values(notasSalvas).reduce((total, nota) => total + nota, 0) / Object.keys(notasSalvas).length;
+                rank.push({ matricula: matriculaAtual, nome: alunos[matriculaAtual], media });
+            }
 
+            rank.sort((a, b) => b.media - a.media);
             const rankingContainer = document.createElement('div');
-            rankingContainer.innerHTML = rankingHTML;
+            rankingContainer.innerHTML = rank.map(aluno => `${aluno.nome}: ${aluno.media.toFixed(2)}`).join("<br>");
             document.body.appendChild(rankingContainer);
         }
 
-        function calcularMediaNotas(notas) {
-            const total = Object.values(notas).reduce((acc, nota) => acc + nota, 0);
-            return total / Object.keys(notas).length;
+        function toggleRankingButton() {
+            document.getElementById("ranking-btn").disabled = !document.getElementById("rank").checked;
         }
     </script>
 </body>
