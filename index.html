@@ -103,25 +103,25 @@
             <label for="disciplina">Selecione a Disciplina:</label>
             <select id="disciplina" onchange="atualizarNota()">
               <option value="ADP">Administração de Pessoal (ADP)</option>
-                <option value="ALF">Administração Logística Financeira (ALF)</option>
-                <option value="AMTP">Armamento, Munição e Tiro Policial (AMTP)</option>
-                <option value="APHT">Atendimento Pré-Hospitalar Tático (APH)</option>
-                <option value="CCL">Comando Chefia e Liderança (CCL)</option>
-                <option value="DPE">Defesa Pessoal Policial (DPE)</option>
-                <option value="DAD">Direito Administrativo Disciplinar (DAD)</option>
-                <option value="DPPM">Direito Penal Militar, Processual Penal Militar (DPPM)</option>
-                <option value="EFPM">Educação Física Policial Militar (EFPM)</option>
-                <option value="DDPH">Ética e Direitos Humanos na Atividade Policial (DDPH)</option>
-                <option value="GAO">Gerenciamento de Atividade Operacional (GAO)</option>
-                <option value="INP">Inteligência Policial (INP)</option>
-                <option value="LET">Legislação de Trânsito e Operações (LET)</option>
-                <option value="LEI">Legislação Institucional (LEI)</option>
-                <option value="OUD">Ordem Unida (OUD)</option>
-                <option value="PDP">Polícia de Proximidade (PDP)</option>
-                <option value="POS">Polícia Ostensiva (POS)</option>
-                <option value="SCOH">Sistema de Comando e Operações de Ajuda Humanitária (SCOH)</option>
-                <option value="TPO">Técnicas E Operações De Polícia Militar (TPO)</option>
-                <option value="TELA">Tópicos Especiais de Legislação Aplicáveis à Atividade (TELA)</option>
+              <option value="ALF">Administração Logística Financeira (ALF)</option>
+              <option value="AMTP">Armamento, Munição e Tiro Policial (AMTP)</option>
+              <option value="APHT">Atendimento Pré-Hospitalar Tático (APH)</option>
+              <option value="CCL">Comando Chefia e Liderança (CCL)</option>
+              <option value="DPE">Defesa Pessoal Policial (DPE)</option>
+              <option value="DAD">Direito Administrativo Disciplinar (DAD)</option>
+              <option value="DPPM">Direito Penal Militar, Processual Penal Militar (DPPM)</option>
+              <option value="EFPM">Educação Física Policial Militar (EFPM)</option>
+              <option value="DDPH">Ética e Direitos Humanos na Atividade Policial (DDPH)</option>
+              <option value="GAO">Gerenciamento de Atividade Operacional (GAO)</option>
+              <option value="INP">Inteligência Policial (INP)</option>
+              <option value="LET">Legislação de Trânsito e Operações (LET)</option>
+              <option value="LEI">Legislação Institucional (LEI)</option>
+              <option value="OUD">Ordem Unida (OUD)</option>
+              <option value="PDP">Polícia de Proximidade (PDP)</option>
+              <option value="POS">Polícia Ostensiva (POS)</option>
+              <option value="SCOH">Sistema de Comando e Operações de Ajuda Humanitária (SCOH)</option>
+              <option value="TPO">Técnicas E Operações De Polícia Militar (TPO)</option>
+              <option value="TELA">Tópicos Especiais de Legislação Aplicáveis à Atividade (TELA)</option>
             </select>
         </div>
 
@@ -194,204 +194,115 @@
         "9329056": "VINICIUS JOVELINO COSTA",
         "9339477": "DANIEL SERAFIM PESSI"
     };
-
-    const notas = {};
+ const notas = {};
     let alunoAtual = null;
-
-    // Inicializar Firebase
+    
     const firebaseConfig = {
-        apiKey: "AIzaSyDEvCDdX0LGjDMFpyxljj-4JTjZKtgooDM",
-        authDomain: "notas-cfs.firebaseapp.com",
-        projectId: "notas-cfs",
-        storageBucket: "notas-cfs.appspot.com",
-        messagingSenderId: "91086463856",
-        appId: "1:91086463856:web:6a16fb0b3abe04bbc425b5"
+        const firebaseConfig = {
+  apiKey: "AIzaSyDEvCDdX0LGjDMFpyxljj-4JTjZKtgooDM",
+  authDomain: "notas-cfs.firebaseapp.com",
+  projectId: "notas-cfs",
+  storageBucket: "notas-cfs.appspot.com",
+  messagingSenderId: "91086463856",
+  appId: "1:91086463856:web:6a16fb0b3abe04bbc425b5"
+};
 
 };
 
 // Inicializar Firebase
 const app = firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
-    };
-    
-    const app = firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
 
-    async function login() {
-        const matriculaInput = document.getElementById("matricula").value;
+    let matriculaAtual = '';
 
+    function login() {
+        const matriculaInput = document.getElementById('matricula').value;
         if (alunos[matriculaInput]) {
-            alunoAtual = matriculaInput;
-            localStorage.setItem('alunoAtual', matriculaInput);
-            document.getElementById("aluno-nome").innerText = alunos[matriculaInput];
-            document.getElementById("login-form").classList.add("hidden");
-            document.getElementById("notas-form").classList.remove("hidden");
-            await carregarNotas();
+            matriculaAtual = matriculaInput;
+            document.getElementById('aluno-nome').innerText = alunos[matriculaInput];
+            document.getElementById('notas-form').classList.remove('hidden');
+            document.getElementById('login-form').classList.add('hidden');
+            carregarNotas();
         } else {
-            document.getElementById("login-error").classList.remove("hidden");
+            document.getElementById('login-error').classList.remove('hidden');
         }
     }
 
-    async function carregarNotas() {
-        try {
-            const doc = await db.collection('notas').doc(alunoAtual).get();
-            if (doc.exists) {
-                notas[alunoAtual] = doc.data();
-            }
-        } catch (error) {
-            console.error("Erro ao carregar notas: ", error);
-        }
-    }
-
-    async function salvarNota() {
-        const disciplina = document.getElementById("disciplina").value;
-        const notaInput = document.getElementById("nota");
-        const nota = parseFloat(document.getElementById("nota").value);
-
-        if (nota >= 1 && nota <= 10) {
-            try {
-                if (!notas[alunoAtual]) {
-                    notas[alunoAtual] = {};
-                }
-                notas[alunoAtual][disciplina] = nota;
-
-                await db.collection('notas').doc(alunoAtual).set({
-                    [disciplina]: nota
-                }, { merge: true });
-
-                mostrarMensagemSucesso();
-                atualizarRankingButton();
-            } catch (error) {
-                console.error("Erro ao salvar nota: ", error);
-            }
-        } else {
-            mostrarMensagemErro();
-        }
-        async function atualizarNota() {
-        const disciplina = document.getElementById("disciplina").value;
-        const notaInput = document.getElementById("nota");
-
-        try {
-            const doc = await db.collection('notas').doc(alunoAtual).get();
-            if (doc.exists && doc.data()[disciplina] !== undefined) {
-                notaInput.value = doc.data()[disciplina];
-            } else {
-                notaInput.value = "";
-            }
-        } catch (error) {
-            console.error("Erro ao buscar nota: ", error);
-        }
-    }
-    }
-
-    function mostrarMensagemSucesso() {
-        document.getElementById("nota-success").classList.remove("hidden");
-        document.getElementById("nota-error").classList.add("hidden");
-        setTimeout(() => {
-            document.getElementById("nota-success").classList.add("hidden");
-        }, 2000);
-    }
-
-    function mostrarMensagemErro() {
-        document.getElementById("nota-error").classList.remove("hidden");
-        document.getElementById("nota-success").classList.add("hidden");
-        setTimeout(() => {
-            document.getElementById("nota-error").classList.add("hidden");
-        }, 2000);
+    function atualizarNota() {
+        const disciplina = document.getElementById('disciplina').value;
+        document.getElementById('nota').value = ''; // Limpa a nota
+        carregarNotaEspecifica(disciplina);
     }
 
     function toggleRankingButton() {
-        const rankingBtn = document.getElementById("ranking-btn");
-        const rankCheckbox = document.getElementById("rank");
+        const rankCheckbox = document.getElementById('rank');
+        const rankingBtn = document.getElementById('ranking-btn');
         rankingBtn.disabled = !rankCheckbox.checked;
-        rankingBtn.style.display = rankCheckbox.checked ? 'block' : 'none';
-    }
-    async function verNotas() {
-        try {
-            const doc = await db.collection('notas').doc(alunoAtual).get();
-            if (doc.exists) {
-                let notasAluno = doc.data();
-                let notasStr = "Notas Salvas:\n";
-                for (let disciplina in notasAluno) {
-                    notasStr += `${disciplina}: ${notasAluno[disciplina]}\n`;
-                }
-                alert(notasStr);
-            } else {
-                alert("Nenhuma nota salva.");
-            }
-        } catch (error) {
-            console.error("Erro ao buscar notas: ", error);
-        }
     }
 
-    async function mostrarRanking() {
-        const ranking = await calcularRanking();
-        alert("Ranking dos Alunos:\n" + ranking.join("\n"));
-    }
+    function salvarNota() {
+        const disciplina = document.getElementById('disciplina').value;
+        const nota = parseFloat(document.getElementById('nota').value);
 
-    async function calcularRanking() {
-        let ranking = [];
-        try {
-            const snapshot = await db.collection('notas').get();
-            snapshot.forEach(doc => {
-                const dadosAluno = doc.data();
-                const matricula = doc.id;
-
-                const rankPermitido = dadosAluno.rank || false;
-                if (rankPermitido) {
-                    const notasAluno = Object.values(dadosAluno);
-                    const media = notasAluno.reduce((a, b) => a + b, 0) / notasAluno.length;
-                    ranking.push({ matricula, media });
-                }
-            });
-
-            ranking.sort((a, b) => b.media - a.media);
-            return ranking.map(r => `${r.aluno}: Média ${r.media.toFixed(2)}`);
-        } catch (error) {
-            console.error("Erro ao calcular ranking: ", error);
-        }
-async function calcularMedia() {
-    try {
-        // Busca o documento das notas do aluno atual no Firestore
-        const doc = await db.collection('notas').doc(alunoAtual).get();
-
-        if (doc.exists) {
-            // Obtém as disciplinas e notas do documento
-            const disciplinas = doc.data();
-
-            // Usa a função calcularMediaAluno() para calcular a média
-            const media = calcularMediaAluno(disciplinas);
-
-            // Mostra a média calculada para o usuário
-            alert(`Sua média geral é: ${media.toFixed(2)}`);
+        if (nota < 1 || nota > 10) {
+            document.getElementById('nota-error').classList.remove('hidden');
+            return;
         } else {
-            alert("Nenhuma nota encontrada para calcular a média.");
+            document.getElementById('nota-error').classList.add('hidden');
         }
-    } catch (error) {
-        console.error("Erro ao calcular média: ", error);
-        alert("Ocorreu um erro ao calcular a média.");
+
+        db.collection('notas').doc(`${matriculaAtual}_${disciplina}`).set({
+            matricula: matriculaAtual,
+            disciplina: disciplina,
+            nota: nota
+        }).then(() => {
+            document.getElementById('nota-success').classList.remove('hidden');
+            document.getElementById('nota').value = '';
+            carregarNotas();
+        });
     }
-}
 
-function calcularMediaAluno(disciplinas) {
-    // Obtém os valores das notas (números) e calcula a média
-    const notas = Object.values(disciplinas).filter(nota => typeof nota === 'number');
+    function carregarNotas() {
+        db.collection('notas').where("matricula", "==", matriculaAtual).get().then(snapshot => {
+            const notasDiv = document.createElement('div');
+            notasDiv.innerHTML = '';
+            snapshot.forEach(doc => {
+                const data = doc.data();
+                notasDiv.innerHTML += `<p>${data.disciplina}: ${data.nota}</p>`;
+            });
+            document.getElementById('notas-container').innerHTML = notasDiv.innerHTML;
+        });
+    }
 
-    if (notas.length === 0) return 0; // Previne divisão por zero se não houver notas
- 
- 
-    return notas.reduce((a, b) => a + b, 0) / notas.length;
-        return ranking.map(entry => `${alunos[entry.matricula]}: ${entry.media.toFixed(2)}`);
-}
+    function carregarNotaEspecifica(disciplina) {
+        db.collection('notas').doc(`${matriculaAtual}_${disciplina}`).get().then(doc => {
+            if (doc.exists) {
+                const data = doc.data();
+                document.getElementById('nota').value = data.nota; // Preenche a nota
+            } else {
+                document.getElementById('nota').value = ''; // Limpa se não existir
+            }
+        });
+    }
 
-}
+    function calcularMedia() {
+        db.collection('notas').where("matricula", "==", matriculaAtual).get().then(snapshot => {
+            let soma = 0;
+            let count = 0;
+            snapshot.forEach(doc => {
+                soma += doc.data().nota;
+                count++;
+            });
+            const media = count > 0 ? (soma / count).toFixed(2) : 0;
+            alert(`A média do aluno ${alunos[matriculaAtual]} é: ${media}`);
+        });
+    }
 
-    function calcularMediaAluno(disciplinas) {
-        const notas = Object.values(disciplinas);
-        return notas.reduce((a, b) => a + b, 0) / notas.length;
-        return ranking.map(entry => `${alunos[entry.matricula]}: ${entry.media.toFixed(2)}`);
+    function mostrarRanking() {
+        // Lógica para mostrar o ranking
+        alert('Função de ranking ainda não implementada!');
     }
 </script>
-
 </body>
 </html>
+
