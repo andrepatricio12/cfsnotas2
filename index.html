@@ -1,11 +1,20 @@
 <!DOCTYPE html>
 <html lang="pt-br">
+    <div id="loading" class="hidden">Salvando...</div>
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistema de Notas - Curso de Sargentos</title>
 
     <style>
+        #loading {
+    text-align: center;
+    font-weight: bold;
+    color: #007bff;
+    margin-top: 10px;
+}
+
         body {
             font-family: Arial, sans-serif;
             margin: 0;
@@ -60,6 +69,34 @@
         #ranking-btn {
             display: none; /* Inicialmente escondido */
         }
+        <div class="button-group spacing">
+    <button id="ranking-btn" onclick="mostrarRanking()" disabled>
+        Ver Ranking
+        <span class="tooltip hidden">Selecione para aparecer no ranking!</span>
+    </button>
+        .tooltip {
+    visibility: hidden; /* Inicialmente escondido */
+    background-color: #555;
+    color: #fff;
+    text-align: center;
+    border-radius: 5px;
+    padding: 5px;
+    position: absolute;
+    z-index: 1;
+    bottom: 125%; /* Posiciona acima do botão */
+    left: 50%;
+    margin-left: -60px; /* Centraliza o tooltip */
+    opacity: 0; /* Começa invisível */
+    transition: opacity 0.3s;
+}
+
+button:hover .tooltip {
+    visibility: visible; /* Exibe o tooltip ao passar o mouse */
+    opacity: 1; /* Torna visível */
+}
+
+</div>
+
         .message {
             margin-top: 20px;
             text-align: center;
@@ -197,17 +234,17 @@
     };
 
     // Configuração do Firebase
-    const firebaseConfig = {
-  apiKey: "AIzaSyDEvCDdX0LGjDMFpyxljj-4JTjZKtgooDM",
-  authDomain: "notas-cfs.firebaseapp.com",
-  projectId: "notas-cfs",
-  storageBucket: "notas-cfs.appspot.com",
-  messagingSenderId: "91086463856",
-  appId: "1:91086463856:web:6a16fb0b3abe04bbc425b5"
+const firebaseConfig = {
+    apiKey: "AIzaSyDEvCDdX0LGjDMFpyxljj-4JTjZKtgooDM",
+    authDomain: "notas-cfs.firebaseapp.com",
+    projectId: "notas-cfs",
+    storageBucket: "notas-cfs.appspot.com",
+    messagingSenderId: "91086463856",
+    appId: "1:91086463856:web:6a16fb0b3abe04bbc425b5"
 };
 
-    const app = firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore(app);
+const app = firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore(app);
 
     let matriculaAtual = null;
 
@@ -239,30 +276,13 @@
         }
     }
 
-    async function salvarNota() {
-        const disciplina = document.getElementById('disciplina').value;
-        const nota = parseFloat(document.getElementById('nota').value);
-        if (nota < 1 || nota > 10 || isNaN(nota)) {
-            document.getElementById('nota-error').classList.remove('hidden');
-            return;
-        }
+    #loading {
+    text-align: center;
+    font-weight: bold;
+    color: #007bff;
+    margin-top: 10px;
+}
 
-        await db.collection('notas').doc(`${matriculaAtual}_${disciplina}`).set({ nota });
-        document.getElementById('nota-success').classList.remove('hidden');
-        document.getElementById('nota-error').classList.add('hidden');
-        setTimeout(() => {
-            document.getElementById('nota-success').classList.add('hidden');
-        }, 2000);
-    }
-
-    async function carregarNotas() {
-        const notasContainer = document.getElementById('notas-container');
-        notasContainer.innerHTML = ''; // Limpa notas anteriores
-        const querySnapshot = await db.collection('notas').where('matricula', '==', matriculaAtual).get();
-        querySnapshot.forEach(doc => {
-            const data = doc.data();
-            notasContainer.innerHTML += `<p>${doc.id.split('_')[1]}: ${data.nota}</p>`;
-        });
     }
 
     function toggleRankingButton() {
@@ -270,9 +290,27 @@
         document.getElementById('ranking-btn').disabled = !checkbox.checked;
     }
 
-    function mostrarRanking() {
-        alert('Lógica para mostrar o ranking ainda não foi implementada.');
-    }
+    async function mostrarRanking() {
+    const rankingContainer = document.createElement('div');
+    const querySnapshot = await db.collection('notas').get();
+    const rankings = [];
+
+    querySnapshot.forEach(doc => {
+        const data = doc.data();
+        rankings.push({ disciplina: doc.id.split('_')[1], nota: data.nota });
+    });
+
+    // Ordenar pelo valor da nota
+    rankings.sort((a, b) => b.nota - a.nota);
+
+    rankingContainer.innerHTML = '<h2>Ranking</h2>';
+    rankings.forEach(ranking => {
+        rankingContainer.innerHTML += `<p>${ranking.disciplina}: ${ranking.nota}</p>`;
+    });
+
+    document.body.appendChild(rankingContainer);
+}
+
 
     async function calcularMedia() {
         const querySnapshot = await db.collection('notas').where('matricula', '==', matriculaAtual).get();
