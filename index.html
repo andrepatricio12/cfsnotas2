@@ -39,6 +39,9 @@
             color: #333;
         }
 
+        <button id="rankingButton" onclick="window.location.href='ranking.html'">Ver Ranking</button>
+
+
         .form-group {
             margin-bottom: 15px;
         }
@@ -117,7 +120,52 @@
         .spacing {
             margin-top: 10px;
         }
+        /* styles.css */
+body {
+    font-family: Arial, sans-serif;
+    margin: 20px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th, td {
+    border: 1px solid #ddd;
+    padding: 8px;
+}
+
+th {
+    background-color: #f2f2f2;
+}
+
     </style>
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ranking de Alunos</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <h1>Ranking de Alunos</h1>
+    <table id="rankingTable">
+        <thead>
+            <tr>
+                <th>Nome</th>
+                <th>Média</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Os dados do ranking serão inseridos aqui -->
+        </tbody>
+    </table>
+    <button onclick="window.location.href='index.html'">Voltar</button>
+    <script src="ranking.js"></script>
+</body>
+</html>
     
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
@@ -240,7 +288,6 @@
         "3847446": "DAIANA PEREIRA",
         "9329056": "VINICIUS JOVELINO COSTA",
         "9339477": "DANIEL SERAFIM PESSI"
-    };
         };
 
         // Configuração do Firebase
@@ -327,6 +374,36 @@ const db = firebase.firestore(app);
         const media = contador > 0 ? (totalNotas / contador).toFixed(2) : 0;
         alert(`A média do aluno ${alunos[matriculaAtual]} é: ${media}`);
     }
+        // ranking.js
+// Supondo que você já tenha configurado o Firebase e o Firestore
+
+const db = firebase.firestore();
+
+async function loadRanking() {
+    const rankingRef = db.collection('alunos').where('optoRanking', '==', true);
+    const snapshot = await rankingRef.get();
+    const rankingData = [];
+
+    snapshot.forEach(doc => {
+        const data = doc.data();
+        rankingData.push({ nome: data.nome, media: data.media });
+    });
+
+    // Ordenar por média
+    rankingData.sort((a, b) => b.media - a.media);
+
+    const tableBody = document.getElementById('rankingTable').getElementsByTagName('tbody')[0];
+
+    rankingData.forEach(aluno => {
+        const row = tableBody.insertRow();
+        row.insertCell(0).innerText = aluno.nome;
+        row.insertCell(1).innerText = aluno.media.toFixed(2); // Formata a média com duas casas decimais
+    });
+}
+
+// Carregar o ranking quando a página for carregada
+window.onload = loadRanking;
+
 </script>
 </body>
 </html>
