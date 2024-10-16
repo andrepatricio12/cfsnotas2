@@ -40,6 +40,9 @@
             border-radius: 5px;
             border: 1px solid #ddd;
         }
+        #matricula {
+            width: 60%; /* Campo da matrícula ajustado para 60% */
+        }
         button {
             padding: 10px;
             width: 100%;
@@ -49,14 +52,15 @@
             color: white;
             font-size: 16px;
             cursor: pointer;
-            transition: background-color 0.3s;
+            transition: background-color 0.3s, transform 0.3s; /* Animação adicionada */
+        }
+        button:hover:not(:disabled) {
+            background-color: #0056b3;
+            transform: scale(1.05); /* Animação de hover */
         }
         button:disabled {
             background-color: #ccc;
             cursor: not-allowed;
-        }
-        button:hover:not(:disabled) {
-            background-color: #0056b3;
         }
         .message {
             margin-top: 20px;
@@ -94,8 +98,8 @@
     </style>
     
     <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
 </head>
 <body>
 <div class="container">
@@ -141,8 +145,8 @@
         </div>
 
         <div class="form-group">
-            <label for="nota">Insira sua nota (entre 1 e 10):</label>
-            <input type="number" id="nota" min="1" max="10" step="0.01">
+            <label for="nota">Insira sua nota (entre 0 e 10):</label> <!-- Alterado para 0 a 10 -->
+            <input type="number" id="nota" min="0" max="10" step="0.01">
         </div>
 
         <div class="form-group">
@@ -172,7 +176,7 @@
 
         <div id="notas-container" class="message"></div>
         <div id="nota-success" class="message hidden">Nota salva com sucesso!</div>
-        <div id="nota-error" class="error hidden">A nota deve estar entre 1 e 10.</div>
+        <div id="nota-error" class="error hidden">A nota deve estar entre 0 e 10.</div> <!-- Ajuste para 0 a 10 -->
 
         <!-- Média do aluno -->
         <div id="media-container" class="message hidden">Sua média é: <span id="media-value"></span></div>
@@ -184,7 +188,7 @@
 
 <script>
     const alunos = {
-        "9287027": "ELIENAR FARIAS",
+       "9287027": "ELIENAR FARIAS",
             "9306820": "NAZARETH LIMA GOEDERT",
             "9303219": "CARLA DE LUCA LINHARES",
            "9287124": "LEANDRO GHELLERE",
@@ -243,156 +247,85 @@
             document.getElementById('aluno-nome').textContent = alunos[matricula];
             document.getElementById('login-form').classList.add('hidden');
             document.getElementById('notas-form').classList.remove('hidden');
-            document.getElementById('login-error').classList.add('hidden'); // Limpa a mensagem de erro
-            carregarNotas();
         } else {
             document.getElementById('login-error').classList.remove('hidden');
         }
     }
 
-    function atualizarNota() {
-        const disciplina = document.getElementById('disciplina').value;
-        document.getElementById('nota').value = ''; // Limpa o campo de nota ao selecionar nova disciplina
-        carregarNotaSalva(disciplina);
-    }
-
-    async function carregarNotaSalva(disciplina) {
-        const doc = await db.collection('notas').doc(`${matriculaAtual}_${disciplina}`).get();
-        if (doc.exists) {
-            document.getElementById('nota').value = doc.data().nota;
-        } else {
-            document.getElementById('nota').value = ''; // Se não houver nota, limpa o campo
-        }
-    }
-
-    async function salvarNota() {
+    function salvarNota() {
         const disciplina = document.getElementById('disciplina').value;
         const nota = parseFloat(document.getElementById('nota').value);
-        const exibirNoRanking = document.getElementById('rank').checked;
 
         if (nota < 0 || nota > 10 || isNaN(nota)) {
             document.getElementById('nota-error').classList.remove('hidden');
             return;
         }
 
-        await db.collection('notas').doc(`${matriculaAtual}_${disciplina}`).set({
-            nota,
-            exibirNoRanking,
-            matricula: matriculaAtual
-        });
-
-        document.getElementById('nota-success').classList.remove('hidden');
         document.getElementById('nota-error').classList.add('hidden');
+        const rank = document.getElementById('rank').checked;
 
-        calcularMedia();
-        if (mostrarRanking) mostrarRanking();
-
-        setTimeout(() => {
-            document.getElementById('nota-success').classList.add('hidden');
-        }, 2000);
+        db.collection('notas').doc(matriculaAtual).set({
+            disciplina: disciplina,
+            nota: nota,
+            nome: alunos[matriculaAtual],
+            rank: rank
+        }).then(() => {
+            document.getElementById('nota-success').classList.remove('hidden');
+            setTimeout(() => document.getElementById('nota-success').classList.add('hidden'), 2000);
+        });
     }
 
-    async function carregarNotas() {
+    function carregarNotas() {
         const notasContainer = document.getElementById('notas-container');
         notasContainer.innerHTML = '';
 
-        const querySnapshot = await db.collection('notas')
-            .where('matricula', '==', matriculaAtual).get();
-
-        if (querySnapshot.empty) {
-            notasContainer.innerHTML = '<p>Sem notas salvas.</p>';
-            return;
-        }
-
-        querySnapshot.forEach(doc => {
-            const data = doc.data();
-            notasContainer.innerHTML += `<p>${doc.id.split('_')[1]}: ${data.nota}</p>`;
-        });
-    }
-
-    async function excluirNota() {
-        const disciplina = document.getElementById('disciplina').value;
-        await db.collection('notas').doc(`${matriculaAtual}_${disciplina}`).delete();
-
-        document.getElementById('nota').value = '';
-        carregarNotas();
-        calcularMedia();
-
-        if (mostrarRanking) {
-            mostrarRanking();
-        }
-    }
-
-    async function calcularMedia() {
-        const querySnapshot = await db.collection('notas')
-            .where('matricula', '==', matriculaAtual).get();
-
-        let soma = 0;
-        let count = 0;
-
-        querySnapshot.forEach(doc => {
-            soma += doc.data().nota;
-            count++;
-        });
-
-        if (count > 0) {
-            const media = (soma / count).toFixed(2);
-            document.getElementById('media-value').textContent = media;
-            document.getElementById('media-container').classList.remove('hidden');
-        } else {
-            document.getElementById('media-container').classList.add('hidden');
-        }
-    }
-
-    function toggleRankingButton() {
-        const rankCheckbox = document.getElementById('rank');
-        const rankingBtn = document.getElementById('ranking-btn');
-
-        if (rankCheckbox.checked) {
-            if (confirm("Ao marcar esta opção, você concorda em exibir seu nome no ranking, e poderá ver o nome dos outros alunos que também optaram por exibir seu nome no ranking.")) {
-                rankingBtn.disabled = false;
+        db.collection('notas').doc(matriculaAtual).get().then(doc => {
+            if (doc.exists) {
+                const data = doc.data();
+                notasContainer.innerHTML = `Disciplina: ${data.disciplina}, Nota: ${data.nota}`;
             } else {
-                rankCheckbox.checked = false;
+                notasContainer.innerHTML = 'Nenhuma nota encontrada.';
             }
-        } else {
-            alert("Você desmarcou a opção de exibir seu nome no ranking.");
-            rankingBtn.disabled = true;
-        }
+        });
     }
 
-    async function mostrarRanking() {
+    function mostrarRanking() {
         const rankingContainer = document.getElementById('ranking-container');
         rankingContainer.innerHTML = '';
 
-        const querySnapshot = await db.collection('notas')
-            .where('exibirNoRanking', '==', true).get();
+        db.collection('notas').where('rank', '==', true).get().then(snapshot => {
+            let rankingHTML = '<h3>Ranking de Notas:</h3>';
+            snapshot.forEach(doc => {
+                const data = doc.data();
+                rankingHTML += `<p>${data.nome}: ${data.nota} - Disciplina: ${data.disciplina}</p>`;
+            });
+            rankingContainer.innerHTML = rankingHTML;
+            rankingContainer.classList.remove('hidden');
+        });
+    }
 
-        const rankingData = [];
+    function excluirNota() {
+        db.collection('notas').doc(matriculaAtual).delete().then(() => {
+            document.getElementById('notas-container').innerHTML = 'Nota excluída com sucesso!';
+        });
+    }
 
-        querySnapshot.forEach(doc => {
-            const data = doc.data();
-            const index = rankingData.findIndex(item => item.matricula === data.matricula);
-            if (index === -1) {
-                rankingData.push({ matricula: data.matricula, notas: [data.nota] });
-            } else {
-                rankingData[index].notas.push(data.nota);
+    function calcularMedia() {
+        db.collection('notas').doc(matriculaAtual).get().then(doc => {
+            if (doc.exists) {
+                const data = doc.data();
+                const media = data.nota;
+                document.getElementById('media-value').textContent = media.toFixed(2);
+                document.getElementById('media-container').classList.remove('hidden');
             }
         });
+    }
 
-        rankingData.forEach(item => {
-            const soma = item.notas.reduce((acc, val) => acc + val, 0);
-            const media = (soma / item.notas.length).toFixed(2);
-            item.media = media;
-        });
-
-        rankingData.sort((a, b) => b.media - a.media);
-
-        rankingData.forEach((item, index) => {
-            rankingContainer.innerHTML += `<p>${index + 1}. ${alunos[item.matricula]} - Média: ${item.media}</p>`;
-        });
-
-        rankingContainer.classList.remove('hidden');
+    function toggleRankingButton() {
+        const rankingBtn = document.getElementById('ranking-btn');
+        rankingBtn.disabled = !document.getElementById('rank').checked;
     }
 </script>
+
 </body>
 </html>
