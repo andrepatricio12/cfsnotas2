@@ -78,6 +78,11 @@
             margin-top: 10px; /* Espaço entre botões */
         }
     </style>
+
+    <!-- Adicionar Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js"></script>
+
 </head>
 <body>
 
@@ -210,22 +215,29 @@
         }
     }
 
-    function salvarNota() {
-        const disciplina = document.getElementById("disciplina").value;
-        const notaInput = document.getElementById("nota");
-        const nota = parseFloat(notaInput.value);
+    async function salvarNota() {
+    const disciplina = document.getElementById("disciplina").value;
+    const notaInput = document.getElementById("nota");
+    const nota = parseFloat(notaInput.value);
 
-        if (nota >= 1 && nota <= 10) {
-            if (!notas[alunoAtual]) {
-                notas[alunoAtual] = {};
-            }
-            notas[alunoAtual][disciplina] = nota;
-            localStorage.setItem("notas", JSON.stringify(notas)); // Armazenar no localStorage
+    if (nota >= 1 && nota <= 10) {
+        try {
+            // Salva a nota no Firestore
+            await db.collection('notas').doc(alunoAtual).set({
+                [disciplina]: nota
+            }, { merge: true }); // Usamos merge para não sobrescrever disciplinas anteriores
+
             notaInput.value = nota; // Manter a nota no campo
             mostrarMensagemSucesso();
             atualizarRankingButton();
-        } else {
-            mostrarMensagemErro();
+        } catch (error) {
+            console.error("Erro ao salvar nota: ", error);
+        }
+    } else {
+        mostrarMensagemErro();
+    }
+}
+
         }
     }
 
@@ -245,29 +257,46 @@
         }, 2000);
     }
 
-    function verNotas() {
-        let notasAluno = notas[alunoAtual];
-        let notasStr = "Notas Salvas:\n";
+    async function verNotas() {
+    try {
+        const doc = await db.collection('notas').doc(alunoAtual).get();
+        if (doc.exists) {
+            let notasAluno = doc.data();
+            let notasStr = "Notas Salvas:\n";
 
-        if (notasAluno) {
             for (let disciplina in notasAluno) {
                 notasStr += `${disciplina}: ${notasAluno[disciplina]}\n`;
             }
+            alert(notasStr);
         } else {
-            notasStr = "Nenhuma nota salva.";
+            alert("Nenhuma nota salva.");
+        }
+    } catch (error) {
+        console.error("Erro ao buscar notas: ", error);
+    }
+
+
         }
 
         alert(notasStr);
     }
 
-    function atualizarNota() {
-        const disciplina = document.getElementById("disciplina").value;
-        const notaInput = document.getElementById("nota");
+    async function atualizarNota() {
+    const disciplina = document.getElementById("disciplina").value;
+    const notaInput = document.getElementById("nota");
 
-        if (notas[alunoAtual] && notas[alunoAtual][disciplina] !== undefined) {
-            notaInput.value = notas[alunoAtual][disciplina]; // Exibir a nota salva
+    try {
+        const doc = await db.collection('notas').doc(alunoAtual).get();
+        if (doc.exists && doc.data()[disciplina] !== undefined) {
+            notaInput.value = doc.data()[disciplina]; // Exibir a nota salva
         } else {
             notaInput.value = ""; // Limpar se não houver nota
+        }
+    } catch (error) {
+        console.error("Erro ao buscar nota: ", error);
+    }
+}
+
         }
     }
 
@@ -294,16 +323,27 @@
         alert("Ranking dos Alunos:\n" + ranking.join("\n"));
     }
 
-    function calcularRanking() {
-        const ranking = [];
+    async function calcularRanking() {
+    const ranking = [];
 
-        for (const aluno in notas) {
-            const disciplinas = notas[aluno];
+    try {
+        const querySnapshot = await db.collection('notas').get();
+        querySnapshot.forEach((doc) => {
+            const disciplinas = doc.data();
             const media = calcularMediaAluno(disciplinas);
 
-            if (document.getElementById("rank").checked) {
-                ranking.push({ aluno: alunos[aluno], media });
+            if (doc.id === alunoAtual && document.getElementById("rank").checked) {
+                ranking.push({ aluno: alunos[doc.id], media });
             }
+        });
+
+        ranking.sort((a, b) => b.media - a.media); // Ordenar por média
+        return ranking.map(r => `${r.aluno}: ${r.media.toFixed(2)}`);
+    } catch (error) {
+        console.error("Erro ao calcular ranking: ", error);
+    }
+}
+
         }
 
         ranking.sort((a, b) => b.media - a.media); // Ordenar por média
@@ -326,13 +366,34 @@
         return total / Object.keys(disciplinas).length;
     }
 
-    // Carregar notas do localStorage ao iniciar
-    window.onload = function() {
-        const notasStorage = localStorage.getItem("notas");
-        if (notasStorage) {
-            Object.assign(notas, JSON.parse(notasStorage));
+    window.onload = async function() {
+    try {
+        const doc = await db.collection('notas').doc(alunoAtual).get();
+        if (doc.exists) {
+            Object.assign(notas, doc.data());
         }
+    } catch (error) {
+        console.error("Erro ao carregar notas: ", error);
     }
+}
+
+    }
+
+    // Sua configuração do Firebase (obtenha essas informações no console do Firebase)
+const firebaseConfig = {
+  apiKey: "AIzaSyDEvCDdX0LGjDMFpyxljj-4JTjZKtgooDM",
+  authDomain: "notas-cfs.firebaseapp.com",
+  projectId: "notas-cfs",
+  storageBucket: "notas-cfs.appspot.com",
+  messagingSenderId: "91086463856",
+  appId: "1:91086463856:web:6a16fb0b3abe04bbc425b5"
+
+};
+
+// Inicializar Firebase
+const app = firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
 </script>
 
 </body>
