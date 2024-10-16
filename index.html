@@ -117,11 +117,12 @@
         .spacing {
             margin-top: 10px;
         }
-        @media (max-width: 600px) {
-    .container {
-        padding: 10px;
-    }
 
+        @media (max-width: 600px) {
+            .container {
+                padding: 10px;
+            }
+        }
     </style>
 
     <!-- Firebase SDK -->
@@ -254,126 +255,91 @@
   storageBucket: "notas-cfs.appspot.com",
   messagingSenderId: "91086463856",
   appId: "1:91086463856:web:6a16fb0b3abe04bbc425b5"
-        };
-
-        // Inicializa o Firebase
+};
         const app = firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore(app);
+        
+        let currentMatricula = '';
+        let notas = {};
 
-        let matriculaAtual = "";
+        async function login() {
+            const matriculaInput = document.getElementById("matricula");
+            currentMatricula = matriculaInput.value;
+            const alunoNome = alunos[currentMatricula];
 
-        function login() {
-            const matricula = document.getElementById('matricula').value;
-            if (alunos[matricula]) {
-                matriculaAtual = matricula;
-                document.getElementById('aluno-nome').innerText = `Bem-vindo, ${alunos[matricula]}`;
-                document.getElementById('notas-form').classList.remove('hidden');
-                document.getElementById('login-form').classList.add('hidden');
-                carregarNotas();
+            if (alunoNome) {
+                document.getElementById("aluno-nome").innerText = alunoNome;
+                document.getElementById("login-form").classList.add("hidden");
+                document.getElementById("notas-form").classList.remove("hidden");
+                await carregarNotas();
             } else {
-                document.getElementById('login-error').classList.remove('hidden');
+                document.getElementById("login-error").classList.remove("hidden");
+            }
+        }
+
+        async function carregarNotas() {
+            const notasContainer = document.getElementById("notas-container");
+            notasContainer.innerHTML = '';
+            const notasDoc = await db.collection("notas").doc(currentMatricula).get();
+            if (notasDoc.exists) {
+                notas = notasDoc.data();
+                for (const disciplina in notas) {
+                    const nota = notas[disciplina];
+                    notasContainer.innerHTML += `<p>${disciplina}: ${nota}</p>`;
+                }
+            } else {
+                notasContainer.innerHTML = '<p>Nenhuma nota encontrada.</p>';
             }
         }
 
         function atualizarNota() {
-            carregarNotaSalva(document.getElementById('disciplina').value);
-        }
-
-        async function carregarNotaSalva(disciplina) {
-            const doc = await db.collection('notas').doc(`${matriculaAtual}_${disciplina}`).get();
-            if (doc.exists) {
-                document.getElementById('nota').value = doc.data().nota;
-            } else {
-                document.getElementById('nota').value = ''; // Limpa se não houver nota
-            }
+            const disciplinaSelecionada = document.getElementById("disciplina").value;
+            document.getElementById("nota").value = notas[disciplinaSelecionada] || '';
         }
 
         async function salvarNota() {
-            const disciplina = document.getElementById('disciplina').value;
-            const nota = parseFloat(document.getElementById('nota').value);
+            const disciplinaSelecionada = document.getElementById("disciplina").value;
+            const notaInput = document.getElementById("nota").value;
 
-            if (nota < 1 || nota > 10) {
-                document.getElementById('nota-error').classList.remove('hidden');
+            if (notaInput < 0 || notaInput > 10) {
+                document.getElementById("nota-error").classList.remove("hidden");
                 return;
             } else {
-                document.getElementById('nota-error').classList.add('hidden');
+                document.getElementById("nota-error").classList.add("hidden");
             }
 
-            document.getElementById('loading').classList.remove('hidden');
+            const loadingDiv = document.getElementById("loading");
+            loadingDiv.classList.remove("hidden");
 
-            await db.collection('notas').doc(`${matriculaAtual}_${disciplina}`).set({
-                nota: nota
-            });
+            notas[disciplinaSelecionada] = notaInput;
+            await db.collection("notas").doc(currentMatricula).set(notas);
+            loadingDiv.classList.add("hidden");
 
-            document.getElementById('nota-success').classList.remove('hidden');
-            document.getElementById('loading').classList.add('hidden');
+            document.getElementById("nota-success").classList.remove("hidden");
             setTimeout(() => {
-                document.getElementById('nota-success').classList.add('hidden');
-            }, 2000);
-            carregarNotas();
-        }
-
-        async function carregarNotas() {
-    const querySnapshot = await db.collection('notas').get();
-    const notasContainer = document.getElementById('notas-container');
-    notasContainer.innerHTML = '';
-    querySnapshot.forEach((doc) => {
-        const [matricula, disciplina] = doc.id.split('_');
-        if (matricula === matriculaAtual) { // Verifica se a matrícula do documento é a atual
-            notasContainer.innerHTML += `<p>${disciplina}: ${doc.data().nota}</p>`;
-        }
-};
-;
+                document.getElementById("nota-success").classList.add("hidden");
+            }, 3000);
+            await carregarNotas();
         }
 
         function toggleRankingButton() {
-            const rankingButton = document.getElementById('ranking-btn');
-            rankingButton.disabled = !document.getElementById('rank').checked;
+            const rankingCheckbox = document.getElementById("rank");
+            const rankingButton = document.getElementById("ranking-btn");
+            rankingButton.disabled = !rankingCheckbox.checked;
         }
 
-        async function mostrarRanking() {
-            const querySnapshot = await db.collection('notas').get();
-            const ranking = [];
-
-            querySnapshot.forEach((doc) => {
-                const [matricula, disciplina] = doc.id.split('_');
-                if (document.getElementById('rank').checked) {
-                    ranking.push({ disciplina, nota: doc.data().nota, matricula });
-                }
-            });
-
-            ranking.sort((a, b) => b.nota - a.nota); // Ordena em ordem decrescente
-
-            const rankingContainer = document.getElementById('notas-container');
-            rankingContainer.innerHTML = '<h3>Ranking</h3>';
-            ranking.forEach((ranking) => {
-                rankingContainer.innerHTML += `<p>${ranking.disciplina}: ${ranking.nota}</p>`;
-            });
+        function mostrarRanking() {
+            // Aqui você pode implementar a lógica para mostrar o ranking
+            alert('Exibindo ranking!');
         }
 
-        async function calcularMedia() {
-    const querySnapshot = await db.collection('notas').get(); // Busca todas as notas
-    let soma = 0;
-    let count = 0;
-
-    querySnapshot.forEach((doc) => {
-        const [matricula] = doc.id.split('_');
-        if (matricula === matriculaAtual) { // Filtra pelo aluno atual
-            soma += doc.data().nota;
-            count++;
-        }
-    });
-
-    const media = (count > 0) ? (soma / count) : 0;
-    alert(`A média das suas notas é: ${media.toFixed(2)}`);
-}
-);
-
-            const media = (count > 0) ? (soma / count) : 0;
-            alert(`A média das suas notas é: ${media.toFixed(2)}`);
+        function calcularMedia() {
+            const notasArray = Object.values(notas);
+            const soma = notasArray.reduce((acc, nota) => acc + parseFloat(nota), 0);
+            const media = soma / notasArray.length;
+            alert(`Sua média é: ${media.toFixed(2)}`);
         }
     </script>
 </body>
 
 </html>
-
