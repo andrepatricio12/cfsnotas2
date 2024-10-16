@@ -62,20 +62,6 @@
             background-color: #ccc;
             cursor: not-allowed;
         }
-        button:disabled:hover::after {
-            content: "Para visualizar o ranking, você deve aceitar que seu nome apareça no ranking.";
-            position: absolute;
-            background-color: #333;
-            color: white;
-            padding: 5px;
-            border-radius: 5px;
-            top: -40px;
-            right: 10px;
-            width: 200px;
-            text-align: center;
-            font-size: 12px;
-            line-height: 1.5;
-        }
         .message {
             margin-top: 20px;
             text-align: center;
@@ -105,14 +91,14 @@
     <script src="https://www.gstatic.com/firebasejs/9.12.0/firebase-database.js"></script>
     <script>
         // Configuração do Firebase
-        const firebaseConfig = {
+       const firebaseConfig = {
   apiKey: "AIzaSyDEvCDdX0LGjDMFpyxljj-4JTjZKtgooDM",
   authDomain: "notas-cfs.firebaseapp.com",
   projectId: "notas-cfs",
   storageBucket: "notas-cfs.appspot.com",
   messagingSenderId: "91086463856",
   appId: "1:91086463856:web:6a16fb0b3abe04bbc425b5"
-            
+
         };
 
         // Inicializa o Firebase
@@ -260,10 +246,10 @@
                 .then((snapshot) => {
                     if (snapshot.exists()) {
                         notas = snapshot.val();
-                        atualizarNotas();
-                        atualizarMedia();
-                        atualizarAlunosRanking();
                     }
+                    atualizarNotas();
+                    atualizarMedia();
+                    atualizarAlunosRanking();
                 });
         } else {
             document.getElementById('login-error').classList.remove('hidden');
@@ -299,6 +285,10 @@
 
         for (const [disciplina, nota] of Object.entries(notas)) {
             notasContainer.innerHTML += `${disciplina}: ${nota}<br>`;
+        }
+
+        if (Object.keys(notas).length === 0) {
+            notasContainer.innerHTML = "Nenhuma nota registrada.";
         }
     }
 
@@ -379,44 +369,11 @@
         
         if (checkbox.checked) {
             // Mensagem de confirmação
-            const confirmButton = document.createElement('button');
-            confirmButton.textContent = "OK";
-            confirmButton.onclick = function() {
-                alert("Você aceitou aparecer no ranking!");
-                document.getElementById('ranking-button').disabled = false;
-                confirmacao.classList.add('hidden');
-                confirmButton.remove(); // Remove o botão de confirmação
-            };
-            document.querySelector('.button-group').appendChild(confirmButton);
+            alert("Você aceitou aparecer no ranking!");
+            document.getElementById('ranking-button').disabled = false;
         } else {
             // Se o checkbox for desmarcado, desabilita o botão de ranking
             document.getElementById('ranking-button').disabled = true;
-            const confirmButton = document.querySelector('.button-group button:last-child');
-            if (confirmButton) {
-                confirmButton.remove(); // Remove o botão de confirmação se existir
-            }
-        }
-    }
-
-    function mostrarTooltipRanking() {
-        const tooltip = document.createElement('div');
-        tooltip.textContent = "Para visualizar o ranking, você deve aceitar que seu nome apareça no ranking.";
-        tooltip.style.position = "absolute";
-        tooltip.style.backgroundColor = "#333";
-        tooltip.style.color = "#fff";
-        tooltip.style.padding = "5px";
-        tooltip.style.borderRadius = "5px";
-        tooltip.style.top = "-40px";
-        tooltip.style.right = "10px";
-        tooltip.style.zIndex = "1000";
-        document.body.appendChild(tooltip);
-        tooltip.id = "ranking-tooltip";
-    }
-
-    function esconderTooltipRanking() {
-        const tooltip = document.getElementById('ranking-tooltip');
-        if (tooltip) {
-            tooltip.remove();
         }
     }
 </script>
