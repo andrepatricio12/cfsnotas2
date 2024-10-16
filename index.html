@@ -359,11 +359,7 @@ window.atualizarNota = function() {
     });
 }
 function atualizarRanking() {
-  // Aqui você pode implementar a lógica para recalcular o ranking
-  // com base nas médias atualizadas, conforme já foi descrito antes.
-
-  // Exemplo básico (ajuste conforme necessário):
-  firebase.firestore().collection('notas').get()
+  getDocs(collection(db, 'notas'))
     .then((snapshot) => {
       const alunos = [];
       
@@ -393,6 +389,27 @@ function atualizarRanking() {
     .catch((error) => {
       console.error('Erro ao atualizar o ranking:', error);
     });
+}
+);
+
+      // Ordena por média (decrescente) e exibe o ranking
+      alunos.sort((a, b) => b.media - a.media);
+
+      // Atualiza o ranking na tela
+      const rankingElement = document.getElementById('ranking');
+      rankingElement.innerHTML = '';
+
+      alunos.forEach((aluno, index) => {
+        rankingElement.innerHTML += `<p>${index + 1}º - Matrícula: ${aluno.matricula}, Média: ${aluno.media.toFixed(2)}</p>`;
+      });
+    })
+    .catch((error) => {
+      console.error('Erro ao atualizar o ranking:', error);
+    });
+}
+        window.verificarMostrarRanking = function(checked) {
+    document.getElementById("mostrar-ranking").checked = checked;
+    atualizarPreferencias();
 }
 
         window.atualizarPreferencias = function () {
