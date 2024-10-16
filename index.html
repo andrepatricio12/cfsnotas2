@@ -118,7 +118,7 @@
             margin-top: 10px;
         }
     </style>
-    
+
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js"></script>
@@ -144,25 +144,25 @@
                 <label for="disciplina">Selecione a Disciplina:</label>
                 <select id="disciplina" onchange="atualizarNota()">
                     <option value="ADP">Administração de Pessoal (ADP)</option>
-              <option value="ALF">Administração Logística Financeira (ALF)</option>
-              <option value="AMTP">Armamento, Munição e Tiro Policial (AMTP)</option>
-              <option value="APHT">Atendimento Pré-Hospitalar Tático (APH)</option>
-              <option value="CCL">Comando Chefia e Liderança (CCL)</option>
-              <option value="DPE">Defesa Pessoal Policial (DPE)</option>
-              <option value="DAD">Direito Administrativo Disciplinar (DAD)</option>
-              <option value="DPPM">Direito Penal Militar, Processual Penal Militar (DPPM)</option>
-              <option value="EFPM">Educação Física Policial Militar (EFPM)</option>
-              <option value="DDPH">Ética e Direitos Humanos na Atividade Policial (DDPH)</option>
-              <option value="GAO">Gerenciamento de Atividade Operacional (GAO)</option>
-              <option value="INP">Inteligência Policial (INP)</option>
-              <option value="LET">Legislação de Trânsito e Operações (LET)</option>
-              <option value="LEI">Legislação Institucional (LEI)</option>
-              <option value="OUD">Ordem Unida (OUD)</option>
-              <option value="PDP">Polícia de Proximidade (PDP)</option>
-              <option value="POS">Polícia Ostensiva (POS)</option>
-              <option value="SCOH">Sistema de Comando e Operações de Ajuda Humanitária (SCOH)</option>
-              <option value="TPO">Técnicas E Operações De Polícia Militar (TPO)</option>
-              <option value="TELA">Tópicos Especiais de Legislação Aplicáveis à Atividade (TELA)</option>
+                    <option value="ALF">Administração Logística Financeira (ALF)</option>
+                    <option value="AMTP">Armamento, Munição e Tiro Policial (AMTP)</option>
+                    <option value="APHT">Atendimento Pré-Hospitalar Tático (APH)</option>
+                    <option value="CCL">Comando Chefia e Liderança (CCL)</option>
+                    <option value="DPE">Defesa Pessoal Policial (DPE)</option>
+                    <option value="DAD">Direito Administrativo Disciplinar (DAD)</option>
+                    <option value="DPPM">Direito Penal Militar, Processual Penal Militar (DPPM)</option>
+                    <option value="EFPM">Educação Física Policial Militar (EFPM)</option>
+                    <option value="DDPH">Ética e Direitos Humanos na Atividade Policial (DDPH)</option>
+                    <option value="GAO">Gerenciamento de Atividade Operacional (GAO)</option>
+                    <option value="INP">Inteligência Policial (INP)</option>
+                    <option value="LET">Legislação de Trânsito e Operações (LET)</option>
+                    <option value="LEI">Legislação Institucional (LEI)</option>
+                    <option value="OUD">Ordem Unida (OUD)</option>
+                    <option value="PDP">Polícia de Proximidade (PDP)</option>
+                    <option value="POS">Polícia Ostensiva (POS)</option>
+                    <option value="SCOH">Sistema de Comando e Operações de Ajuda Humanitária (SCOH)</option>
+                    <option value="TPO">Técnicas e Operações de Polícia Militar (TPO)</option>
+                    <option value="TELA">Tópicos Especiais de Legislação Aplicáveis à Atividade (TELA)</option>
                 </select>
             </div>
 
@@ -196,7 +196,7 @@
 
             <div id="notas-container" class="message"></div>
             <div id="nota-success" class="message hidden">Nota salva com sucesso!</div>
-            <div id="nota-error" class="error hidden">A nota deve estar entre 1 e 10.</div>
+            <div id="nota-error" class="error hidden">A nota deve estar entre 0 e 10.</div>
         </div>
 
         <div id="loading" class="hidden">Salvando...</div>
@@ -205,10 +205,10 @@
 
     <script>
         const alunos = {
-             "9287027": "ELIENAR FARIAS",
-        "9306820": "NAZARETH LIMA GOEDERT",
-        "9303219": "CARLA DE LUCA LINHARES",
-        "9287124": "LEANDRO GHELLERE",
+            "9287027": "ELIENAR FARIAS",
+            "9306820": "NAZARETH LIMA GOEDERT",
+            "9303219": "CARLA DE LUCA LINHARES",
+            "9287124": "LEANDRO GHELLERE",
         "9300350": "TIAGO LUIZ CLEMES",
         "9288350": "MARCOS AURÉLIO LUIZ DUARTE",
         "9320547": "ANDRÉ LUIS PATRÍCIO",
@@ -240,12 +240,9 @@
         "3847446": "DAIANA PEREIRA",
         "9329056": "VINICIUS JOVELINO COSTA",
         "9339477": "DANIEL SERAFIM PESSI"
-    };
         };
 
-        // Configuração do Firebase
-
-const firebaseConfig = {
+        const firebaseConfig = {
   apiKey: "AIzaSyDEvCDdX0LGjDMFpyxljj-4JTjZKtgooDM",
   authDomain: "notas-cfs.firebaseapp.com",
   projectId: "notas-cfs",
@@ -253,19 +250,21 @@ const firebaseConfig = {
   messagingSenderId: "91086463856",
   appId: "1:91086463856:web:6a16fb0b3abe04bbc425b5"
 };
+        };
 
-const app = firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore(app);
-        
-        let matriculaAtual = null;
+        // Inicializa o Firebase
+        const app = firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore(app);
+
+        let matriculaAtual = "";
 
         function login() {
             const matricula = document.getElementById('matricula').value;
             if (alunos[matricula]) {
                 matriculaAtual = matricula;
-                document.getElementById('aluno-nome').textContent = alunos[matricula];
-                document.getElementById('login-form').classList.add('hidden');
+                document.getElementById('aluno-nome').innerText = `Bem-vindo, ${alunos[matricula]}`;
                 document.getElementById('notas-form').classList.remove('hidden');
+                document.getElementById('login-form').classList.add('hidden');
                 carregarNotas();
             } else {
                 document.getElementById('login-error').classList.remove('hidden');
@@ -273,60 +272,92 @@ const db = firebase.firestore(app);
         }
 
         function atualizarNota() {
-            const disciplina = document.getElementById('disciplina').value;
-            document.getElementById('nota').value = ''; // Limpa o campo de nota ao selecionar nova disciplina
-            carregarNotaSalva(disciplina);
+            carregarNotaSalva(document.getElementById('disciplina').value);
         }
 
         async function carregarNotaSalva(disciplina) {
-            const doc = await db.collection('notas').doc(${matriculaAtual}_${disciplina}).get();
+            const doc = await db.collection('notas').doc(`${matriculaAtual}_${disciplina}`).get();
             if (doc.exists) {
                 document.getElementById('nota').value = doc.data().nota;
             } else {
-                document.getElementById('nota').value = ''; // Se não houver nota, limpa o campo
+                document.getElementById('nota').value = ''; // Limpa se não houver nota
             }
         }
 
+        async function salvarNota() {
+            const disciplina = document.getElementById('disciplina').value;
+            const nota = parseFloat(document.getElementById('nota').value);
+
+            if (nota < 1 || nota > 10) {
+                document.getElementById('nota-error').classList.remove('hidden');
+                return;
+            } else {
+                document.getElementById('nota-error').classList.add('hidden');
+            }
+
+            document.getElementById('loading').classList.remove('hidden');
+
+            await db.collection('notas').doc(`${matriculaAtual}_${disciplina}`).set({
+                nota: nota
+            });
+
+            document.getElementById('nota-success').classList.remove('hidden');
+            document.getElementById('loading').classList.add('hidden');
+            setTimeout(() => {
+                document.getElementById('nota-success').classList.add('hidden');
+            }, 2000);
+            carregarNotas();
+        }
+
+        async function carregarNotas() {
+            const querySnapshot = await db.collection('notas').where("matricula", "==", matriculaAtual).get();
+            const notasContainer = document.getElementById('notas-container');
+            notasContainer.innerHTML = '';
+            querySnapshot.forEach((doc) => {
+                notasContainer.innerHTML += `<p>${doc.id.split('_')[1]}: ${doc.data().nota}</p>`;
+            });
+        }
+
         function toggleRankingButton() {
-            const checkbox = document.getElementById('rank');
-            document.getElementById('ranking-btn').disabled = !checkbox.checked;
+            const rankingButton = document.getElementById('ranking-btn');
+            rankingButton.disabled = !document.getElementById('rank').checked;
         }
 
         async function mostrarRanking() {
-            const rankingContainer = document.createElement('div');
             const querySnapshot = await db.collection('notas').get();
-            const rankings = [];
+            const ranking = [];
 
-            querySnapshot.forEach(doc => {
-                const data = doc.data();
-                rankings.push({ disciplina: doc.id.split('_')[1], nota: data.nota });
+            querySnapshot.forEach((doc) => {
+                const [matricula, disciplina] = doc.id.split('_');
+                if (document.getElementById('rank').checked) {
+                    ranking.push({ disciplina, nota: doc.data().nota, matricula });
+                }
             });
 
-            // Ordenar pelo valor da nota
-            rankings.sort((a, b) => b.nota - a.nota);
+            ranking.sort((a, b) => b.nota - a.nota); // Ordena em ordem decrescente
 
-            rankingContainer.innerHTML = '<h2>Ranking</h2>';
-            rankings.forEach(ranking => {
-                rankingContainer.innerHTML += <p>${ranking.disciplina}: ${ranking.nota}</p>;
+            const rankingContainer = document.getElementById('notas-container');
+            rankingContainer.innerHTML = '<h3>Ranking</h3>';
+            ranking.forEach((ranking) => {
+                rankingContainer.innerHTML += `<p>${ranking.disciplina}: ${ranking.nota}</p>`;
             });
-
-            document.body.appendChild(rankingContainer);
         }
 
         async function calcularMedia() {
-            const querySnapshot = await db.collection('notas').where('matricula',
- '==', matriculaAtual).get();
-        let totalNotas = 0;
-        let contador = 0;
-        querySnapshot.forEach(doc => {
-            const data = doc.data();
-            totalNotas += data.nota;
-            contador++;
-        });
+            const querySnapshot = await db.collection('notas').where("matricula", "==", matriculaAtual).get();
+            let soma = 0;
+            let count = 0;
 
-        const media = contador > 0 ? (totalNotas / contador).toFixed(2) : 0;
-        alert(A média do aluno ${alunos[matriculaAtual]} é: ${media});
-    }
-</script>
+            querySnapshot.forEach((doc) => {
+                soma += doc.data().nota;
+                count++;
+            });
+
+            const media = (count > 0) ? (soma / count) : 0;
+            alert(`A média das suas notas é: ${media.toFixed(2)}`);
+        }
+    </script>
 </body>
+
 </html>
+
