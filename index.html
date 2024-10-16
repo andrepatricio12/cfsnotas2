@@ -5,7 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistema de Notas - Curso de Sargentos</title>
 
- body {
+<style>
+    body {
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
@@ -156,8 +157,8 @@
 
 <script>
     const alunos = {
-         "9287027": "ELIENAR FARIAS",
-       "9306820": "NAZARETH LIMA GOEDERT",
+        "9287027": "ELIENAR FARIAS",
+        "9306820": "NAZARETH LIMA GOEDERT",
         "9303219": "CARLA DE LUCA LINHARES",
         "9287124": "LEANDRO GHELLERE",
         "9300350": "TIAGO LUIZ CLEMES",
@@ -376,6 +377,28 @@ async function atualizarNota() {
             console.error("Erro ao calcular ranking: ", error);
         }
     }
+            sync function calcularMedia() {
+    try {
+        // Busca o documento das notas do aluno atual no Firestore
+        const doc = await db.collection('notas').doc(alunoAtual).get();
+        
+        if (doc.exists) {
+            // Obtém as disciplinas e notas do documento
+            const disciplinas = doc.data();
+
+            // Usa a função calcularMediaAluno() para calcular a média
+            const media = calcularMediaAluno(disciplinas);
+
+            // Mostra a média calculada para o usuário
+            alert(`Sua média geral é: ${media.toFixed(2)}`);
+        } else {
+            alert("Nenhuma nota encontrada para calcular a média.");
+        }
+    } catch (error) {
+        console.error("Erro ao calcular média: ", error);
+        alert("Ocorreu um erro ao calcular a média.");
+    }
+}
 
     function calcularMediaAluno(disciplinas) {
         const notas = Object.values(disciplinas);
