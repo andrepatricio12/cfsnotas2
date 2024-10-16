@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistema de Notas - Curso de Sargentos</title>
 
-<style>
-    body {
+    <style>
+        body {
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
@@ -77,7 +77,8 @@
         .spacing {
             margin-top: 10px; /* Espaço entre botões */
         }
-<style>
+    </style>
+    
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js"></script>
@@ -101,7 +102,7 @@
         <div class="form-group">
             <label for="disciplina">Selecione a Disciplina:</label>
             <select id="disciplina" onchange="atualizarNota()">
-                 <option value="ADP">Administração de Pessoal (ADP)</option>
+              <option value="ADP">Administração de Pessoal (ADP)</option>
                 <option value="ALF">Administração Logística Financeira (ALF)</option>
                 <option value="AMTP">Armamento, Munição e Tiro Policial (AMTP)</option>
                 <option value="APHT">Atendimento Pré-Hospitalar Tático (APH)</option>
@@ -199,30 +200,30 @@
 
     // Inicializar Firebase
     const firebaseConfig = {
-  apiKey: "AIzaSyDEvCDdX0LGjDMFpyxljj-4JTjZKtgooDM",
-  authDomain: "notas-cfs.firebaseapp.com",
-  projectId: "notas-cfs",
-  storageBucket: "notas-cfs.appspot.com",
-  messagingSenderId: "91086463856",
-  appId: "1:91086463856:web:6a16fb0b3abe04bbc425b5"
+        apiKey: "AIzaSyDEvCDdX0LGjDMFpyxljj-4JTjZKtgooDM",
+        authDomain: "notas-cfs.firebaseapp.com",
+        projectId: "notas-cfs",
+        storageBucket: "notas-cfs.appspot.com",
+        messagingSenderId: "91086463856",
+        appId: "1:91086463856:web:6a16fb0b3abe04bbc425b5"
 
 };
 
 // Inicializar Firebase
 const app = firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
-
     };
+    
+    const app = firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
 
-    // Função de login com verificação no localStorage
     async function login() {
-        const matriculaInput = document.getElementById("matricula");
-        const matricula = matriculaInput.value;
+        const matriculaInput = document.getElementById("matricula").value;
 
-        if (alunos[matricula]) {
-            alunoAtual = matricula;
-            localStorage.setItem('alunoAtual', matricula);
-            document.getElementById("aluno-nome").innerText = alunos[matricula];
+        if (alunos[matriculaInput]) {
+            alunoAtual = matriculaInput;
+            localStorage.setItem('alunoAtual', matriculaInput);
+            document.getElementById("aluno-nome").innerText = alunos[matriculaInput];
             document.getElementById("login-form").classList.add("hidden");
             document.getElementById("notas-form").classList.remove("hidden");
             await carregarNotas();
@@ -231,46 +232,21 @@ const db = firebase.firestore();
         }
     }
 
-    // Carregar notas do Firestore
     async function carregarNotas() {
         try {
             const doc = await db.collection('notas').doc(alunoAtual).get();
             if (doc.exists) {
-                Object.assign(notas[alunoAtual], doc.data());
+                notas[alunoAtual] = doc.data();
             }
         } catch (error) {
             console.error("Erro ao carregar notas: ", error);
         }
-        // Função de carregar notas
-async function carregarNotas() {
-    try {
-        const doc = await db.collection('notas').doc(alunoAtual).get();
-        if (doc.exists) {
-            notas[alunoAtual] = doc.data();
-        }
-    } catch (error) {
-        console.error("Erro ao carregar notas: ", error);
-    }
-}
-
-// Função para atualizar o campo de nota ao mudar de disciplina
-async function atualizarNota() {
-    const disciplina = document.getElementById("disciplina").value;
-    const notaInput = document.getElementById("nota");
-
-    if (notas[alunoAtual] && notas[alunoAtual][disciplina] !== undefined) {
-        notaInput.value = notas[alunoAtual][disciplina];
-    } else {
-        notaInput.value = "";
-    }
-}
-
     }
 
     async function salvarNota() {
         const disciplina = document.getElementById("disciplina").value;
         const notaInput = document.getElementById("nota");
-        const nota = parseFloat(notaInput.value);
+        const nota = parseFloat(document.getElementById("nota").value);
 
         if (nota >= 1 && nota <= 10) {
             try {
@@ -291,9 +267,7 @@ async function atualizarNota() {
         } else {
             mostrarMensagemErro();
         }
-    }
-
-    async function atualizarNota() {
+        async function atualizarNota() {
         const disciplina = document.getElementById("disciplina").value;
         const notaInput = document.getElementById("nota");
 
@@ -307,6 +281,7 @@ async function atualizarNota() {
         } catch (error) {
             console.error("Erro ao buscar nota: ", error);
         }
+    }
     }
 
     function mostrarMensagemSucesso() {
@@ -328,11 +303,9 @@ async function atualizarNota() {
     function toggleRankingButton() {
         const rankingBtn = document.getElementById("ranking-btn");
         const rankCheckbox = document.getElementById("rank");
-
         rankingBtn.disabled = !rankCheckbox.checked;
         rankingBtn.style.display = rankCheckbox.checked ? 'block' : 'none';
     }
-
     async function verNotas() {
         try {
             const doc = await db.collection('notas').doc(alunoAtual).get();
@@ -357,17 +330,18 @@ async function atualizarNota() {
     }
 
     async function calcularRanking() {
-        const ranking = [];
-
+        let ranking = [];
         try {
-            const querySnapshot = await db.collection('notas').get();
-            querySnapshot.forEach((doc) => {
-                const disciplinas = doc.data();
-                const media = calcularMediaAluno(disciplinas);
-                const alunoId = doc.id;
+            const snapshot = await db.collection('notas').get();
+            snapshot.forEach(doc => {
+                const dadosAluno = doc.data();
+                const matricula = doc.id;
 
-                if (alunos[alunoId]) {
-                    ranking.push({ aluno: alunos[alunoId], media });
+                const rankPermitido = dadosAluno.rank || false;
+                if (rankPermitido) {
+                    const notasAluno = Object.values(dadosAluno);
+                    const media = notasAluno.reduce((a, b) => a + b, 0) / notasAluno.length;
+                    ranking.push({ matricula, media });
                 }
             });
 
@@ -376,12 +350,11 @@ async function atualizarNota() {
         } catch (error) {
             console.error("Erro ao calcular ranking: ", error);
         }
-    }
-            async function calcularMedia() {
+async function calcularMedia() {
     try {
         // Busca o documento das notas do aluno atual no Firestore
         const doc = await db.collection('notas').doc(alunoAtual).get();
-        
+
         if (doc.exists) {
             // Obtém as disciplinas e notas do documento
             const disciplinas = doc.data();
@@ -403,10 +376,12 @@ async function atualizarNota() {
 function calcularMediaAluno(disciplinas) {
     // Obtém os valores das notas (números) e calcula a média
     const notas = Object.values(disciplinas).filter(nota => typeof nota === 'number');
-    
-    if (notas.length === 0) return 0; // Previne divisão por zero se não houver notas
 
+    if (notas.length === 0) return 0; // Previne divisão por zero se não houver notas
+ 
+ 
     return notas.reduce((a, b) => a + b, 0) / notas.length;
+        return ranking.map(entry => `${alunos[entry.matricula]}: ${entry.media.toFixed(2)}`);
 }
 
 }
@@ -414,7 +389,9 @@ function calcularMediaAluno(disciplinas) {
     function calcularMediaAluno(disciplinas) {
         const notas = Object.values(disciplinas);
         return notas.reduce((a, b) => a + b, 0) / notas.length;
+        return ranking.map(entry => `${alunos[entry.matricula]}: ${entry.media.toFixed(2)}`);
     }
 </script>
+
 </body>
 </html>
