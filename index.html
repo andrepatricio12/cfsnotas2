@@ -48,9 +48,13 @@
         .form-group input,
         .form-group select {
             padding: 10px;
-            width: 100%;
             border-radius: 5px;
             border: 1px solid #ddd;
+        }
+
+        /* Ajuste para o campo de nota */
+        #nota {
+            width: 80px; /* Define um tamanho fixo adequado */
         }
 
         button {
@@ -211,136 +215,156 @@
         }
 
         window.carregarNotas = function () {
-            getDoc(doc(db, "notas", alunoAtual)).then((doc) => {
-                if (doc.exists()) {
-                    disciplinas = doc.data();
-                    const notasContainer = document.getElementById("notas-container");
-                    notasContainer.innerHTML = "<h3>Notas Salvas:</h3>";
-                    for (let disciplina in disciplinas) {
-                        notasContainer.innerHTML += `${disciplina}: ${disciplinas[disciplina]}<br>`;
+            getDoc(doc(db, "notas", alunoAtual)).then((docSnap) => {
+                if (docSnap.exists()) {
+                    const notas = docSnap.data();
+                    let notasDisplay = "";
+                    let totalNotas = 0;
+                    let quantidadeNotas = 0;
+
+                    for (const [disciplina, nota] of Object.entries(notas)) {
+                        if (disciplina !== "mostrarRanking") { // Remove a exibição da mensagem
+                            notasDisplay += `${disciplina}: ${nota.toFixed(2)}<br>`;
+                            totalNotas += nota;
+                            quantidadeNotas++;
+                        }
+                    }
+
+                    document.getElementById("notas-salvas").innerHTML = notasDisplay;
+                    document.getElementById("notas-vazias").classList.toggle("hidden", notasDisplay.length > 0);
+
+                    if (quantidadeNotas > 0) {
+                        calcularMedia(totalNotas, quantidadeNotas); // Atualiza a média ao carregar as notas
+                    } else {
+                        document.getElementById("media").innerText = "sua média é: -";
                     }
                 } else {
-                    document.getElementById("notas-container").innerHTML = "Nenhuma nota salva.";
+                    document.getElementById("notas-salvas").innerHTML = "";
+                    document.getElementById("notas-vazias").classList.remove("hidden");
                 }
             }).catch((error) => {
                 console.error("Erro ao carregar notas: ", error);
             });
         }
 
-        window.calcularMedia = function () {
-            const totalNotas = Object.values(disciplinas).reduce((total, nota) => total + nota, 0);
-            const quantidadeNotas = Object.values(disciplinas).length;
-            const media = quantidadeNotas > 0 ? (totalNotas / quantidadeNotas).toFixed(2) : "N/A";
+        window.calcularMedia = function (totalNotas = 0, quantidadeNotas = 0) {
+            getDoc(doc(db, "notas", alunoAtual)).then((docSnap) => {
+                if (docSnap.exists()) {
+                    const notas = docSnap.data();
+                    totalNotas = 0;
+                    quantidadeNotas = 0;
 
-            document.getElementById("media-container").innerText = `Média: ${media}`;
-            atualizarRanking();
-        }
+                    for (const nota of Object.values(notas)) {
+                        if (typeof nota === "number") {
+                            totalNotas += nota;
+                            quantidadeNotas++;
+                        }
+                    }
 
-        window.atualizarRanking = async function () {
-            if (!alunoAtual || !document.getElementById("exibir-ranking").checked) return; // Se o aluno não estiver logado ou o ranking não estiver habilitado, retorna.
-
-            const snapshot = await getDocs(collection(db, "notas"));
-            const ranking = [];
-
-            snapshot.forEach((doc) => {
-                const notas = doc.data();
-                const totalNotas = Object.values(notas).reduce((total, nota) => total + nota, 0);
-                const quantidadeNotas = Object.values(notas).length;
-                const media = quantidadeNotas > 0 ? (totalNotas / quantidadeNotas).toFixed(2) : 0;
-
-                ranking.push({ matricula: doc.id, media });
+                    const media = quantidadeNotas > 0 ? (totalNotas / quantidadeNotas).toFixed(2) : 0;
+                    document.getElementById("media").innerText = `sua média é: ${media}`;
+                }
+            }).catch((error) => {
+                console.error("Erro ao calcular média: ", error);
             });
-
-            ranking.sort((a, b) => b.media - a.media);
-            const rankingContainer = document.getElementById("ranking-container");
-            rankingContainer.innerHTML = "<h3>Ranking:</h3>";
-
-            ranking.forEach(aluno => {
-                rankingContainer.innerHTML += `${aluno.matricula}: ${aluno.media}<br>`;
-            });
-
-            // Controla a exibição do ranking para que apareça apenas uma vez
-            if (!rankingExibido) {
-                rankingContainer.classList.remove("hidden");
-                rankingExibido = true; // Marca que o ranking foi exibido
-            }
         }
 
         window.carregarPreferencias = function () {
-            const preferencias = localStorage.getItem(`preferencias_${alunoAtual}`);
-            if (preferencias) {
-                const { mostrarRanking } = JSON.parse(preferencias);
-                document.getElementById("exibir-ranking").checked = mostrarRanking;
-                if (mostrarRanking) {
-                    atualizarRanking();
+            getDoc(doc(db, "preferencias", alunoAtual)).then((docSnap) => {
+                if (docSnap.exists()) {
+                    const preferencias = docSnap.data();
+                    document.getElementById("mostrar-ranking").checked = preferencias.mostrarRanking || false;
+                    rankingExibido = preferencias.mostrarRanking || false;
                 }
-            }
+            }).catch((error) => {
+                console.error("Erro ao carregar preferências: ", error);
+            });
         }
 
-        window.salvarPreferencias = function () {
-            const mostrarRanking = document.getElementById("exibir-ranking").checked;
-            localStorage.setItem(`preferencias_${alunoAtual}`, JSON.stringify({ mostrarRanking }));
-            if (mostrarRanking) {
-                atualizarRanking();
+        window.atualizarPreferencias = function () {
+            const mostrarRanking = document.getElementById("mostrar-ranking").checked;
+            const mensagens = mostrarRanking ? "Você deseja ser exibido no ranking?" : "Você não deseja mais aparecer no ranking?";
+
+            if (confirm(mensagens)) {
+                rankingExibido = mostrarRanking;
+                setDoc(doc(db, "preferencias", alunoAtual), { mostrarRanking }, { merge: true })
+                    .then(() => {
+                        alert(`Preferência de ranking ${mostrarRanking ? "salva" : "removida"} com sucesso!`);
+                        if (mostrarRanking) {
+                            calcularMedia(); // Atualiza a média ao exibir o ranking
+                        } else {
+                            // Limpar qualquer exibição anterior do ranking se necessário
+                        }
+                    }).catch((error) => {
+                        console.error("Erro ao salvar preferências: ", error);
+                    });
             } else {
-                document.getElementById("ranking-container").innerHTML = ""; // Limpa o ranking se não for exibido
-                rankingExibido = false; // Reseta a exibição do ranking
+                // Se o usuário não confirmar, restaura o estado anterior
+                document.getElementById("mostrar-ranking").checked = !mostrarRanking;
             }
         }
     </script>
 </head>
 <body>
     <div class="container">
+        <h1>Sistema de Notas</h1>
         <div id="login-form">
-            <h1>Login</h1>
             <div class="form-group">
                 <label for="matricula">Matrícula:</label>
-                <input type="text" id="matricula">
-                <div class="error hidden" id="login-error">Matrícula inválida.</div>
+                <input type="text" id="matricula" placeholder="Digite sua matrícula">
+                <div class="error hidden" id="login-error">Matrícula inválida!</div>
             </div>
             <button onclick="login()">Entrar</button>
         </div>
-
         <div id="notas-form" class="hidden">
-            <h1>Notas de <span id="aluno-nome"></span></h1>
-
-            <div id="media-container">Média: N/A</div>
-
+            <h2 id="aluno-nome"></h2>
             <div class="form-group">
                 <label for="disciplina">Disciplina:</label>
                 <select id="disciplina">
-                    <option value="Matemática">Matemática</option>
-                    <option value="Português">Português</option>
-                    <option value="História">História</option>
-                    <option value="Geografia">Geografia</option>
-                    <option value="Educação Física">Educação Física</option>
+                    <label for="disciplina">Disciplina:</label>
+            <select id="disciplina" onchange="atualizarNota()">
+                <option value="ADP">Administração de Pessoal (ADP)</option>
+                <option value="ALF">Administração Logística Financeira (ALF)</option>
+                <option value="AMTP">Armamento, Munição e Tiro Policial (AMTP)</option>
+                <option value="APHT">Atendimento Pré-Hospitalar Tático (APH)</option>
+                <option value="CCL">Comando Chefia e Liderança (CCL)</option>
+                <option value="DPE">Defesa Pessoal Policial (DPE)</option>
+                <option value="DAD">Direito Administrativo Disciplinar (DAD)</option>
+                <option value="DPPM">Direito Penal Militar, Processual Penal Militar (DPPM)</option>
+                <option value="EFPM">Educação Física Policial Militar (EFPM)</option>
+                <option value="DDPH">Ética e Direitos Humanos na Atividade Policial (DDPH)</option>
+                <option value="GAO">Gerenciamento de Atividade Operacional (GAO)</option>
+                <option value="INP">Inteligência Policial (INP)</option>
+                <option value="LET">Legislação de Trânsito e Operações (LET)</option>
+                <option value="LEI">Legislação Institucional (LEI)</option>
+                <option value="OUD">Ordem Unida (OUD)</option>
+                <option value="PDP">Polícia de Proximidade (PDP)</option>
+                <option value="POS">Polícia Ostensiva (POS)</option>
+                <option value="SCOH">Sistema de Comando e Operações de Ajuda Humanitária (SCOH)</option>
+                <option value="TPO">Técnicas E Operações De Polícia Militar (TPO)</option>
+                <option value="TELA">Tópicos Especiais de Legislação Aplicáveis à Atividade (TELA)</option>
                 </select>
             </div>
             <div class="form-group">
-                <label for="nota">Nota (0 a 10):</label>
-                <input type="number" id="nota" min="0" max="10" step="0.1">
-                <div class="error hidden" id="nota-error">Nota inválida. Deve ser entre 0 e 10.</div>
+                <label for="nota">Nota:</label>
+                <input type="number" id="nota" placeholder="0.00" step="0.01" min="0" max="10">
+                <div class="error hidden" id="nota-error">A nota deve estar entre 0 e 10!</div>
+            </div>
+            <div id="loading" class="hidden">Salvando...</div>
+            <div class="form-group">
+                <div class="button-group">
+                    <button onclick="salvarNota()">Salvar Nota</button>
+                    <button onclick="excluirNota()">Excluir Nota</button>
+                </div>
                 <div class="success hidden" id="nota-success">Nota salva com sucesso!</div>
             </div>
-
-            <div class="button-group">
-                <button onclick="salvarNota()">Salvar Nota</button>
-                <button onclick="excluirNota()">Excluir Nota</button>
+            <div id="notas-salvas"></div>
+            <div id="notas-vazias" class="error hidden">Você não possui notas salvas.</div>
+            <div id="media" style="font-weight: bold;">sua média é: -</div>
+            <div class="form-group">
+                <label for="mostrar-ranking">Mostrar no ranking:</label>
+                <input type="checkbox" id="mostrar-ranking" onchange="atualizarPreferencias()">
             </div>
-
-            <div id="loading" class="hidden">Carregando...</div>
-
-            <div id="notas-container">
-                <h3>Notas Salvas:</h3>
-            </div>
-
-            <div>
-                <label>
-                    <input type="checkbox" id="exibir-ranking" onchange="salvarPreferencias()">
-                    Exibir Ranking
-                </label>
-            </div>
-            <div id="ranking-container" class="hidden"></div>
         </div>
     </div>
 </body>
