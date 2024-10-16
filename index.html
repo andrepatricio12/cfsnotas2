@@ -52,6 +52,11 @@
             width: 100%;
         }
 
+        #matricula {
+            width: 60%; /* Tamanho reduzido do campo de matrícula */
+            padding: 8px;
+        }
+
         #nota {
             width: 80px;
             padding: 8px;
@@ -96,19 +101,7 @@
         .button-group button {
             width: 48%;
         }
-         /* Animação ao clicar nos botões */
-button:active {
-  transform: scale(0.95);
-  transition: transform 0.1s;
-}
-
-        #loading {
-            text-align: center;
-            font-weight: bold;
-            color: #007bff;
-            margin-top: 10px;
-        }
-
+        
         /* Animação ao clicar nos botões */
         button:active {
             transform: scale(0.95);
@@ -224,9 +217,10 @@ button:active {
         document.getElementById("nota").addEventListener("input", toggleSalvarNotaButton);
         window.onload = toggleSalvarNotaButton;
 
-        function excluirNota(matricula, disciplina) {
+        function excluirNota() {
+            const disciplina = document.getElementById("disciplina").value;
             if (confirm(`Tem certeza que deseja excluir a nota da disciplina ${disciplina}?`)) {
-                updateDoc(doc(db, "notas", matricula), {
+                updateDoc(doc(db, "notas", alunoAtual), {
                     [disciplina]: deleteField()
                 }).then(() => {
                     console.log('Nota excluída com sucesso!');
@@ -241,88 +235,61 @@ button:active {
         window.carregarNotas = function () {
             if (!alunoAtual) return;
 
-            getDoc(doc(db, "notas", alunoAtual)).then((docSnap) => {
-                let notasDisplay = "";
-                let quantidadeNotas = 0;
-                let totalNotas = 0;
-
-                if (docSnap.exists()) {
-                    const notas = docSnap.data();
-
-                    for (const disciplina in notas) {
-                        const nota = notas[disciplina];
-                        notasDisplay += `<div>${disciplina}: ${nota} <button onclick="excluirNota('${alunoAtual}', '${disciplina}')">Excluir</button></div>`;
-                        quantidadeNotas++;
-                        totalNotas += nota;
+            document.getElementById("loading").classList.remove("hidden");
+            getDoc(doc(db, "notas", alunoAtual)).then((doc) => {
+                if (doc.exists()) {
+                    const data = doc.data();
+                    let notasHTML = "";
+                    for (const disciplina in data) {
+                        notasHTML += `<li>${disciplina}: ${data[disciplina]}</li>`;
                     }
+                    document.getElementById("notas-list").innerHTML = notasHTML || "<li>Nenhuma nota salva.</li>";
+                } else {
+                    document.getElementById("notas-list").innerHTML = "<li>Nenhuma nota salva.</li>";
                 }
-
-                document.getElementById("notas").innerHTML = notasDisplay || "Nenhuma nota encontrada.";
-                document.getElementById("quantidade-notas").innerText = `Total de Notas: ${quantidadeNotas}`;
+                document.getElementById("loading").classList.add("hidden");
             }).catch((error) => {
                 console.error("Erro ao carregar notas: ", error);
+                document.getElementById("loading").classList.add("hidden");
             });
         };
 
-         window.calcularMedia = function () {
-    getDoc(doc(db, "notas", alunoAtual)).then((docSnap) => {
-        if (docSnap.exists()) {
-            const notas = docSnap.data();
-            console.log("Notas:", notas); // Log das notas
-            const totalNotas = Object.values(notas).reduce((sum, nota) => sum + nota, 0);
-            console.log("Total das notas:", totalNotas); // Log do total das notas
-            const quantidadeNotas = Object.values(notas).length;
-            console.log("Quantidade de notas:", quantidadeNotas); // Log da quantidade de notas
+        window.calcularMedia = function () {
+            if (!alunoAtual) return;
 
-            const media = quantidadeNotas > 0 ? (totalNotas / quantidadeNotas).toFixed(2) : 0;
-            document.getElementById("media").innerText = sua média é: ${media};
-        } else {
-            document.getElementById("media").innerText = "sua média é: -";
-        }
-    }).catch((error) => {
-        console.error("Erro ao calcular média: ", error);
-    });
-};
-        
-
-        window.mostrarRanking = function () {
-            const rankingCheckbox = document.getElementById("ranking");
-            const rankingButton = document.getElementById("visualizarRanking");
-            rankingButton.disabled = !rankingCheckbox.checked;
-
-            if (rankingCheckbox.checked) {
-                alert("Você optou por ser incluído no ranking.");
-                // Aqui você pode implementar a lógica para armazenar essa preferência no Firestore
-            } else {
-                alert("Você optou por não ser incluído no ranking.");
-                // Aqui você pode implementar a lógica para armazenar essa preferência no Firestore
-            }
-        };
-
-        window.visualizarRanking = function () {
-            // Adicione a lógica para visualizar o ranking aqui
-            alert("Ranking: (Adicionar lógica para mostrar o ranking aqui)");
+            getDoc(doc(db, "notas", alunoAtual)).then((doc) => {
+                if (doc.exists()) {
+                    const data = doc.data();
+                    const notas = Object.values(data);
+                    const media = notas.reduce((a, b) => a + b, 0) / notas.length || 0;
+                    document.getElementById("media").innerText = media.toFixed(2);
+                } else {
+                    document.getElementById("media").innerText = "N/A";
+                }
+            }).catch((error) => {
+                console.error("Erro ao calcular média: ", error);
+            });
         };
     </script>
 </head>
 <body>
     <div class="container">
         <h1>Sistema de Notas</h1>
-
         <div id="login-form">
             <div class="form-group">
                 <label for="matricula">Matrícula:</label>
-                <input type="text" id="matricula" required>
-                <div id="login-error" class="error">Matrícula inválida. Tente novamente.</div>
+                <input type="text" id="matricula" placeholder="Digite sua matrícula" oninput="toggleSalvarNotaButton()" />
             </div>
             <button onclick="login()">Entrar</button>
+            <div id="login-error" class="error">Matrícula inválida!</div>
         </div>
-
+        
         <div id="notas-form" class="hidden">
             <h2 id="aluno-nome"></h2>
+            <div id="loading" class="hidden">Carregando...</div>
             <div class="form-group">
                 <label for="disciplina">Disciplina:</label>
-                <select id="disciplina">
+                <select id="disciplina" oninput="toggleSalvarNotaButton()">
                     <option value="ADP">Administração de Pessoal (ADP)</option>
                 <option value="ALF">Administração Logística Financeira (ALF)</option>
                 <option value="AMTP">Armamento, Munição e Tiro Policial (AMTP)</option>
@@ -347,27 +314,18 @@ button:active {
             </div>
             <div class="form-group">
                 <label for="nota">Nota:</label>
-                <input type="number" id="nota" min="0" max="10" step="0.01">
-                <div id="nota-error" class="error">Nota deve estar entre 0 e 10.</div>
-                <div id="nota-success" class="error" style="color: green;">Nota salva com sucesso!</div>
+                <input type="number" id="nota" placeholder="0 a 10" oninput="toggleSalvarNotaButton()" />
+                <div id="nota-error" class="error">Nota deve ser entre 0 e 10!</div>
+                <div id="nota-success" class="hidden">Nota salva com sucesso!</div>
             </div>
-
+            <div id="loading"></div>
             <div class="button-group">
-                <button id="salvarNota" onclick="salvarNota()">Salvar Nota</button>
-                <button id="visualizarRanking" onclick="visualizarRanking()" disabled>Visualizar Ranking</button>
+                <button id="salvarNota" onclick="salvarNota()" disabled>Salvar Nota</button>
+                <button id="excluirNota" onclick="excluirNota()">Excluir Nota</button>
             </div>
-
-            <div class="form-group">
-                <label>
-                    <input type="checkbox" id="ranking" onclick="mostrarRanking()"> Quero ser incluído no ranking
-                </label>
-            </div>
-
-            <div id="loading" class="hidden">Carregando...</div>
-
-            <h3 id="quantidade-notas">Total de Notas: 0</h3>
-            <div id="notas"></div>
-            <h3 id="media">Sua média é: 0</h3>
+            <h3>Notas Salvas:</h3>
+            <ul id="notas-list"></ul>
+            <h3>Sua média é: <span id="media">N/A</span></h3>
         </div>
     </div>
 </body>
