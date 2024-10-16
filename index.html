@@ -212,14 +212,22 @@
     }
 }
 
-window.onload = function() {
-    const alunoLogado = localStorage.getItem('alunoAtual');
-    if (alunoLogado && alunos[alunoLogado]) {
-        alunoAtual = alunoLogado;
-        document.getElementById("aluno-nome").innerText = alunos[alunoLogado];
-        document.getElementById("login-form").classList.add("hidden");
-        document.getElementById("notas-form").classList.remove("hidden");
-    }
+ window.onload = async function() {
+        const alunoLogado = localStorage.getItem('alunoAtual');
+        if (alunoLogado && alunos[alunoLogado]) {
+            alunoAtual = alunoLogado;
+            document.getElementById("aluno-nome").innerText = alunos[alunoLogado];
+            document.getElementById("login-form").classList.add("hidden");
+            document.getElementById("notas-form").classList.remove("hidden");
+            try {
+                const doc = await db.collection('notas').doc(alunoAtual).get();
+                if (doc.exists) {
+                    Object.assign(notas[alunoAtual], doc.data());
+                }
+            } catch (error) {
+                console.error("Erro ao carregar notas: ", error);
+            }
+        }
 }
 
 
