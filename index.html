@@ -377,7 +377,7 @@ async function atualizarNota() {
             console.error("Erro ao calcular ranking: ", error);
         }
     }
-            sync function calcularMedia() {
+            async function calcularMedia() {
     try {
         // Busca o documento das notas do aluno atual no Firestore
         const doc = await db.collection('notas').doc(alunoAtual).get();
@@ -398,6 +398,17 @@ async function atualizarNota() {
         console.error("Erro ao calcular média: ", error);
         alert("Ocorreu um erro ao calcular a média.");
     }
+}
+
+function calcularMediaAluno(disciplinas) {
+    // Obtém os valores das notas (números) e calcula a média
+    const notas = Object.values(disciplinas).filter(nota => typeof nota === 'number');
+    
+    if (notas.length === 0) return 0; // Previne divisão por zero se não houver notas
+
+    return notas.reduce((a, b) => a + b, 0) / notas.length;
+}
+
 }
 
     function calcularMediaAluno(disciplinas) {
