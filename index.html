@@ -118,7 +118,7 @@
             margin-top: 10px;
         }
 
-        @media (max-width: 600px) {
+        @media (max-width: 600px) }
             .container {
                 padding: 10px;
             }
@@ -278,19 +278,16 @@
         }
 
         async function carregarNotas() {
-            const notasContainer = document.getElementById("notas-container");
-            notasContainer.innerHTML = '';
-            const notasDoc = await db.collection("notas").doc(currentMatricula).get();
-            if (notasDoc.exists) {
-                notas = notasDoc.data();
-                for (const disciplina in notas) {
-                    const nota = notas[disciplina];
-                    notasContainer.innerHTML += `<p>${disciplina}: ${nota}</p>`;
-                }
-            } else {
-                notasContainer.innerHTML = '<p>Nenhuma nota encontrada.</p>';
-            }
+    const querySnapshot = await db.collection('notas').get();
+    const notasContainer = document.getElementById('notas-container');
+    notasContainer.innerHTML = '';
+    querySnapshot.forEach((doc) => {
+        const [matricula, disciplina] = doc.id.split('_');
+        if (matricula === matriculaAtual) { // Verifica se a matrícula do documento é a atual
+            notasContainer.innerHTML += `<p>${disciplina}: ${doc.data().nota}</p>`;
         }
+    });
+}
 
         function atualizarNota() {
             const disciplinaSelecionada = document.getElementById("disciplina").value;
