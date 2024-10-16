@@ -164,7 +164,6 @@
        "9306820": "NAZARETH LIMA GOEDERT",
         "9303219": "CARLA DE LUCA LINHARES",
         "9287124": "LEANDRO GHELLERE",
-        "9287124": "LEANDRO GHELLERE",
         "9300350": "TIAGO LUIZ CLEMES",
         "9288350": "MARCOS AURÉLIO LUIZ DUARTE",
         "9320547": "ANDRÉ LUIS PATRÍCIO",
@@ -222,12 +221,17 @@
 
     if (nota >= 1 && nota <= 10) {
         try {
+            // Atualiza as notas no objeto local
+            if (!notas[alunoAtual]) {
+                notas[alunoAtual] = {};
+            }
+            notas[alunoAtual][disciplina] = nota;
+
             // Salva a nota no Firestore
             await db.collection('notas').doc(alunoAtual).set({
                 [disciplina]: nota
             }, { merge: true }); // Usamos merge para não sobrescrever disciplinas anteriores
 
-            notaInput.value = nota; // Manter a nota no campo
             mostrarMensagemSucesso();
             atualizarRankingButton();
         } catch (error) {
@@ -236,6 +240,26 @@
     } else {
         mostrarMensagemErro();
     }
+}
+
+async function atualizarNota() {
+    const disciplina = document.getElementById("disciplina").value;
+    const notaInput = document.getElementById("nota");
+
+    try {
+        const doc = await db.collection('notas').doc(alunoAtual).get();
+        if (doc.exists && doc.data()[disciplina] !== undefined) {
+            notaInput.value = doc.data()[disciplina]; // Exibir a nota salva
+            // Atualiza as notas locais
+            notas[alunoAtual] = doc.data();
+        } else {
+            notaInput.value = ""; // Limpar se não houver nota
+        }
+    } catch (error) {
+        console.error("Erro ao buscar nota: ", error);
+    }
+}
+
 }
 
         }
@@ -274,6 +298,8 @@
     } catch (error) {
         console.error("Erro ao buscar notas: ", error);
     }
+}
+
 
 
         }
@@ -351,30 +377,35 @@
     }
 
     function calcularMedia() {
-        const disciplinas = notas[alunoAtual];
-        if (!disciplinas) {
-            alert("Nenhuma nota salva para calcular a média.");
-            return;
+    const disciplinas = notas[alunoAtual];
+    if (!disciplinas || Object.keys(disciplinas).length === 0) {
+        alert("Nenhuma nota salva para calcular a média.");
+        return;
+    }
+
+    const media = calcularMediaAluno(disciplinas);
+    alert(`A média do aluno ${alunos[alunoAtual]} é: ${media.toFixed(2)}`);
+}
+
+function calcularMediaAluno(disciplinas) {
+    const total = Object.values(disciplinas).reduce((acc, nota) => acc + nota, 0);
+    return total / Object.keys(disciplinas).length;
+}
+
+
+   window.onload = async function() {
+    if (alunoAtual) {
+        try {
+            const doc = await db.collection('notas').doc(alunoAtual).get();
+            if (doc.exists) {
+                Object.assign(notas[alunoAtual], doc.data());
+            }
+        } catch (error) {
+            console.error("Erro ao carregar notas: ", error);
         }
-
-        const media = calcularMediaAluno(disciplinas);
-        alert(`A média do aluno ${alunos[alunoAtual]} é: ${media.toFixed(2)}`);
     }
+}
 
-    function calcularMediaAluno(disciplinas) {
-        const total = Object.values(disciplinas).reduce((acc, nota) => acc + nota, 0);
-        return total / Object.keys(disciplinas).length;
-    }
-
-    window.onload = async function() {
-    try {
-        const doc = await db.collection('notas').doc(alunoAtual).get();
-        if (doc.exists) {
-            Object.assign(notas, doc.data());
-        }
-    } catch (error) {
-        console.error("Erro ao carregar notas: ", error);
-    }
 }
 
     }
