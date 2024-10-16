@@ -1,16 +1,13 @@
+e agora?
+
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistema de Notas - Curso de Sargentos</title>
+
     <style>
-        #loading {
-            text-align: center;
-            font-weight: bold;
-            color: #007bff;
-            margin-top: 10px;
-        }
         body {
             font-family: Arial, sans-serif;
             margin: 0;
@@ -21,7 +18,6 @@
             height: 100vh;
             background-color: #f5f5f5;
         }
-
         .container {
             background-color: white;
             padding: 20px;
@@ -30,38 +26,22 @@
             max-width: 600px;
             width: 100%;
         }
-
         h1 {
             text-align: center;
             color: #333;
         }
-
         .form-group {
             margin-bottom: 15px;
         }
-
         .form-group label {
             display: block;
         }
-
-        .form-group input,
-        .form-group select {
+        .form-group input, .form-group select {
             padding: 10px;
+            width: 100%;
             border-radius: 5px;
             border: 1px solid #ddd;
-            width: 100%;
         }
-
-        #matricula {
-            width: 60%; /* Tamanho reduzido do campo de matrícula */
-            padding: 8px;
-        }
-
-        #nota {
-            width: 80px;
-            padding: 8px;
-        }
-
         button {
             padding: 10px;
             width: 100%;
@@ -72,261 +52,244 @@
             font-size: 16px;
             cursor: pointer;
             transition: background-color 0.3s;
-            margin: 5px 0;
         }
-
         button:disabled {
             background-color: #ccc;
         }
-
         button:hover:not(:disabled) {
             background-color: #0056b3;
         }
-
+        #ranking-btn {
+            display: none; /* Inicialmente escondido */
+        }
+        .message {
+            margin-top: 20px;
+            text-align: center;
+            font-weight: bold;
+        }
         .error {
             color: red;
-            display: none;
         }
-
         .hidden {
             display: none;
         }
-
         .button-group {
             margin-top: 20px;
-            display: flex;
-            justify-content: space-between;
         }
-
-        .button-group button {
-            width: 48%;
-        }
-        
-        /* Animação ao clicar nos botões */
-        button:active {
-            transform: scale(0.95);
-            transition: transform 0.1s;
+        .spacing {
+            margin-top: 10px; /* Espaço entre botões */
         }
     </style>
-
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-        import { getFirestore, doc, setDoc, getDoc, updateDoc, deleteField } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyDEvCDdX0LGjDMFpyxljj-4JTjZKtgooDM",
-            authDomain: "notas-cfs.firebaseapp.com",
-            projectId: "notas-cfs",
-            storageBucket: "notas-cfs.appspot.com",
-            messagingSenderId: "91086463856",
-            appId: "1:91086463856:web:6a16fb0b3abe04bbc425b5"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-
-        const alunos = {
-            "9287027": "ELIENAR FARIAS",
-            "9306820": "NAZARETH LIMA GOEDERT",
-            "9303219": "CARLA DE LUCA LINHARES",
-            "9287124": "LEANDRO GHELLERE",
-            "9300350": "TIAGO LUIZ CLEMES",
-            "9288350": "MARCOS AURÉLIO LUIZ DUARTE",
-            "9320547": "ANDRÉ LUIS PATRÍCIO",
-            "9288520": "MATHEUS ROSSI LONGO",
-            "9320555": "RICARDO MESQUITA DE MEDEIROS",
-            "9320601": "JOSÉ RENATO COSTA",
-            "9307800": "JEAN CARLOS PEREIRA MACHADO",
-            "9300600": "AILTON BOZELLO DE BITTENCOURT",
-            "9300341": "TIAGO SANTOS DE SOUZA",
-            "9316230": "RODRIGO SILVA DOS SANTOS",
-            "9308652": "ANDERSON ROVEDA",
-            "9333967": "MAYARA ZILI DA SILVA",
-            "9316221": "MARCOS ADRIANO DAL PONT",
-            "9333860": "SARAH WAGNER ZANATTA",
-            "9329730": "FELIPE LUMERTZ DA SILVA",
-            "9316116": "JAQUES ROCHA DE SOUZA",
-            "9329340": "ÉZIO FRANCISCO FERNANDES",
-            "9329382": "EDERSON FRANÇA DE MACHADO",
-            "6606032": "ROBSON GOMES HAHN",
-            "9339558": "EVANDRO ANASTÁCIO TEIXEIRA",
-            "9339329": "TIAGO ANSELMO VALNIER",
-            "9287205": "ALEXANDRE DA LUZ",
-            "9307745": "WANDERSON RICARDO DE CARVALHO",
-            "9316159": "ANDERSON DOS SANTOS ROSA",
-            "9320563": "IURI CÚRCIO CARRER",
-            "6718680": "LAURO TOGNON NETO",
-            "9330097": "PATRICK CARDOSO DE RAMOS",
-            "9330356": "BRUNA DA SILVA PIRES",
-            "3847446": "DAIANA PEREIRA",
-            "9329056": "VINICIUS JOVELINO COSTA",
-            "9339477": "DANIEL SERAFIM PESSI"
-        };
-
-        let alunoAtual = null;
-
-        window.login = function () {
-            const matricula = document.getElementById("matricula").value.trim();
-            const alunoNome = alunos[matricula];
-
-            if (alunoNome) {
-                alunoAtual = matricula;
-                document.getElementById("aluno-nome").innerText = alunoNome;
-                document.getElementById("login-form").classList.add("hidden");
-                document.getElementById("notas-form").classList.remove("hidden");
-                carregarNotas();
-            } else {
-                document.getElementById("login-error").classList.remove("hidden");
-            }
-        };
-
-        window.salvarNota = function () {
-            const disciplina = document.getElementById("disciplina").value;
-            const nota = parseFloat(document.getElementById("nota").value);
-
-            if (nota < 0 || nota > 10) {
-                document.getElementById("nota-error").classList.remove("hidden");
-                return;
-            }
-
-            document.getElementById("loading").classList.remove("hidden");
-            setDoc(doc(db, "notas", alunoAtual), {
-                [disciplina]: nota
-            }, { merge: true }).then(() => {
-                document.getElementById("loading").classList.add("hidden");
-                document.getElementById("nota-success").classList.remove("hidden");
-                setTimeout(() => {
-                    document.getElementById("nota-success").classList.add("hidden");
-                }, 3000);
-                carregarNotas();
-                calcularMedia();
-            }).catch((error) => {
-                console.error("Erro ao salvar nota: ", error);
-            });
-        };
-
-        function toggleSalvarNotaButton() {
-            const disciplina = document.getElementById("disciplina").value;
-            const nota = document.getElementById("nota").value;
-            const salvarNotaButton = document.getElementById("salvarNota");
-
-            salvarNotaButton.disabled = (disciplina === "" || nota === "");
-        }
-
-        document.getElementById("disciplina").addEventListener("input", toggleSalvarNotaButton);
-        document.getElementById("nota").addEventListener("input", toggleSalvarNotaButton);
-        window.onload = toggleSalvarNotaButton;
-
-        function excluirNota() {
-            const disciplina = document.getElementById("disciplina").value;
-            if (confirm(`Tem certeza que deseja excluir a nota da disciplina ${disciplina}?`)) {
-                updateDoc(doc(db, "notas", alunoAtual), {
-                    [disciplina]: deleteField()
-                }).then(() => {
-                    console.log('Nota excluída com sucesso!');
-                    carregarNotas();
-                    calcularMedia();
-                }).catch((error) => {
-                    console.error('Erro ao excluir a nota:', error);
-                });
-            }
-        }
-
-        window.carregarNotas = function () {
-            if (!alunoAtual) return;
-
-            document.getElementById("loading").classList.remove("hidden");
-            getDoc(doc(db, "notas", alunoAtual)).then((doc) => {
-                if (doc.exists()) {
-                    const data = doc.data();
-                    let notasHTML = "";
-                    for (const disciplina in data) {
-                        notasHTML += `<li>${disciplina}: ${data[disciplina]}</li>`;
-                    }
-                    document.getElementById("notas-list").innerHTML = notasHTML || "<li>Nenhuma nota salva.</li>";
-                } else {
-                    document.getElementById("notas-list").innerHTML = "<li>Nenhuma nota salva.</li>";
-                }
-                document.getElementById("loading").classList.add("hidden");
-            }).catch((error) => {
-                console.error("Erro ao carregar notas: ", error);
-                document.getElementById("loading").classList.add("hidden");
-            });
-        };
-
-        window.calcularMedia = function () {
-            if (!alunoAtual) return;
-
-            getDoc(doc(db, "notas", alunoAtual)).then((doc) => {
-                if (doc.exists()) {
-                    const data = doc.data();
-                    const notas = Object.values(data);
-                    const media = notas.reduce((a, b) => a + b, 0) / notas.length || 0;
-                    document.getElementById("media").innerText = media.toFixed(2);
-                } else {
-                    document.getElementById("media").innerText = "N/A";
-                }
-            }).catch((error) => {
-                console.error("Erro ao calcular média: ", error);
-            });
-        };
-    </script>
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js"></script>
 </head>
 <body>
-    <div class="container">
-        <h1>Sistema de Notas</h1>
-        <div id="login-form">
-            <div class="form-group">
-                <label for="matricula">Matrícula:</label>
-                <input type="text" id="matricula" placeholder="Digite sua matrícula" oninput="toggleSalvarNotaButton()" />
-            </div>
-            <button onclick="login()">Entrar</button>
-            <div id="login-error" class="error">Matrícula inválida!</div>
+<div class="container">
+    <h1>Sistema de Notas - Curso de Sargentos</h1>
+
+    <div id="login-form">
+        <div class="form-group">
+            <label for="matricula">Digite sua matrícula:</label>
+            <input type="text" id="matricula" placeholder="Digite sua matrícula">
         </div>
-        
-        <div id="notas-form" class="hidden">
-            <h2 id="aluno-nome"></h2>
-            <div id="loading" class="hidden">Carregando...</div>
-            <div class="form-group">
-                <label for="disciplina">Disciplina:</label>
-                <select id="disciplina" oninput="toggleSalvarNotaButton()">
-                    <option value="ADP">Administração de Pessoal (ADP)</option>
-                <option value="ALF">Administração Logística Financeira (ALF)</option>
-                <option value="AMTP">Armamento, Munição e Tiro Policial (AMTP)</option>
-                <option value="APHT">Atendimento Pré-Hospitalar Tático (APH)</option>
-                <option value="CCL">Comando Chefia e Liderança (CCL)</option>
-                <option value="DPE">Defesa Pessoal Policial (DPE)</option>
-                <option value="DAD">Direito Administrativo Disciplinar (DAD)</option>
-                <option value="DPPM">Direito Penal Militar, Processual Penal Militar (DPPM)</option>
-                <option value="EFPM">Educação Física Policial Militar (EFPM)</option>
-                <option value="DDPH">Ética e Direitos Humanos na Atividade Policial (DDPH)</option>
-                <option value="GAO">Gerenciamento de Atividade Operacional (GAO)</option>
-                <option value="INP">Inteligência Policial (INP)</option>
-                <option value="LET">Legislação de Trânsito e Operações (LET)</option>
-                <option value="LEI">Legislação Institucional (LEI)</option>
-                <option value="OUD">Ordem Unida (OUD)</option>
-                <option value="PDP">Polícia de Proximidade (PDP)</option>
-                <option value="POS">Polícia Ostensiva (POS)</option>
-                <option value="SCOH">Sistema de Comando e Operações de Ajuda Humanitária (SCOH)</option>
-                <option value="TPO">Técnicas E Operações De Polícia Militar (TPO)</option>
-                <option value="TELA">Tópicos Especiais de Legislação Aplicáveis à Atividade (TELA)</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="nota">Nota:</label>
-                <input type="number" id="nota" placeholder="0 a 10" oninput="toggleSalvarNotaButton()" />
-                <div id="nota-error" class="error">Nota deve ser entre 0 e 10!</div>
-                <div id="nota-success" class="hidden">Nota salva com sucesso!</div>
-            </div>
-            <div id="loading"></div>
-            <div class="button-group">
-                <button id="salvarNota" onclick="salvarNota()" disabled>Salvar Nota</button>
-                <button id="excluirNota" onclick="excluirNota()">Excluir Nota</button>
-            </div>
-            <h3>Notas Salvas:</h3>
-            <ul id="notas-list"></ul>
-            <h3>Sua média é: <span id="media">N/A</span></h3>
-        </div>
+        <button onclick="login()">Entrar</button>
+        <div id="login-error" class="error hidden">Matrícula não encontrada. Por favor, tente novamente.</div>
     </div>
+
+    <div id="notas-form" class="hidden">
+        <h2 id="aluno-nome"></h2>
+
+        <div class="form-group">
+            <label for="disciplina">Selecione a Disciplina:</label>
+            <select id="disciplina" onchange="atualizarNota()">
+              <option value="ADP">Administração de Pessoal (ADP)</option>
+              <option value="ALF">Administração Logística Financeira (ALF)</option>
+              <option value="AMTP">Armamento, Munição e Tiro Policial (AMTP)</option>
+              <option value="APHT">Atendimento Pré-Hospitalar Tático (APH)</option>
+              <option value="CCL">Comando Chefia e Liderança (CCL)</option>
+              <option value="DPE">Defesa Pessoal Policial (DPE)</option>
+              <option value="DAD">Direito Administrativo Disciplinar (DAD)</option>
+              <option value="DPPM">Direito Penal Militar, Processual Penal Militar (DPPM)</option>
+              <option value="EFPM">Educação Física Policial Militar (EFPM)</option>
+              <option value="DDPH">Ética e Direitos Humanos na Atividade Policial (DDPH)</option>
+              <option value="GAO">Gerenciamento de Atividade Operacional (GAO)</option>
+              <option value="INP">Inteligência Policial (INP)</option>
+              <option value="LET">Legislação de Trânsito e Operações (LET)</option>
+              <option value="LEI">Legislação Institucional (LEI)</option>
+              <option value="OUD">Ordem Unida (OUD)</option>
+              <option value="PDP">Polícia de Proximidade (PDP)</option>
+              <option value="POS">Polícia Ostensiva (POS)</option>
+              <option value="SCOH">Sistema de Comando e Operações de Ajuda Humanitária (SCOH)</option>
+              <option value="TPO">Técnicas E Operações De Polícia Militar (TPO)</option>
+              <option value="TELA">Tópicos Especiais de Legislação Aplicáveis à Atividade (TELA)</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="nota">Insira sua nota (entre 1 e 10):</label>
+            <input type="number" id="nota" min="1" max="10" step="0.01">
+        </div>
+
+        <div class="form-group">
+            <label for="rank">Permitir exibir no ranking:</label>
+            <input type="checkbox" id="rank" onchange="toggleRankingButton()">
+        </div>
+
+        <div class="button-group">
+            <button id="salvarNotaBtn" onclick="salvarNota()">Salvar Nota</button>
+        </div>
+
+        <div class="button-group spacing">
+            <button onclick="carregarNotas()">Ver Todas as Notas</button>
+        </div>
+
+        <div class="button-group spacing">
+            <button id="ranking-btn" onclick="mostrarRanking()" disabled>Ver Ranking</button>
+        </div>
+
+        <div class="button-group">
+            <button id="media-btn" onclick="calcularMedia()">Calcular Média</button>
+        </div>
+
+        <div id="notas-container" class="message"></div>
+        <div id="nota-success" class="message hidden">Nota salva com sucesso!</div>
+        <div id="nota-error" class="error hidden">A nota deve estar entre 1 e 10.</div>
+    </div>
+</div>
+
+<script>
+    const alunos = {
+        "9287027": "ELIENAR FARIAS",
+        "9306820": "NAZARETH LIMA GOEDERT",
+        "9303219": "CARLA DE LUCA LINHARES",
+        "9287124": "LEANDRO GHELLERE",
+        "9300350": "TIAGO LUIZ CLEMES",
+        "9288350": "MARCOS AURÉLIO LUIZ DUARTE",
+        "9320547": "ANDRÉ LUIS PATRÍCIO",
+        "9288520": "MATHEUS ROSSI LONGO",
+        "9320555": "RICARDO MESQUITA DE MEDEIROS",
+        "9320601": "JOSÉ RENATO COSTA",
+        "9307800": "JEAN CARLOS PEREIRA MACHADO",
+        "9300600": "AILTON BOZELLO DE BITTENCOURT",
+        "9300341": "TIAGO SANTOS DE SOUZA",
+        "9316230": "RODRIGO SILVA DOS SANTOS",
+        "9308652": "ANDERSON ROVEDA",
+        "9333967": "MAYARA ZILI DA SILVA",
+        "9316221": "MARCOS ADRIANO DAL PONT",
+        "9333860": "SARAH WAGNER ZANATTA",
+        "9329730": "FELIPE LUMERTZ DA SILVA",
+        "9316116": "JAQUES ROCHA DE SOUZA",
+        "9329340": "ÉZIO FRANCISCO FERNANDES",
+        "9329382": "EDERSON FRANÇA DE MACHADO",
+        "6606032": "ROBSON GOMES HAHN",
+        "9339558": "EVANDRO ANASTÁCIO TEIXEIRA",
+        "9339329": "TIAGO ANSELMO VALNIER",
+        "9287205": "ALEXANDRE DA LUZ",
+        "9307745": "WANDERSON RICARDO DE CARVALHO",
+        "9316159": "ANDERSON DOS SANTOS ROSA",
+        "9320563": "IURI CÚRCIO CARRER",
+        "6718680": "LAURO TOGNON NETO",
+        "9330097": "PATRICK CARDOSO DE RAMOS",
+        "9330356": "BRUNA DA SILVA PIRES",
+        "3847446": "DAIANA PEREIRA",
+        "9329056": "VINICIUS JOVELINO COSTA",
+        "9339477": "DANIEL SERAFIM PESSI"
+    };
+
+    // Configuração do Firebase
+    const firebaseConfig = {
+  apiKey: "AIzaSyDEvCDdX0LGjDMFpyxljj-4JTjZKtgooDM",
+  authDomain: "notas-cfs.firebaseapp.com",
+  projectId: "notas-cfs",
+  storageBucket: "notas-cfs.appspot.com",
+  messagingSenderId: "91086463856",
+  appId: "1:91086463856:web:6a16fb0b3abe04bbc425b5"
+};
+    };
+
+    const app = firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore(app);
+
+    let matriculaAtual = null;
+
+    function login() {
+        const matricula = document.getElementById('matricula').value;
+        if (alunos[matricula]) {
+            matriculaAtual = matricula;
+            document.getElementById('aluno-nome').textContent = alunos[matricula];
+            document.getElementById('login-form').classList.add('hidden');
+            document.getElementById('notas-form').classList.remove('hidden');
+            carregarNotas();
+        } else {
+            document.getElementById('login-error').classList.remove('hidden');
+        }
+    }
+
+    function atualizarNota() {
+        const disciplina = document.getElementById('disciplina').value;
+        document.getElementById('nota').value = ''; // Limpa o campo de nota ao selecionar nova disciplina
+        carregarNotaSalva(disciplina);
+    }
+
+    async function carregarNotaSalva(disciplina) {
+        const doc = await db.collection('notas').doc(${matriculaAtual}_${disciplina}).get();
+        if (doc.exists) {
+            document.getElementById('nota').value = doc.data().nota;
+        } else {
+            document.getElementById('nota').value = ''; // Se não houver nota, limpa o campo
+        }
+    }
+
+    async function salvarNota() {
+        const disciplina = document.getElementById('disciplina').value;
+        const nota = parseFloat(document.getElementById('nota').value);
+        if (nota < 1 || nota > 10 || isNaN(nota)) {
+            document.getElementById('nota-error').classList.remove('hidden');
+            return;
+        }
+
+        await db.collection('notas').doc(${matriculaAtual}_${disciplina}).set({ nota });
+        document.getElementById('nota-success').classList.remove('hidden');
+        document.getElementById('nota-error').classList.add('hidden');
+        setTimeout(() => {
+            document.getElementById('nota-success').classList.add('hidden');
+        }, 2000);
+    }
+
+    async function carregarNotas() {
+        const notasContainer = document.getElementById('notas-container');
+        notasContainer.innerHTML = ''; // Limpa notas anteriores
+        const querySnapshot = await db.collection('notas').where('matricula', '==', matriculaAtual).get();
+        querySnapshot.forEach(doc => {
+            const data = doc.data();
+            notasContainer.innerHTML += <p>${doc.id.split('_')[1]}: ${data.nota}</p>;
+        });
+    }
+
+    function toggleRankingButton() {
+        const checkbox = document.getElementById('rank');
+        document.getElementById('ranking-btn').disabled = !checkbox.checked;
+    }
+
+    function mostrarRanking() {
+        alert('Lógica para mostrar o ranking ainda não foi implementada.');
+    }
+
+    async function calcularMedia() {
+        const querySnapshot = await db.collection('notas').where('matricula', '==', matriculaAtual).get();
+        let totalNotas = 0;
+        let contador = 0;
+        querySnapshot.forEach(doc => {
+            const data = doc.data();
+            totalNotas += data.nota;
+            contador++;
+        });
+
+        const media = contador > 0 ? (totalNotas / contador).toFixed(2) : 0;
+        alert(A média do aluno ${alunos[matriculaAtual]} é: ${media});
+    }
+</script>
 </body>
 </html>
