@@ -207,7 +207,7 @@
             });
         }
 
-        window.carregarNotas = function () {
+        wwindow.carregarNotas = function () {
     getDoc(doc(db, "notas", alunoAtual)).then((doc) => {
         const notasContainer = document.getElementById("notas-container");
         notasContainer.innerHTML = "<h3>Notas Salvas:</h3>"; // Reinicia o conteúdo do container
@@ -215,7 +215,10 @@
         if (doc.exists()) {
             disciplinas = doc.data();
             for (const [disciplina, nota] of Object.entries(disciplinas)) {
-                notasContainer.innerHTML += `<p>${disciplina}: ${nota}</p>`;
+                // Evita exibir a chave mostrarRanking
+                if (disciplina !== "mostrarRanking") {
+                    notasContainer.innerHTML += `<p>${disciplina}: ${nota}</p>`;
+                }
             }
         } else {
             notasContainer.innerHTML += "<p>Nenhuma nota salva.</p>";
@@ -224,6 +227,7 @@
         console.error("Erro ao carregar notas: ", error);
     });
 }
+
 
 
         window.calcularMedia = function () {
