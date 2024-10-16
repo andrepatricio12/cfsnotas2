@@ -41,7 +41,7 @@
             width: 100%;
         }
         #matricula {
-            width: 50%; /* Reduzi o campo de matrícula */
+            width: 50%; /* Campo de matrícula ajustado */
         }
         button {
             padding: 10px;
@@ -75,6 +75,11 @@
         }
         .button-group {
             margin-top: 20px;
+            display: flex;
+            justify-content: space-between;
+        }
+        .button-small {
+            width: 48%;
         }
         .spacing {
             margin-top: 10px;
@@ -99,8 +104,7 @@
 
         <div class="form-group">
             <label for="disciplina">Selecione a Disciplina:</label>
-            <select id="disciplina">
-                <!-- Lista de Disciplinas -->
+            <select id="disciplina" onchange="atualizarCampoNota()">
                 <option value="ADP">Administração de Pessoal (ADP)</option>
                 <option value="ALF">Administração Logística Financeira (ALF)</option>
                 <option value="AMTP">Armamento, Munição e Tiro Policial (AMTP)</option>
@@ -129,25 +133,39 @@
             <input type="number" id="nota" min="0" max="10" step="0.01">
         </div>
 
-        <div class="button-group">
-            <button onclick="salvarNota()">Salvar Nota</button>
+        <div class="form-group">
+            <label>
+                <input type="checkbox" id="ranking-checkbox" onchange="atualizarRankingCheckbox()"> Desejo aparecer no ranking
+            </label>
+            <div id="ranking-confirmacao" class="hidden">Seu nome ficará visível para todos que optarem pelo ranking.</div>
         </div>
 
-        <div id="notas-container" class="message"></div> <!-- Onde as notas aparecerão -->
+        <div class="button-group">
+            <button class="button-small" onclick="salvarNota()">Salvar Nota</button>
+            <button class="button-small" onclick="excluirNota()">Excluir Nota</button>
+        </div>
+
+        <div id="notas-container" class="message"></div>
         <div class="message hidden" id="nota-success">Nota salva com sucesso!</div>
         <div class="error hidden" id="nota-error">A nota deve estar entre 0 e 10.</div>
 
         <div class="button-group spacing">
-            <button onclick="excluirNota()">Excluir Nota</button>
+            <button id="ranking-button" disabled onclick="mostrarRanking()">Ver Ranking</button>
         </div>
 
-        <div class="message hidden" id="media-container">Sua média é: <span id="media-value"></span></div> <!-- Exibição da média -->
+        <div class="message hidden" id="media-container">Sua média é: <span id="media-value"></span></div>
+
+        <div class="message hidden" id="ranking-container">
+            <h3>Ranking de Alunos</h3>
+            <div id="ranking-list"></div>
+            <button onclick="ocultarRanking()">Ocultar Ranking</button>
+        </div>
     </div>
 </div>
 
 <script>
     const alunos = {
-       "9287027": "ELIENAR FARIAS",
+         "9287027": "ELIENAR FARIAS",
             "9306820": "NAZARETH LIMA GOEDERT",
             "9303219": "CARLA DE LUCA LINHARES",
            "9287124": "LEANDRO GHELLERE",
@@ -185,7 +203,8 @@
     };
 
     let matriculaAtual;
-    let notas = [];
+    let notas = {};
+    let rankingOptIn = false;
 
     // Função de login
     function login() {
@@ -196,10 +215,21 @@
             document.getElementById('login-form').classList.add('hidden');
             document.getElementById('notas-form').classList.remove('hidden');
             document.getElementById('aluno-nome').innerText = alunos[matricula];
-            atualizarMedia();  // Atualizar média ao logar
-            atualizarNotas();  // Atualizar notas ao logar
+            atualizarMedia();
+            atualizarNotas();
         } else {
             document.getElementById('login-error').classList.remove('hidden');
+        }
+    }
+
+    // Atualizar o campo da nota ao mudar de disciplina
+    function atualizarCampoNota() {
+        const disciplina = document.getElementById('disciplina').value;
+        const notaInput = document.getElementById('nota');
+        if (notas[disciplina]) {
+            notaInput.value = notas[disciplina];
+        } else {
+            notaInput.value = '';
         }
     }
 
@@ -209,37 +239,36 @@
         const nota = parseFloat(document.getElementById('nota').value);
 
         if (nota >= 0 && nota <= 10) {
-            // Salva a nota na lista de notas
-            notas.push({ disciplina: disciplina, nota: nota });
+            notas[disciplina] = nota;
             document.getElementById('nota-success').classList.remove('hidden');
             document.getElementById('nota-error').classList.add('hidden');
-            atualizarNotas();  // Atualizar a lista de notas salvas
-            atualizarMedia();  // Atualizar média
+            atualizarNotas();
+            atualizarMedia();
         } else {
             document.getElementById('nota-success').classList.add('hidden');
             document.getElementById('nota-error').classList.remove('hidden');
         }
     }
 
-    // Função para excluir a última nota salva
+    // Função para excluir a nota da disciplina atual
     function excluirNota() {
-        if (notas.length > 0) {
-            notas.pop();  // Remove a última nota
-            atualizarNotas();  // Atualizar a lista de notas salvas
-            atualizarMedia();  // Atualizar a média
-        }
+        const disciplina = document.getElementById('disciplina').value;
+        delete notas[disciplina];
+        atualizarNotas();
+        atualizarMedia();
     }
 
-    // Função para atualizar a exibição das notas
+    // Função para atualizar as notas exibidas
     function atualizarNotas() {
         const notasContainer = document.getElementById('notas-container');
-        notasContainer.innerHTML = '';  // Limpar o conteúdo anterior
+        notasContainer.innerHTML = '';
 
-        if (notas.length === 0) {
+        const disciplinas = Object.keys(notas);
+        if (disciplinas.length === 0) {
             notasContainer.innerHTML = 'Nenhuma nota salva.';
         } else {
-            notas.forEach((nota, index) => {
-                notasContainer.innerHTML += `Nota ${index + 1}: Disciplina: ${nota.disciplina}, Nota: ${nota.nota.toFixed(2)}<br>`;
+            disciplinas.forEach((disciplina, index) => {
+                notasContainer.innerHTML += `Nota ${index + 1}: Disciplina: ${disciplina}, Nota: ${notas[disciplina].toFixed(2)}<br>`;
             });
         }
     }
@@ -249,14 +278,55 @@
         const mediaContainer = document.getElementById('media-container');
         const mediaValue = document.getElementById('media-value');
 
-        if (notas.length === 0) {
+        const disciplinas = Object.keys(notas);
+        if (disciplinas.length === 0) {
             mediaContainer.classList.add('hidden');
         } else {
-            const soma = notas.reduce((total, nota) => total + nota.nota, 0);
-            const media = soma / notas.length;
-            mediaValue.textContent = media.toFixed(2);  // Exibe a média com 2 casas decimais
+            const soma = disciplinas.reduce((total, disciplina) => total + notas[disciplina], 0);
+            const media = soma / disciplinas.length;
+            mediaValue.textContent = media.toFixed(2);
             mediaContainer.classList.remove('hidden');
         }
+    }
+
+    // Função para atualizar o checkbox de ranking
+    function atualizarRankingCheckbox() {
+        rankingOptIn = document.getElementById('ranking-checkbox').checked;
+        const rankingConfirmacao = document.getElementById('ranking-confirmacao');
+        const rankingButton = document.getElementById('ranking-button');
+
+        if (rankingOptIn) {
+            rankingConfirmacao.classList.remove('hidden');
+            rankingButton.disabled = false;
+            rankingButton.style.backgroundColor = '#007bff'; // Ativar cor do botão
+        } else {
+            rankingConfirmacao.classList.add('hidden');
+            rankingButton.disabled = true;
+            rankingButton.style.backgroundColor = '#ccc'; // Desativar cor do botão
+        }
+    }
+
+    // Função para mostrar o ranking
+    function mostrarRanking() {
+        const rankingContainer = document.getElementById('ranking-container');
+        const rankingList = document.getElementById('ranking-list');
+
+        const alunosRankeados = [
+            { nome: 'ELIENAR FARIAS', media: 9.5 }, // Exemplo de alunos no ranking
+            { nome: 'NAZARETH LIMA', media: 8.7 }
+        ];
+
+        rankingList.innerHTML = '';
+        alunosRankeados.forEach((aluno, index) => {
+            rankingList.innerHTML += `${index + 1}. ${aluno.nome}: Média ${aluno.media.toFixed(2)}<br>`;
+        });
+
+        rankingContainer.classList.remove('hidden');
+    }
+
+    // Função para ocultar o ranking
+    function ocultarRanking() {
+        document.getElementById('ranking-container').classList.add('hidden');
     }
 </script>
 
