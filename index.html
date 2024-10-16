@@ -62,6 +62,20 @@
             background-color: #ccc;
             cursor: not-allowed;
         }
+        button:disabled:hover::after {
+            content: "Para visualizar o ranking, você deve aceitar que seu nome apareça no ranking.";
+            position: absolute;
+            background-color: #333;
+            color: white;
+            padding: 5px;
+            border-radius: 5px;
+            top: -40px;
+            right: 10px;
+            width: 200px;
+            text-align: center;
+            font-size: 12px;
+            line-height: 1.5;
+        }
         .message {
             margin-top: 20px;
             text-align: center;
@@ -150,7 +164,7 @@
         <div class="error hidden" id="nota-error">A nota deve estar entre 0 e 10.</div>
 
         <div class="button-group spacing">
-            <button id="ranking-button" disabled onclick="mostrarRanking()">Ver Ranking</button>
+            <button id="ranking-button" disabled onmouseover="mostrarTooltipRanking()" onmouseout="esconderTooltipRanking()" onclick="mostrarRanking()">Ver Ranking</button>
         </div>
 
         <div class="message hidden" id="media-container">Sua média é: <span id="media-value"></span></div>
@@ -165,7 +179,7 @@
 
 <script>
     const alunos = {
-         "9287027": "ELIENAR FARIAS",
+        "9287027": "ELIENAR FARIAS",
             "9306820": "NAZARETH LIMA GOEDERT",
             "9303219": "CARLA DE LUCA LINHARES",
            "9287124": "LEANDRO GHELLERE",
@@ -205,6 +219,7 @@
     let matriculaAtual;
     let notas = {};
     let rankingOptIn = false;
+    let alunosRanking = [];
 
     // Função de login
     function login() {
@@ -244,6 +259,7 @@
             document.getElementById('nota-error').classList.add('hidden');
             atualizarNotas();
             atualizarMedia();
+            atualizarAlunosRanking();
         } else {
             document.getElementById('nota-success').classList.add('hidden');
             document.getElementById('nota-error').classList.remove('hidden');
@@ -306,18 +322,34 @@
         }
     }
 
+    // Função para atualizar os alunos que optaram por aparecer no ranking
+    function atualizarAlunosRanking() {
+        if (rankingOptIn) {
+            const disciplinas = Object.keys(notas);
+            const soma = disciplinas.reduce((total, disciplina) => total + notas[disciplina], 0);
+            const media = soma / disciplinas.length;
+            const aluno = {
+                nome: alunos[matriculaAtual],
+                media: media
+            };
+            const alunoIndex = alunosRanking.findIndex(a => a.nome === aluno.nome);
+            if (alunoIndex > -1) {
+                alunosRanking[alunoIndex] = aluno;
+            } else {
+                alunosRanking.push(aluno);
+            }
+        }
+    }
+
     // Função para mostrar o ranking
     function mostrarRanking() {
         const rankingContainer = document.getElementById('ranking-container');
         const rankingList = document.getElementById('ranking-list');
 
-        const alunosRankeados = [
-            { nome: 'ELIENAR FARIAS', media: 9.5 }, // Exemplo de alunos no ranking
-            { nome: 'NAZARETH LIMA', media: 8.7 }
-        ];
+        alunosRanking.sort((a, b) => b.media - a.media);
 
         rankingList.innerHTML = '';
-        alunosRankeados.forEach((aluno, index) => {
+        alunosRanking.forEach((aluno, index) => {
             rankingList.innerHTML += `${index + 1}. ${aluno.nome}: Média ${aluno.media.toFixed(2)}<br>`;
         });
 
@@ -327,6 +359,21 @@
     // Função para ocultar o ranking
     function ocultarRanking() {
         document.getElementById('ranking-container').classList.add('hidden');
+    }
+
+    // Função para mostrar o tooltip do ranking
+    function mostrarTooltipRanking() {
+        const rankingButton = document.getElementById('ranking-button');
+        if (rankingButton.disabled) {
+            rankingButton.style.position = 'relative';
+            rankingButton.setAttribute('data-tooltip', 'Para visualizar o ranking, você deve aceitar que seu nome apareça no ranking.');
+        }
+    }
+
+    // Função para esconder o tooltip do ranking
+    function esconderTooltipRanking() {
+        const rankingButton = document.getElementById('ranking-button');
+        rankingButton.removeAttribute('data-tooltip');
     }
 </script>
 
