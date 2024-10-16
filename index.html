@@ -228,23 +228,30 @@ document.getElementById("nota").addEventListener("input", toggleSalvarNotaButton
 window.onload = toggleSalvarNotaButton;
 
         // Função para excluir nota com confirmação
-function excluirNota(disciplina, matricula) {
-    const confirmacao = confirm("Você tem certeza que deseja excluir essa nota?");
-    
-    if (confirmacao) {
-        // Exclui a nota somente se o usuário confirmar
-        firebase.firestore().collection('notas').doc(`${matricula}-${disciplina}`).delete()
-            .then(() => {
-                alert("Nota excluída com sucesso!");
-                // Atualizar UI após a exclusão
-                atualizarMedia();
-                atualizarRanking();
-            })
-            .catch((error) => {
-                console.error("Erro ao excluir a nota: ", error);
-            });
-    }
+function excluirNota(matricula, disciplina) {
+  // Exibe uma caixa de confirmação antes de excluir a nota
+  if (confirm(`Tem certeza que deseja excluir a nota da disciplina ${disciplina}?`)) {
+    // Exclui a nota da disciplina para a matrícula específica
+    firebase.firestore().collection('notas').doc(matricula).update({
+      [disciplina]: firebase.firestore.FieldValue.delete()
+    })
+    .then(() => {
+      console.log('Nota excluída com sucesso!');
+
+      // Atualiza a média do aluno
+      atualizarMedia(matricula);
+
+      // Atualiza o ranking após a exclusão
+      atualizarRanking();
+
+      // Atualize a UI se necessário (por exemplo, limpando a nota da tela)
+    })
+    .catch((error) => {
+      console.error('Erro ao excluir a nota:', error);
+    });
+  }
 }
+
 
         window.carregarNotas = function () {
             getDoc(doc(db, "notas", alunoAtual)).then((docSnap) => {
@@ -327,6 +334,66 @@ window.atualizarNota = function() {
         console.error("Erro ao carregar nota: ", error);
     });
 }
+        function atualizarMedia(matricula) {
+  firebase.firestore().collection('notas').doc(matricula).get()
+    .then((doc) => {
+      if (doc.exists) {
+        const notas = doc.data();
+        const valores = Object.values(notas);
+
+        // Calcula a média apenas se houver notas
+        if (valores.length > 0) {
+          const soma = valores.reduce((acc, nota) => acc + nota, 0);
+          const media = soma / valores.length;
+
+          // Exibe a nova média na tela
+          document.getElementById('media').innerText = `Sua média é: ${media.toFixed(2)}`;
+        } else {
+          document.getElementById('media').innerText = 'Sua média é: N/A';
+        }
+      }
+    })
+    .catch((error) => {
+      console.error('Erro ao calcular a média:', error);
+    });
+}
+function atualizarRanking() {
+  // Aqui você pode implementar a lógica para recalcular o ranking
+  // com base nas médias atualizadas, conforme já foi descrito antes.
+
+  // Exemplo básico (ajuste conforme necessário):
+  firebase.firestore().collection('notas').get()
+    .then((snapshot) => {
+      const alunos = [];
+      
+      snapshot.forEach((doc) => {
+        const notas = doc.data();
+        const valores = Object.values(notas);
+
+        if (valores.length > 0) {
+          const soma = valores.reduce((acc, nota) => acc + nota, 0);
+          const media = soma / valores.length;
+
+          alunos.push({ matricula: doc.id, media: media });
+        }
+      });
+
+      // Ordena por média (decrescente) e exibe o ranking
+      alunos.sort((a, b) => b.media - a.media);
+
+      // Atualiza o ranking na tela
+      const rankingElement = document.getElementById('ranking');
+      rankingElement.innerHTML = '';
+
+      alunos.forEach((aluno, index) => {
+        rankingElement.innerHTML += `<p>${index + 1}º - Matrícula: ${aluno.matricula}, Média: ${aluno.media.toFixed(2)}</p>`;
+      });
+    })
+    .catch((error) => {
+      console.error('Erro ao atualizar o ranking:', error);
+    });
+}
+
         window.atualizarPreferencias = function () {
             const mostrarRanking = document.getElementById("mostrar-ranking").checked;
             const mensagens = mostrarRanking ? "Você deseja ser exibido no ranking?" : "Você não deseja mais aparecer no ranking?";
