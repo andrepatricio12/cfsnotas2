@@ -253,13 +253,31 @@
     }
 
     function salvarNota() {
-        const disciplina = document.getElementById('disciplina').value;
-        const nota = parseFloat(document.getElementById('nota').value);
+    const disciplina = document.getElementById('disciplina').value;
+    const nota = parseFloat(document.getElementById('nota').value);
 
-        if (nota < 0 || nota > 10 || isNaN(nota)) {
-            document.getElementById('nota-error').classList.remove('hidden');
-            return;
+    if (nota < 0 || nota > 10 || isNaN(nota)) {
+        document.getElementById('nota-error').classList.remove('hidden');
+        return;
+    }
+
+    document.getElementById('nota-error').classList.add('hidden');
+    const rank = document.getElementById('rank').checked;
+
+    db.collection('notas').doc(matriculaAtual).set({
+        disciplina: disciplina,
+        nota: nota,
+        nome: alunos[matriculaAtual],
+        rank: rank
+    }).then(() => {
+        document.getElementById('nota-success').classList.remove('hidden');
+        setTimeout(() => document.getElementById('nota-success').classList.add('hidden'), 2000);
+        carregarNotas(); // Atualizar a exibição das notas após salvar
+        if (rank) {
+            mostrarRanking(); // Atualizar o ranking se o checkbox estiver marcado
         }
+    });
+}
 
         document.getElementById('nota-error').classList.add('hidden');
         const rank = document.getElementById('rank').checked;
