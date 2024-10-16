@@ -264,26 +264,25 @@ button:active {
             });
         };
 
-        window.calcularMedia = function () {
-            getDoc(doc(db, "notas", alunoAtual)).then((docSnap) => {
-                let totalNotas = 0;
-                let quantidadeNotas = 0;
+         window.calcularMedia = function () {
+    getDoc(doc(db, "notas", alunoAtual)).then((docSnap) => {
+        if (docSnap.exists()) {
+            const notas = docSnap.data();
+            console.log("Notas:", notas); // Log das notas
+            const totalNotas = Object.values(notas).reduce((sum, nota) => sum + nota, 0);
+            console.log("Total das notas:", totalNotas); // Log do total das notas
+            const quantidadeNotas = Object.values(notas).length;
+            console.log("Quantidade de notas:", quantidadeNotas); // Log da quantidade de notas
 
-                if (docSnap.exists()) {
-                    const notas = docSnap.data();
-
-                    for (const disciplina in notas) {
-                        totalNotas += notas[disciplina];
-                        quantidadeNotas++;
-                    }
-                }
-
-                const media = quantidadeNotas > 0 ? (totalNotas / quantidadeNotas).toFixed(2) : 0;
-                document.getElementById("media").innerText = `Sua média é: ${media}`;
-            }).catch((error) => {
-                console.error("Erro ao calcular a média: ", error);
-            });
-        };
+            const media = quantidadeNotas > 0 ? (totalNotas / quantidadeNotas).toFixed(2) : 0;
+            document.getElementById("media").innerText = sua média é: ${media};
+        } else {
+            document.getElementById("media").innerText = "sua média é: -";
+        }
+    }).catch((error) => {
+        console.error("Erro ao calcular média: ", error);
+    });
+};
         
 
         window.mostrarRanking = function () {
