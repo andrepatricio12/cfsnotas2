@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 
 <head>
     <meta charset="UTF-8">
@@ -38,9 +38,6 @@
             text-align: center;
             color: #333;
         }
-
-        <button id="rankingButton" onclick="window.location.href='ranking.html'">Ver Ranking</button>
-
 
         .form-group {
             margin-bottom: 15px;
@@ -120,53 +117,22 @@
         .spacing {
             margin-top: 10px;
         }
-        /* styles.css */
-body {
-    font-family: Arial, sans-serif;
-    margin: 20px;
-}
 
-table {
-    width: 100%;
-    border-collapse: collapse;
-}
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
 
-th, td {
-    border: 1px solid #ddd;
-    padding: 8px;
-}
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+        }
 
-th {
-    background-color: #f2f2f2;
-}
-
+        th {
+            background-color: #f2f2f2;
+        }
     </style>
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ranking de Alunos</title>
-    <link rel="stylesheet" href="styles.css">
-</head>
-<body>
-    <h1>Ranking de Alunos</h1>
-    <table id="rankingTable">
-        <thead>
-            <tr>
-                <th>Nome</th>
-                <th>Média</th>
-            </tr>
-        </thead>
-        <tbody>
-            <!-- Os dados do ranking serão inseridos aqui -->
-        </tbody>
-    </table>
-    <button onclick="window.location.href='index.html'">Voltar</button>
-    <script src="ranking.js"></script>
-</body>
-</html>
-    
+
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js"></script>
@@ -192,25 +158,25 @@ th {
                 <label for="disciplina">Selecione a Disciplina:</label>
                 <select id="disciplina" onchange="atualizarNota()">
                     <option value="ADP">Administração de Pessoal (ADP)</option>
-              <option value="ALF">Administração Logística Financeira (ALF)</option>
-              <option value="AMTP">Armamento, Munição e Tiro Policial (AMTP)</option>
-              <option value="APHT">Atendimento Pré-Hospitalar Tático (APH)</option>
-              <option value="CCL">Comando Chefia e Liderança (CCL)</option>
-              <option value="DPE">Defesa Pessoal Policial (DPE)</option>
-              <option value="DAD">Direito Administrativo Disciplinar (DAD)</option>
-              <option value="DPPM">Direito Penal Militar, Processual Penal Militar (DPPM)</option>
-              <option value="EFPM">Educação Física Policial Militar (EFPM)</option>
-              <option value="DDPH">Ética e Direitos Humanos na Atividade Policial (DDPH)</option>
-              <option value="GAO">Gerenciamento de Atividade Operacional (GAO)</option>
-              <option value="INP">Inteligência Policial (INP)</option>
-              <option value="LET">Legislação de Trânsito e Operações (LET)</option>
-              <option value="LEI">Legislação Institucional (LEI)</option>
-              <option value="OUD">Ordem Unida (OUD)</option>
-              <option value="PDP">Polícia de Proximidade (PDP)</option>
-              <option value="POS">Polícia Ostensiva (POS)</option>
-              <option value="SCOH">Sistema de Comando e Operações de Ajuda Humanitária (SCOH)</option>
-              <option value="TPO">Técnicas E Operações De Polícia Militar (TPO)</option>
-              <option value="TELA">Tópicos Especiais de Legislação Aplicáveis à Atividade (TELA)</option>
+                    <option value="ALF">Administração Logística Financeira (ALF)</option>
+                    <option value="AMTP">Armamento, Munição e Tiro Policial (AMTP)</option>
+                    <option value="APHT">Atendimento Pré-Hospitalar Tático (APH)</option>
+                    <option value="CCL">Comando Chefia e Liderança (CCL)</option>
+                    <option value="DPE">Defesa Pessoal Policial (DPE)</option>
+                    <option value="DAD">Direito Administrativo Disciplinar (DAD)</option>
+                    <option value="DPPM">Direito Penal Militar, Processual Penal Militar (DPPM)</option>
+                    <option value="EFPM">Educação Física Policial Militar (EFPM)</option>
+                    <option value="DDPH">Ética e Direitos Humanos na Atividade Policial (DDPH)</option>
+                    <option value="GAO">Gerenciamento de Atividade Operacional (GAO)</option>
+                    <option value="INP">Inteligência Policial (INP)</option>
+                    <option value="LET">Legislação de Trânsito e Operações (LET)</option>
+                    <option value="LEI">Legislação Institucional (LEI)</option>
+                    <option value="OUD">Ordem Unida (OUD)</option>
+                    <option value="PDP">Polícia de Proximidade (PDP)</option>
+                    <option value="POS">Polícia Ostensiva (POS)</option>
+                    <option value="SCOH">Sistema de Comando e Operações de Ajuda Humanitária (SCOH)</option>
+                    <option value="TPO">Técnicas E Operações De Polícia Militar (TPO)</option>
+                    <option value="TELA">Tópicos Especiais de Legislação Aplicáveis à Atividade (TELA)</option>
                 </select>
             </div>
 
@@ -248,12 +214,11 @@ th {
         </div>
 
         <div id="loading" class="hidden">Salvando...</div>
-
     </div>
 
     <script>
         const alunos = {
-             "9287027": "ELIENAR FARIAS",
+        "9287027": "ELIENAR FARIAS",
         "9306820": "NAZARETH LIMA GOEDERT",
         "9303219": "CARLA DE LUCA LINHARES",
         "9287124": "LEANDRO GHELLERE",
@@ -288,11 +253,11 @@ th {
         "3847446": "DAIANA PEREIRA",
         "9329056": "VINICIUS JOVELINO COSTA",
         "9339477": "DANIEL SERAFIM PESSI"
+            
         };
 
-        // Configuração do Firebase
-
-const firebaseConfig = {
+        // Inicializar Firebase
+       const firebaseConfig = {
   apiKey: "AIzaSyDEvCDdX0LGjDMFpyxljj-4JTjZKtgooDM",
   authDomain: "notas-cfs.firebaseapp.com",
   projectId: "notas-cfs",
@@ -300,28 +265,32 @@ const firebaseConfig = {
   messagingSenderId: "91086463856",
   appId: "1:91086463856:web:6a16fb0b3abe04bbc425b5"
 };
+        };
 
-const app = firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore(app);
-        
-        let matriculaAtual = null;
+        const app = firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore(app);
+        let alunoMatricula = null;
+        let notas = {};
+        let mediaCalculada = null;
 
         function login() {
-            const matricula = document.getElementById('matricula').value;
-            if (alunos[matricula]) {
-                matriculaAtual = matricula;
-                document.getElementById('aluno-nome').textContent = alunos[matricula];
-                document.getElementById('login-form').classList.add('hidden');
-                document.getElementById('notas-form').classList.remove('hidden');
+            const matriculaInput = document.getElementById("matricula").value;
+            if (alunos[matriculaInput]) {
+                alunoMatricula = matriculaInput;
+                document.getElementById("aluno-nome").innerText = alunos[matriculaInput];
+                document.getElementById("login-form").classList.add("hidden");
+                document.getElementById("notas-form").classList.remove("hidden");
                 carregarNotas();
             } else {
-                document.getElementById('login-error').classList.remove('hidden');
+                document.getElementById("login-error").classList.remove("hidden");
             }
         }
 
-        function atualizarNota() {
+         function atualizarNota() {
             const disciplina = document.getElementById('disciplina').value;
+            const disciplina = document.getElementById("disciplina").value;
             document.getElementById('nota').value = ''; // Limpa o campo de nota ao selecionar nova disciplina
+            document.getElementById("nota").value = notas[disciplina] || "";
             carregarNotaSalva(disciplina);
         }
 
@@ -335,36 +304,113 @@ const db = firebase.firestore(app);
         }
 
         function toggleRankingButton() {
-            const checkbox = document.getElementById('rank');
-            document.getElementById('ranking-btn').disabled = !checkbox.checked;
+            const isChecked = document.getElementById("rank").checked;
+            document.getElementById("ranking-btn").disabled = !isChecked;
+        }
+
+         async function mostrarRanking() {
+           const rankingContainer = document.createElement('div');
+             const querySnapshot = await db.collection('notas').get();
+        
+            const rankings = [];
+        
+
+        async function salvarNota() {
+            const disciplina = document.getElementById("disciplina").value;
+            const nota = parseFloat(document.getElementById("nota").value);
+
+            if (nota < 1 || nota > 10) {
+                document.getElementById("nota-error").classList.remove("hidden");
+                return;
+            }
+
+            document.getElementById("nota-error").classList.add("hidden");
+            document.getElementById("loading").classList.remove("hidden");
+            document.getElementById("nota-success").classList.add("hidden");
+
+            try {
+                await db.collection("notas").doc(alunoMatricula).set({
+                    [disciplina]: nota
+                }, { merge: true });
+
+                notas[disciplina] = nota; // Atualiza a nota no objeto local
+                document.getElementById("nota-success").classList.remove("hidden");
+            } catch (error) {
+                console.error("Erro ao salvar nota: ", error);
+            } finally {
+                document.getElementById("loading").classList.add("hidden");
+                atualizarNota();
+            }
+        }
+
+        async function carregarNotas() {
+            document.getElementById("loading").classList.remove("hidden");
+            const notasContainer = document.getElementById("notas-container");
+            notasContainer.innerHTML = "";
+            try {
+                const doc = await db.collection("notas").doc(alunoMatricula).get();
+                if (doc.exists) {
+                    notas = doc.data();
+                    for (const [disciplina, nota] of Object.entries(notas)) {
+                        notasContainer.innerHTML += `<p>${disciplina}: ${nota}</p>`;
+                    }
+                } else {
+                    notasContainer.innerHTML = "<p>Nenhuma nota encontrada.</p>";
+                }
+            } catch (error) {
+                console.error("Erro ao carregar notas: ", error);
+            } finally {
+                document.getElementById("loading").classList.add("hidden");
+            }
         }
 
         async function mostrarRanking() {
-            const rankingContainer = document.createElement('div');
-            const querySnapshot = await db.collection('notas').get();
-            const rankings = [];
+            const rankingContainer = document.getElementById("notas-container");
+            rankingContainer.innerHTML = "<h3>Ranking de Notas</h3>";
+            const ranking = [];
 
-            querySnapshot.forEach(doc => {
-                const data = doc.data();
-                rankings.push({ disciplina: doc.id.split('_')[1], nota: data.nota });
-            });
+            try {
+                const snapshot = await db.collection("notas").get();
+                snapshot.forEach(doc => {
+                    const alunoData = doc.data();
+                    const alunoNome = alunos[doc.id];
+                    const mediaAluno = calcularMedia(alunoData);
 
-            // Ordenar pelo valor da nota
-            rankings.sort((a, b) => b.nota - a.nota);
+                    if (alunoNome && mediaAluno) {
+                        ranking.push({ nome: alunoNome, media: mediaAluno });
+                    }
+                });
 
-            rankingContainer.innerHTML = '<h2>Ranking</h2>';
-            rankings.forEach(ranking => {
-                rankingContainer.innerHTML += `<p>${ranking.disciplina}: ${ranking.nota}</p>`;
-            });
+                ranking.sort((a, b) => b.media - a.media);
 
-            document.body.appendChild(rankingContainer);
+                ranking.forEach(aluno => {
+                    rankingContainer.innerHTML += `<p>${aluno.nome}: ${aluno.media.toFixed(2)}</p>`;
+                });
+            } catch (error) {
+                console.error("Erro ao carregar ranking: ", error);
+            }
         }
 
-        async function calcularMedia() {
+        function calcularMedia(notas) {
+            const totalNotas = Object.values(notas).reduce((acc, nota) => acc + nota, 0);
+            const quantidadeNotas = Object.keys(notas).length;
+            return quantidadeNotas > 0 ? totalNotas / quantidadeNotas : 0;
+        }
+
+        function calcularMedia() {
+            const media = calcularMedia(notas);
+            alert(`A média do aluno ${alunoMatricula} é: ${media.toFixed(2)}`);
+
+            async function calcularMedia() {
+        function calcularMedia() {
             const querySnapshot = await db.collection('notas').where('matricula',
+            const media = calcularMedia(notas);
  '==', matriculaAtual).get();
+            alert(`A média do aluno ${alunoMatricula} é: ${media.toFixed(2)}`);
         let totalNotas = 0;
+        }
         let contador = 0;
+    </script>
         querySnapshot.forEach(doc => {
             const data = doc.data();
             totalNotas += data.nota;
@@ -404,7 +450,9 @@ async function loadRanking() {
 // Carregar o ranking quando a página for carregada
 window.onload = loadRanking;
 
-</script>
+            
+        }
+    </script>
 </body>
-</html>
 
+</html>
