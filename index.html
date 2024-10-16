@@ -117,6 +117,11 @@
         .spacing {
             margin-top: 10px;
         }
+        @media (max-width: 600px) {
+    .container {
+        padding: 10px;
+    }
+
     </style>
 
     <!-- Firebase SDK -->
@@ -249,7 +254,6 @@
   storageBucket: "notas-cfs.appspot.com",
   messagingSenderId: "91086463856",
   appId: "1:91086463856:web:6a16fb0b3abe04bbc425b5"
-};
         };
 
         // Inicializa o Firebase
@@ -310,15 +314,15 @@
         }
 
         async function carregarNotas() {
-    const querySnapshot = await db.collection('notas').get(); // Busca todas as notas
+    const querySnapshot = await db.collection('notas').get();
     const notasContainer = document.getElementById('notas-container');
     notasContainer.innerHTML = '';
     querySnapshot.forEach((doc) => {
         const [matricula, disciplina] = doc.id.split('_');
-        if (matricula === matriculaAtual) { // Filtra pelo aluno atual
+        if (matricula === matriculaAtual) { // Verifica se a matrícula do documento é a atual
             notasContainer.innerHTML += `<p>${disciplina}: ${doc.data().nota}</p>`;
         }
-    });
+};
 ;
         }
 
