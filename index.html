@@ -5,14 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistema de Notas - Curso de Sargentos</title>
     <style>
-        /* Seus estilos permanecem aqui... */
         #loading {
             text-align: center;
             font-weight: bold;
             color: #007bff;
             margin-top: 10px;
         }
-
         body {
             font-family: Arial, sans-serif;
             margin: 0;
@@ -98,19 +96,26 @@
         .button-group button {
             width: 48%;
         }
-        /* Animação ao clicar nos botões */
+         /* Animação ao clicar nos botões */
 button:active {
   transform: scale(0.95);
   transition: transform 0.1s;
 }
 
+        #loading {
+            text-align: center;
+            font-weight: bold;
+            color: #007bff;
+            margin-top: 10px;
+        }
+
+        /* Animação ao clicar nos botões */
         button:active {
             transform: scale(0.95);
             transition: transform 0.1s;
         }
     </style>
 
-    <!-- Importar as bibliotecas do Firebase -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
         import { getFirestore, doc, setDoc, getDoc, updateDoc, deleteField } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
@@ -128,42 +133,41 @@ button:active {
         const db = getFirestore(app);
 
         const alunos = {
-            // Seu mapeamento de alunos permanece aqui...
             "9287027": "ELIENAR FARIAS",
             "9306820": "NAZARETH LIMA GOEDERT",
             "9303219": "CARLA DE LUCA LINHARES",
-           "9287124": "LEANDRO GHELLERE",
-        "9300350": "TIAGO LUIZ CLEMES",
-        "9288350": "MARCOS AURÉLIO LUIZ DUARTE",
-        "9320547": "ANDRÉ LUIS PATRÍCIO",
-        "9288520": "MATHEUS ROSSI LONGO",
-        "9320555": "RICARDO MESQUITA DE MEDEIROS",
-        "9320601": "JOSÉ RENATO COSTA",
-        "9307800": "JEAN CARLOS PEREIRA MACHADO",
-        "9300600": "AILTON BOZELLO DE BITTENCOURT",
-        "9300341": "TIAGO SANTOS DE SOUZA",
-        "9316230": "RODRIGO SILVA DOS SANTOS",
-        "9308652": "ANDERSON ROVEDA",
-        "9333967": "MAYARA ZILI DA SILVA",
-        "9316221": "MARCOS ADRIANO DAL PONT",
-        "9333860": "SARAH WAGNER ZANATTA",
-        "9329730": "FELIPE LUMERTZ DA SILVA",
-        "9316116": "JAQUES ROCHA DE SOUZA",
-        "9329340": "ÉZIO FRANCISCO FERNANDES",
-        "9329382": "EDERSON FRANÇA DE MACHADO",
-        "6606032": "ROBSON GOMES HAHN",
-        "9339558": "EVANDRO ANASTÁCIO TEIXEIRA",
-        "9339329": "TIAGO ANSELMO VALNIER",
-        "9287205": "ALEXANDRE DA LUZ",
-        "9307745": "WANDERSON RICARDO DE CARVALHO",
-        "9316159": "ANDERSON DOS SANTOS ROSA",
-        "9320563": "IURI CÚRCIO CARRER",
-        "6718680": "LAURO TOGNON NETO",
-        "9330097": "PATRICK CARDOSO DE RAMOS",
-        "9330356": "BRUNA DA SILVA PIRES",
-        "3847446": "DAIANA PEREIRA",
-        "9329056": "VINICIUS JOVELINO COSTA",
-        "9339477": "DANIEL SERAFIM PESSI"
+            "9287124": "LEANDRO GHELLERE",
+            "9300350": "TIAGO LUIZ CLEMES",
+            "9288350": "MARCOS AURÉLIO LUIZ DUARTE",
+            "9320547": "ANDRÉ LUIS PATRÍCIO",
+            "9288520": "MATHEUS ROSSI LONGO",
+            "9320555": "RICARDO MESQUITA DE MEDEIROS",
+            "9320601": "JOSÉ RENATO COSTA",
+            "9307800": "JEAN CARLOS PEREIRA MACHADO",
+            "9300600": "AILTON BOZELLO DE BITTENCOURT",
+            "9300341": "TIAGO SANTOS DE SOUZA",
+            "9316230": "RODRIGO SILVA DOS SANTOS",
+            "9308652": "ANDERSON ROVEDA",
+            "9333967": "MAYARA ZILI DA SILVA",
+            "9316221": "MARCOS ADRIANO DAL PONT",
+            "9333860": "SARAH WAGNER ZANATTA",
+            "9329730": "FELIPE LUMERTZ DA SILVA",
+            "9316116": "JAQUES ROCHA DE SOUZA",
+            "9329340": "ÉZIO FRANCISCO FERNANDES",
+            "9329382": "EDERSON FRANÇA DE MACHADO",
+            "6606032": "ROBSON GOMES HAHN",
+            "9339558": "EVANDRO ANASTÁCIO TEIXEIRA",
+            "9339329": "TIAGO ANSELMO VALNIER",
+            "9287205": "ALEXANDRE DA LUZ",
+            "9307745": "WANDERSON RICARDO DE CARVALHO",
+            "9316159": "ANDERSON DOS SANTOS ROSA",
+            "9320563": "IURI CÚRCIO CARRER",
+            "6718680": "LAURO TOGNON NETO",
+            "9330097": "PATRICK CARDOSO DE RAMOS",
+            "9330356": "BRUNA DA SILVA PIRES",
+            "3847446": "DAIANA PEREIRA",
+            "9329056": "VINICIUS JOVELINO COSTA",
+            "9339477": "DANIEL SERAFIM PESSI"
         };
 
         let alunoAtual = null;
@@ -181,7 +185,7 @@ button:active {
             } else {
                 document.getElementById("login-error").classList.remove("hidden");
             }
-        }
+        };
 
         window.salvarNota = function () {
             const disciplina = document.getElementById("disciplina").value;
@@ -206,7 +210,7 @@ button:active {
             }).catch((error) => {
                 console.error("Erro ao salvar nota: ", error);
             });
-        }
+        };
 
         function toggleSalvarNotaButton() {
             const disciplina = document.getElementById("disciplina").value;
@@ -244,67 +248,83 @@ button:active {
 
                 if (docSnap.exists()) {
                     const notas = docSnap.data();
-                    for (const [disciplina, nota] of Object.entries(notas)) {
-                        notasDisplay += `<p>${disciplina}: ${nota.toFixed(2)} <button onclick="excluirNota('${alunoAtual}', '${disciplina}')">Excluir</button></p>`;
+
+                    for (const disciplina in notas) {
+                        const nota = notas[disciplina];
+                        notasDisplay += `<div>${disciplina}: ${nota} <button onclick="excluirNota('${alunoAtual}', '${disciplina}')">Excluir</button></div>`;
+                        quantidadeNotas++;
                         totalNotas += nota;
+                    }
+                }
+
+                document.getElementById("notas").innerHTML = notasDisplay || "Nenhuma nota encontrada.";
+                document.getElementById("quantidade-notas").innerText = `Total de Notas: ${quantidadeNotas}`;
+            }).catch((error) => {
+                console.error("Erro ao carregar notas: ", error);
+            });
+        };
+
+        window.calcularMedia = function () {
+            getDoc(doc(db, "notas", alunoAtual)).then((docSnap) => {
+                let totalNotas = 0;
+                let quantidadeNotas = 0;
+
+                if (docSnap.exists()) {
+                    const notas = docSnap.data();
+
+                    for (const disciplina in notas) {
+                        totalNotas += notas[disciplina];
                         quantidadeNotas++;
                     }
                 }
 
-                document.getElementById("notas-salvas").innerHTML = notasDisplay;
-                document.getElementById("notas-vazias").classList.toggle("hidden", notasDisplay.length > 0);
-
-                if (quantidadeNotas > 0) {
-                    calcularMedia(totalNotas, quantidadeNotas);
-            
-                } else {
-                    document.getElementById("media").innerText = "sua média é: -";
-                }
+                const media = quantidadeNotas > 0 ? (totalNotas / quantidadeNotas).toFixed(2) : 0;
+                document.getElementById("media").innerText = `Sua média é: ${media}`;
             }).catch((error) => {
-                console.error("Erro ao carregar notas: ", error);
+                console.error("Erro ao calcular a média: ", error);
             });
-        }
+        };
+        
 
-       window.calcularMedia = function () {
-    getDoc(doc(db, "notas", alunoAtual)).then((docSnap) => {
-        if (docSnap.exists()) {
-            const notas = docSnap.data();
-            console.log("Notas:", notas); // Log das notas
-            const totalNotas = Object.values(notas).reduce((sum, nota) => sum + nota, 0);
-            console.log("Total das notas:", totalNotas); // Log do total das notas
-            const quantidadeNotas = Object.values(notas).length;
-            console.log("Quantidade de notas:", quantidadeNotas); // Log da quantidade de notas
+        window.mostrarRanking = function () {
+            const rankingCheckbox = document.getElementById("ranking");
+            const rankingButton = document.getElementById("visualizarRanking");
+            rankingButton.disabled = !rankingCheckbox.checked;
 
-            const media = quantidadeNotas > 0 ? (totalNotas / quantidadeNotas).toFixed(2) : 0;
-            document.getElementById("media").innerText = `sua média é: ${media}`;
-        } else {
-            document.getElementById("media").innerText = "sua média é: -";
-        }
-    }).catch((error) => {
-        console.error("Erro ao calcular média: ", error);
-    });
-}
+            if (rankingCheckbox.checked) {
+                alert("Você optou por ser incluído no ranking.");
+                // Aqui você pode implementar a lógica para armazenar essa preferência no Firestore
+            } else {
+                alert("Você optou por não ser incluído no ranking.");
+                // Aqui você pode implementar a lógica para armazenar essa preferência no Firestore
+            }
+        };
 
-        }
+        window.visualizarRanking = function () {
+            // Adicione a lógica para visualizar o ranking aqui
+            alert("Ranking: (Adicionar lógica para mostrar o ranking aqui)");
+        };
     </script>
 </head>
 <body>
     <div class="container">
         <h1>Sistema de Notas</h1>
+
         <div id="login-form">
             <div class="form-group">
                 <label for="matricula">Matrícula:</label>
-                <input type="text" id="matricula">
-                <span id="login-error" class="error">Matrícula inválida.</span>
+                <input type="text" id="matricula" required>
+                <div id="login-error" class="error">Matrícula inválida. Tente novamente.</div>
             </div>
-            <button onclick="login()">Login</button>
+            <button onclick="login()">Entrar</button>
         </div>
+
         <div id="notas-form" class="hidden">
             <h2 id="aluno-nome"></h2>
             <div class="form-group">
                 <label for="disciplina">Disciplina:</label>
-            <select id="disciplina" onchange="atualizarNota()">
-                <option value="ADP">Administração de Pessoal (ADP)</option>
+                <select id="disciplina">
+                    <option value="ADP">Administração de Pessoal (ADP)</option>
                 <option value="ALF">Administração Logística Financeira (ALF)</option>
                 <option value="AMTP">Armamento, Munição e Tiro Policial (AMTP)</option>
                 <option value="APHT">Atendimento Pré-Hospitalar Tático (APH)</option>
@@ -328,22 +348,27 @@ button:active {
             </div>
             <div class="form-group">
                 <label for="nota">Nota:</label>
-                <input type="number" id="nota" step="0.01" min="0" max="10" oninput="toggleSalvarNotaButton()">
-                <span id="nota-error" class="error">Nota deve ser entre 0 e 10.</span>
-                <span id="nota-success" class="error">Nota salva com sucesso!</span>
+                <input type="number" id="nota" min="0" max="10" step="0.01">
+                <div id="nota-error" class="error">Nota deve estar entre 0 e 10.</div>
+                <div id="nota-success" class="error" style="color: green;">Nota salva com sucesso!</div>
             </div>
-            <div id="loading" class="hidden">Carregando...</div>
-            <div id="notas-salvas"></div>
-            <div id="notas-vazias" class="hidden">Nenhuma nota salva.</div>
-            <p id="media">sua média é: -</p>
+
             <div class="button-group">
-                <button id="salvarNota" onclick="salvarNota()" disabled>Salvar Nota</button>
-                <button onclick="atualizarPreferencias()">Salvar Preferências</button>
+                <button id="salvarNota" onclick="salvarNota()">Salvar Nota</button>
+                <button id="visualizarRanking" onclick="visualizarRanking()" disabled>Visualizar Ranking</button>
             </div>
+
             <div class="form-group">
-                <input type="checkbox" id="ranking" onchange="atualizarPreferencias()">
-                <label for="ranking">Mostrar Ranking</label>
+                <label>
+                    <input type="checkbox" id="ranking" onclick="mostrarRanking()"> Quero ser incluído no ranking
+                </label>
             </div>
+
+            <div id="loading" class="hidden">Carregando...</div>
+
+            <h3 id="quantidade-notas">Total de Notas: 0</h3>
+            <div id="notas"></div>
+            <h3 id="media">Sua média é: 0</h3>
         </div>
     </div>
 </body>
