@@ -257,7 +257,7 @@
   storageBucket: "notas-cfs.appspot.com",
   messagingSenderId: "91086463856",
   appId: "1:91086463856:web:6a16fb0b3abe04bbc425b5"
-};
+}
         };
 
         const app = firebase.initializeApp(firebaseConfig);
@@ -342,11 +342,42 @@
         }
 
         async function mostrarRanking() {
-            const rankingContainer = document.createElement('div');
-            rankingContainer.id = 'ranking-container';
-            document.body.appendChild(rankingContainer);
+    const rankingContainer = document.createElement('div');
+    rankingContainer.id = 'ranking-container';
+    rankingContainer.style.position = 'fixed'; // Posiciona o container
+    rankingContainer.style.top = '50%';
+    rankingContainer.style.left = '50%';
+    rankingContainer.style.transform = 'translate(-50%, -50%)';
+    rankingContainer.style.backgroundColor = 'white'; // Adiciona fundo
+    rankingContainer.style.padding = '20px';
+    rankingContainer.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.1)';
+    
+    const ranking = [];
 
-            const ranking = [];
+    const querySnapshot = await db.collection("notas")
+        .where("aluno", "in", Object.keys(alunos))
+        .get();
+
+    querySnapshot.forEach(doc => {
+        const data = doc.data();
+        ranking.push({ disciplina: data.disciplina, nota: data.nota, aluno: data.aluno });
+    });
+
+    ranking.sort((a, b) => b.nota - a.nota);
+
+    rankingContainer.innerHTML = "<h2>Ranking de Notas</h2>";
+    ranking.forEach((item, index) => {
+        rankingContainer.innerHTML += `<div>${index + 1}. ${alunos[item.aluno]} - ${item.disciplina}: ${item.nota}</div>`;
+    });
+
+    // Botão para fechar
+    const closeButton = document.createElement('button');
+    closeButton.innerText = 'Fechar';
+    closeButton.onclick = () => document.body.removeChild(rankingContainer);
+    rankingContainer.appendChild(closeButton);
+
+    document.body.appendChild(rankingContainer);
+}
 
             const querySnapshot = await db.collection("notas")
                 .where("aluno", "in", Object.keys(alunos))
