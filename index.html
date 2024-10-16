@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistema de Notas - Curso de Sargentos</title>
-
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -39,9 +38,6 @@
             border-radius: 5px;
             border: 1px solid #ddd;
             width: 100%;
-        }
-        #matricula {
-            width: 50%; /* Campo de matrícula ajustado */
         }
         button {
             padding: 10px;
@@ -165,7 +161,7 @@
 
 <script>
     const alunos = {
-         "9287027": "ELIENAR FARIAS",
+       "9287027": "ELIENAR FARIAS",
             "9306820": "NAZARETH LIMA GOEDERT",
             "9303219": "CARLA DE LUCA LINHARES",
            "9287124": "LEANDRO GHELLERE",
@@ -206,6 +202,9 @@
     let notas = {};
     let rankingOptIn = false;
 
+    // Inicializar Firestore
+    const db = firebase.firestore();
+
     // Função de login
     function login() {
         const matricula = document.getElementById('matricula').value;
@@ -226,24 +225,24 @@
     function atualizarCampoNota() {
         const disciplina = document.getElementById('disciplina').value;
         const notaInput = document.getElementById('nota');
-        if (notas[disciplina]) {
-            notaInput.value = notas[disciplina];
-        } else {
-            notaInput.value = '';
-        }
+        notaInput.value = notas[disciplina] || '';
     }
 
-    // Função para salvar a nota
+    // Função para salvar a nota no Firestore
     function salvarNota() {
         const disciplina = document.getElementById('disciplina').value;
         const nota = parseFloat(document.getElementById('nota').value);
 
         if (nota >= 0 && nota <= 10) {
             notas[disciplina] = nota;
-            document.getElementById('nota-success').classList.remove('hidden');
-            document.getElementById('nota-error').classList.add('hidden');
-            atualizarNotas();
-            atualizarMedia();
+            db.collection('notas').doc(matriculaAtual).set(notas)
+                .then(() => {
+                    document.getElementById('nota-success').classList.remove('hidden');
+                    document.getElementById('nota-error').classList.add('hidden');
+                    atualizarNotas();
+                    atualizarMedia();
+                })
+                .catch(error => console.error('Erro ao salvar nota:', error));
         } else {
             document.getElementById('nota-success').classList.add('hidden');
             document.getElementById('nota-error').classList.remove('hidden');
@@ -254,8 +253,12 @@
     function excluirNota() {
         const disciplina = document.getElementById('disciplina').value;
         delete notas[disciplina];
-        atualizarNotas();
-        atualizarMedia();
+        db.collection('notas').doc(matriculaAtual).set(notas)
+            .then(() => {
+                atualizarNotas();
+                atualizarMedia();
+            })
+            .catch(error => console.error('Erro ao excluir nota:', error));
     }
 
     // Função para atualizar as notas exibidas
@@ -268,7 +271,7 @@
             notasContainer.innerHTML = 'Nenhuma nota salva.';
         } else {
             disciplinas.forEach((disciplina, index) => {
-                notasContainer.innerHTML += `Nota ${index + 1}: Disciplina: ${disciplina}, Nota: ${notas[disciplina].toFixed(2)}<br>`;
+                notasContainer.innerHTML += `Disciplina: ${disciplina}, Nota: ${notas[disciplina].toFixed(2)}<br>`;
             });
         }
     }
@@ -298,11 +301,9 @@
         if (rankingOptIn) {
             rankingConfirmacao.classList.remove('hidden');
             rankingButton.disabled = false;
-            rankingButton.style.backgroundColor = '#007bff'; // Ativar cor do botão
         } else {
             rankingConfirmacao.classList.add('hidden');
             rankingButton.disabled = true;
-            rankingButton.style.backgroundColor = '#ccc'; // Desativar cor do botão
         }
     }
 
@@ -311,24 +312,57 @@
         const rankingContainer = document.getElementById('ranking-container');
         const rankingList = document.getElementById('ranking-list');
 
-        const alunosRankeados = [
-            { nome: 'ELIENAR FARIAS', media: 9.5 }, // Exemplo de alunos no ranking
-            { nome: 'NAZARETH LIMA', media: 8.7 }
-        ];
+        db.collection('notas').get().then((querySnapshot) => {
+            const alunosRankeados = [];
+            querySnapshot.forEach((doc) => {
+                const alunoNotas = doc.data();
+                const media = calcularMedia(alunoNotas);
+                const nomeAluno = alunos[doc.id];
+                if (rankingOptIn) {
+                    alunosRankeados.push({ nome: nomeAluno, media });
+                }
+            });
 
-        rankingList.innerHTML = '';
-        alunosRankeados.forEach((aluno, index) => {
-            rankingList.innerHTML += `${index + 1}. ${aluno.nome}: Média ${aluno.media.toFixed(2)}<br>`;
-        });
+            // Ordenar por média
+            alunosRankeados.sort((a, b) => b.media - a.media);
+            rankingList.innerHTML = '';
+            alunosRankeados.forEach((aluno, index) => {
+                rankingList.innerHTML += `${index + 1}. ${aluno.nome}: Média ${aluno.media.toFixed(2)}<br>`;
+            });
 
-        rankingContainer.classList.remove('hidden');
+            rankingContainer.classList.remove('hidden');
+        }).catch(error => console.error('Erro ao buscar ranking:', error));
+    }
+
+    // Função para calcular média
+    function calcularMedia(alunoNotas) {
+        const disciplinas = Object.keys(alunoNotas);
+        if (disciplinas.length === 0) return 0;
+        const soma = disciplinas.reduce((total, disciplina) => total + alunoNotas[disciplina], 0);
+        return soma / disciplinas.length;
     }
 
     // Função para ocultar o ranking
     function ocultarRanking() {
         document.getElementById('ranking-container').classList.add('hidden');
     }
+
+    // Configuração do Firebase
+    const firebaseConfig = {
+  apiKey: "AIzaSyDEvCDdX0LGjDMFpyxljj-4JTjZKtgooDM",
+  authDomain: "notas-cfs.firebaseapp.com",
+  projectId: "notas-cfs",
+  storageBucket: "notas-cfs.appspot.com",
+  messagingSenderId: "91086463856",
+  appId: "1:91086463856:web:6a16fb0b3abe04bbc425b5"
+};
+
+    // Inicializa o Firebase
+    firebase.initializeApp(firebaseConfig);
 </script>
 
+<!-- Adicione a biblioteca do Firebase antes de fechar o body -->
+<script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore.js"></script>
 </body>
 </html>
