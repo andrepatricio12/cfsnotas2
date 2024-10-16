@@ -197,6 +197,32 @@
         "9339477": "DANIEL SERAFIM PESSI"
     };
 
+    function login() {
+    const matriculaInput = document.getElementById("matricula");
+    const matricula = matriculaInput.value;
+
+    if (alunos[matricula]) {
+        alunoAtual = matricula;
+        localStorage.setItem('alunoAtual', matricula); // Armazena no localStorage
+        document.getElementById("aluno-nome").innerText = alunos[matricula];
+        document.getElementById("login-form").classList.add("hidden");
+        document.getElementById("notas-form").classList.remove("hidden");
+    } else {
+        document.getElementById("login-error").classList.remove("hidden");
+    }
+}
+
+window.onload = function() {
+    const alunoLogado = localStorage.getItem('alunoAtual');
+    if (alunoLogado && alunos[alunoLogado]) {
+        alunoAtual = alunoLogado;
+        document.getElementById("aluno-nome").innerText = alunos[alunoLogado];
+        document.getElementById("login-form").classList.add("hidden");
+        document.getElementById("notas-form").classList.remove("hidden");
+    }
+}
+
+
     const notas = {};
     let alunoAtual = null;
 
@@ -299,12 +325,6 @@ async function atualizarNota() {
         console.error("Erro ao buscar notas: ", error);
     }
 }
-
-
-
-        }
-
-        alert(notasStr);
     }
 
     async function atualizarNota() {
@@ -357,9 +377,10 @@ async function atualizarNota() {
         querySnapshot.forEach((doc) => {
             const disciplinas = doc.data();
             const media = calcularMediaAluno(disciplinas);
+            const alunoId = doc.id;
 
-            if (doc.id === alunoAtual && document.getElementById("rank").checked) {
-                ranking.push({ aluno: alunos[doc.id], media });
+            if (document.getElementById("rank").checked && alunos[alunoId]) {
+                ranking.push({ aluno: alunos[alunoId], media });
             }
         });
 
@@ -378,14 +399,17 @@ async function atualizarNota() {
 
     function calcularMedia() {
     const disciplinas = notas[alunoAtual];
-    if (!disciplinas || Object.keys(disciplinas).length === 0) {
+    if (!disciplinas) {
         alert("Nenhuma nota salva para calcular a média.");
         return;
     }
 
     const media = calcularMediaAluno(disciplinas);
-    alert(`A média do aluno ${alunos[alunoAtual]} é: ${media.toFixed(2)}`);
+    const mediaDisplay = document.createElement('p');
+    mediaDisplay.innerText = `A média do aluno ${alunos[alunoAtual]} é: ${media.toFixed(2)}`;
+    document.querySelector('.container').appendChild(mediaDisplay);
 }
+
 
 function calcularMediaAluno(disciplinas) {
     const total = Object.values(disciplinas).reduce((acc, nota) => acc + nota, 0);
