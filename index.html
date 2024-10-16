@@ -391,25 +391,56 @@
             }
         }
 
-        function calcularMedia(notas) {
-            const totalNotas = Object.values(notas).reduce((acc, nota) => acc + nota, 0);
-            const quantidadeNotas = Object.keys(notas).length;
-            return quantidadeNotas > 0 ? totalNotas / quantidadeNotas : 0;
-        }
+       // Função para calcular a média
+async function calcularMedia(matriculaAtual) {
+    // Pega as notas do Firestore baseado na matrícula
+    const querySnapshot = await db.collection('notas').where('matricula', '==', matriculaAtual).get();
+    
+    let totalNotas = 0;
+    let contador = 0;
+    
+    // Percorre os documentos (notas) e soma as notas
+    querySnapshot.forEach(doc => {
+        const data = doc.data();
+        totalNotas += data.nota;
+        contador++;
+    });
+    
+    // Calcula a média, se houver notas
+    const media = contador > 0 ? (totalNotas / contador).toFixed(2) : 0;
+    
+    alert(`A média do aluno ${matriculaAtual} é: ${media}`);
+}
 
-        function calcularMedia() {
-            const media = calcularMedia(notas);
-            alert(`A média do aluno ${alunoMatricula} é: ${media.toFixed(2)}`);
+// Função para carregar o ranking
+const db = firebase.firestore();
 
-            async function calcularMedia() {
-        function calcularMedia() {
-            const querySnapshot = await db.collection('notas').where('matricula',
-            const media = calcularMedia(notas);
- '==', matriculaAtual).get();
-            alert(`A média do aluno ${alunoMatricula} é: ${media.toFixed(2)}`);
-        let totalNotas = 0;
-        }
-        let contador = 0;
+async function loadRanking() {
+    const rankingRef = db.collection('alunos').where('optoRanking', '==', true);
+    const snapshot = await rankingRef.get();
+    const rankingData = [];
+
+    snapshot.forEach(doc => {
+        const data = doc.data();
+        rankingData.push({ nome: data.nome, media: data.media });
+    });
+
+    // Ordenar os dados do ranking por média
+    rankingData.sort((a, b) => b.media - a.media);
+
+    const tableBody = document.getElementById('rankingTable').getElementsByTagName('tbody')[0];
+
+    // Popula a tabela com os dados ordenados
+    rankingData.forEach(aluno => {
+        const row = tableBody.insertRow();
+        row.insertCell(0).innerText = aluno.nome;
+        row.insertCell(1).innerText = aluno.media.toFixed(2); // Formata a média com duas casas decimais
+    });
+}
+
+// Carrega o ranking ao carregar a página
+window.onload = loadRanking;
+
     </script>
         querySnapshot.forEach(doc => {
             const data = doc.data();
