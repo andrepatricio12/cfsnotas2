@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="pt-br">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -127,7 +126,6 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js"></script>
 </head>
-
 <body>
     <div class="container">
         <h1>Sistema de Notas - Curso de Sargentos</h1>
@@ -182,6 +180,7 @@
 
             <div class="button-group">
                 <button id="salvarNotaBtn" onclick="salvarNota()">Salvar Nota</button>
+                <button id="excluirNotaBtn" onclick="excluirNota()">Excluir Nota</button>
             </div>
 
             <div class="button-group spacing">
@@ -246,30 +245,31 @@
         "9339477": "DANIEL SERAFIM PESSI"
         };
 
-        let currentMatricula = null;
-        let notas = {};
+        const notasPorAluno = {};
+        let alunoAtual = null;
 
-        // Firebase Configuration
-        const firebaseConfig = {
+       const firebaseConfig = {
   apiKey: "AIzaSyDEvCDdX0LGjDMFpyxljj-4JTjZKtgooDM",
   authDomain: "notas-cfs.firebaseapp.com",
   projectId: "notas-cfs",
   storageBucket: "notas-cfs.appspot.com",
   messagingSenderId: "91086463856",
   appId: "1:91086463856:web:6a16fb0b3abe04bbc425b5"
+}
 
-        };
-
+        // Initialize Firebase
         const app = firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
         function login() {
-            const matriculaInput = document.getElementById('matricula').value;
-            if (alunos[matriculaInput]) {
-                currentMatricula = matriculaInput;
-                document.getElementById('aluno-nome').innerText = alunos[matriculaInput];
-                document.getElementById('notas-form').classList.remove('hidden');
+            const matriculaInput = document.getElementById('matricula');
+            const matricula = matriculaInput.value;
+
+            if (alunos[matricula]) {
+                alunoAtual = matricula;
+                document.getElementById('aluno-nome').innerText = alunos[matricula];
                 document.getElementById('login-form').classList.add('hidden');
+                document.getElementById('notas-form').classList.remove('hidden');
                 carregarNotas();
             } else {
                 document.getElementById('login-error').classList.remove('hidden');
@@ -279,179 +279,115 @@
         function atualizarNota() {
             const disciplina = document.getElementById('disciplina').value;
             const notaInput = document.getElementById('nota');
-            notaInput.value = notas[`${currentMatricula}-${disciplina}`] || '';
+            const notaSalva = notasPorAluno[alunoAtual]?.[disciplina];
+
+            if (notaSalva !== undefined) {
+                notaInput.value = notaSalva;
+            } else {
+                notaInput.value = '';
+            }
         }
 
         function toggleRankingButton() {
             const rankCheckbox = document.getElementById('rank');
-            document.getElementById('ranking-btn').disabled = !rankCheckbox.checked;
+            const rankingButton = document.getElementById('ranking-btn');
+            rankingButton.disabled = !rankCheckbox.checked;
         }
 
         async function salvarNota() {
+            const notaInput = document.getElementById('nota');
             const disciplina = document.getElementById('disciplina').value;
-            const notaInput = document.getElementById('nota').value;
+            const nota = parseFloat(notaInput.value);
 
-            if (notaInput < 0 || notaInput > 10) {
-                document.getElementById('nota-error').classList.remove('hidden');
-                return;
-            }
+            if (nota >= 0 && nota <= 10) {
+                document.getElementById('loading').classList.remove('hidden');
+                const alunoNotasRef = db.collection('notas').doc(alunoAtual);
+                const alunoNotaData = await alunoNotasRef.get();
+                
+                if (!alunoNotaData.exists) {
+                    await alunoNotasRef.set({ nome: alunos[alunoAtual], notas: {} });
+                }
 
-            document.getElementById('loading').classList.remove('hidden');
-
-            try {
-                const notaRef = db.collection("notas").doc(`${currentMatricula}-${disciplina}`);
-                await notaRef.set({
-                    nota: parseFloat(notaInput),
-                    disciplina: disciplina,
-                    aluno: currentMatricula
+                await alunoNotasRef.update({
+                    [`notas.${disciplina}`]: nota
                 });
 
-                notas[`${currentMatricula}-${disciplina}`] = notaInput;
+                notasPorAluno[alunoAtual] = { ...notasPorAluno[alunoAtual], [disciplina]: nota };
+                notaInput.value = nota; // Mantém a nota no campo
                 document.getElementById('nota-success').classList.remove('hidden');
-                setTimeout(() => {
-                    document.getElementById('nota-success').classList.add('hidden');
-                }, 2000);
-            } catch (error) {
-                console.error("Erro ao salvar nota: ", error);
-            } finally {
-                document.getElementById('loading').classList.add('hidden');
+                document.getElementById('nota-error').classList.add('hidden');
+                carregarNotas();
+            } else {
+                document.getElementById('nota-error').classList.remove('hidden');
             }
+
+            document.getElementById('loading').classList.add('hidden');
+        }
+
+        async function excluirNota() {
+            const disciplina = document.getElementById('disciplina').value;
+            const alunoNotasRef = db.collection('notas').doc(alunoAtual);
+
+            await alunoNotasRef.update({
+                [`notas.${disciplina}`]: firebase.firestore.FieldValue.delete()
+            });
+
+            delete notasPorAluno[alunoAtual][disciplina]; // Remove do objeto local
+            carregarNotas(); // Atualiza a exibição
         }
 
         async function carregarNotas() {
-            const notasContainer = document.getElementById('notas-container');
-            notasContainer.innerHTML = '';
-            try {
-                const querySnapshot = await db.collection("notas")
-                    .where("aluno", "==", currentMatricula)
-                    .get();
+            const alunoNotasRef = db.collection('notas').doc(alunoAtual);
+            const alunoNotaData = await alunoNotasRef.get();
 
-                if (querySnapshot.empty) {
-                    notasContainer.innerHTML = "Nenhuma nota salva.";
-                    return;
+            if (alunoNotaData.exists) {
+                notasPorAluno[alunoAtual] = alunoNotaData.data().notas || {};
+                const notasContainer = document.getElementById('notas-container');
+                notasContainer.innerHTML = '';
+                
+                for (const [disciplina, nota] of Object.entries(notasPorAluno[alunoAtual])) {
+                    notasContainer.innerHTML += `<p>${disciplina}: ${nota}</p>`;
                 }
-
-                querySnapshot.forEach(doc => {
-                    const data = doc.data();
-                    notas[`${data.aluno}-${data.disciplina}`] = data.nota;
-                    notasContainer.innerHTML += `<div>${data.disciplina}: ${data.nota}</div>`;
-                });
-            } catch (error) {
-                console.error("Erro ao carregar notas: ", error);
+            } else {
+                document.getElementById('notas-container').innerText = 'Nenhuma nota salva.';
             }
         }
 
-        async function mostrarRanking() {
-    const rankingContainer = document.createElement('div');
-    rankingContainer.id = 'ranking-container';
-    rankingContainer.style.position = 'fixed'; // Posiciona o container
-    rankingContainer.style.top = '50%';
-    rankingContainer.style.left = '50%';
-    rankingContainer.style.transform = 'translate(-50%, -50%)';
-    rankingContainer.style.backgroundColor = 'white'; // Adiciona fundo
-    rankingContainer.style.padding = '20px';
-    rankingContainer.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.1)';
-
-            async function mostrarRanking() {
-    const rankingContainer = document.createElement('div');
-    rankingContainer.id = 'ranking-container';
-    document.body.appendChild(rankingContainer);
-
-    const ranking = [];
-
-    const querySnapshot = await db.collection("notas")
-        .where("aluno", "in", Object.keys(alunos))
-        .get();
-
-    querySnapshot.forEach(doc => {
-        const data = doc.data();
-        ranking.push({ disciplina: data.disciplina, nota: data.nota, aluno: data.aluno });
-    });
-
-    ranking.sort((a, b) => b.nota - a.nota);
-
-    rankingContainer.innerHTML = "<h2>Ranking de Notas</h2>";
-    ranking.forEach(item => {
-        rankingContainer.innerHTML += `<div>${alunos[item.aluno]} - ${item.disciplina}: ${item.nota}</div>`;
-    });
-
-    // Botão para fechar
-    const closeButton = document.createElement('button');
-    closeButton.innerText = 'Fechar';
-    closeButton.onclick = () => document.body.removeChild(rankingContainer);
-    rankingContainer.appendChild(closeButton);
-}
-
-async function calcularMedia() {
-    const disciplinas = Object.keys(notas);
-    if (disciplinas.length === 0) {
-        alert("Nenhuma nota salva para calcular a média.");
-        return;
-    }
-
-    const total = disciplinas.reduce((acc, key) => acc + parseFloat(notas[key]), 0);
-    const media = total / disciplinas.length;
-
-    const mediaContainer = document.createElement('div');
-    mediaContainer.innerHTML = `A média das notas é: ${media.toFixed(2)}`;
-    document.body.appendChild(mediaContainer);
-}
-    const ranking = [];
-
-    const querySnapshot = await db.collection("notas")
-        .where("aluno", "in", Object.keys(alunos))
-        .get();
-
-    querySnapshot.forEach(doc => {
-        const data = doc.data();
-        ranking.push({ disciplina: data.disciplina, nota: data.nota, aluno: data.aluno });
-    });
-
-    ranking.sort((a, b) => b.nota - a.nota);
-
-    rankingContainer.innerHTML = "<h2>Ranking de Notas</h2>";
-    ranking.forEach((item, index) => {
-        rankingContainer.innerHTML += `<div>${index + 1}. ${alunos[item.aluno]} - ${item.disciplina}: ${item.nota}</div>`;
-    });
-
-    // Botão para fechar
-    const closeButton = document.createElement('button');
-    closeButton.innerText = 'Fechar';
-    closeButton.onclick = () => document.body.removeChild(rankingContainer);
-    rankingContainer.appendChild(closeButton);
-
-    document.body.appendChild(rankingContainer);
-}
-
-            const querySnapshot = await db.collection("notas")
-                .where("aluno", "in", Object.keys(alunos))
-                .get();
-
-            querySnapshot.forEach(doc => {
-                const data = doc.data();
-                ranking.push({ disciplina: data.disciplina, nota: data.nota, aluno: data.aluno });
-            });
-
-            ranking.sort((a, b) => b.nota - a.nota);
-
-            rankingContainer.innerHTML = "<h2>Ranking de Notas</h2>";
-            ranking.forEach(item => {
-                rankingContainer.innerHTML += `<div>${alunos[item.aluno]} - ${item.disciplina}: ${item.nota}</div>`;
-            });
+        function calcularMedia() {
+            const notas = Object.values(notasPorAluno[alunoAtual]);
+            if (notas.length > 0) {
+                const soma = notas.reduce((acc, nota) => acc + nota, 0);
+                const media = soma / notas.length;
+                alert(`A média das notas é: ${media.toFixed(2)}`);
+            } else {
+                alert('Nenhuma nota para calcular a média.');
+            }
         }
 
-        async function calcularMedia() {
-            const disciplinas = Object.keys(notas);
-            if (disciplinas.length === 0) {
-                alert("Nenhuma nota salva para calcular a média.");
-                return;
-            }
+        function mostrarRanking() {
+            const alunosRank = Object.entries(notasPorAluno)
+                .filter(([_, notas]) => notas.length > 0 && notasPorAluno[alunoAtual]?.[disciplina])
+                .map(([matricula, notas]) => ({
+                    matricula,
+                    nome: alunos[matricula],
+                    media: calcularMediaNotas(notas)
+                }))
+                .sort((a, b) => b.media - a.media);
 
-            const total = disciplinas.reduce((acc, key) => acc + parseFloat(notas[key]), 0);
-            const media = total / disciplinas.length;
-            alert(`A média das notas é: ${media.toFixed(2)}`);
+            let rankingHTML = '<h2>Ranking de Alunos</h2>';
+            alunosRank.forEach(aluno => {
+                rankingHTML += `<p>${aluno.nome} (${aluno.matricula}): ${aluno.media.toFixed(2)}</p>`;
+            });
+
+            const rankingContainer = document.createElement('div');
+            rankingContainer.innerHTML = rankingHTML;
+            document.body.appendChild(rankingContainer);
+        }
+
+        function calcularMediaNotas(notas) {
+            const total = Object.values(notas).reduce((acc, nota) => acc + nota, 0);
+            return total / Object.keys(notas).length;
         }
     </script>
 </body>
-
 </html>
