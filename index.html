@@ -208,19 +208,23 @@
         }
 
         window.carregarNotas = function () {
-            getDoc(doc(db, "notas", alunoAtual)).then((doc) => {
-                if (doc.exists()) {
-                    disciplinas = doc.data();
-                    const notasContainer = document.getElementById("notas-container");
-                    notasContainer.innerHTML = "<h3>Notas Salvas:</h3>";
-                    for (let disciplina in disciplinas) {
-                        notasContainer.innerHTML += `${disciplina}: ${disciplinas[disciplina]}<br>`;
-                    }
-                } else {
-                    document.getElementById("notas-container").innerHTML = "Nenhuma nota salva.";
-                }
-            });
+    getDoc(doc(db, "notas", alunoAtual)).then((doc) => {
+        const notasContainer = document.getElementById("notas-container");
+        notasContainer.innerHTML = "<h3>Notas Salvas:</h3>"; // Reinicia o conteúdo do container
+
+        if (doc.exists()) {
+            disciplinas = doc.data();
+            for (const [disciplina, nota] of Object.entries(disciplinas)) {
+                notasContainer.innerHTML += `<p>${disciplina}: ${nota}</p>`;
+            }
+        } else {
+            notasContainer.innerHTML += "<p>Nenhuma nota salva.</p>";
         }
+    }).catch((error) => {
+        console.error("Erro ao carregar notas: ", error);
+    });
+}
+
 
         window.calcularMedia = function () {
             if (Object.keys(disciplinas).length === 0) {
