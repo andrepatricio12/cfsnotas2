@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="pt-br">
-    <div id="loading" class="hidden">Salvando...</div>
 
 <head>
     <meta charset="UTF-8">
@@ -9,11 +8,11 @@
 
     <style>
         #loading {
-    text-align: center;
-    font-weight: bold;
-    color: #007bff;
-    margin-top: 10px;
-}
+            text-align: center;
+            font-weight: bold;
+            color: #007bff;
+            margin-top: 10px;
+        }
 
         body {
             font-family: Arial, sans-serif;
@@ -25,6 +24,7 @@
             height: 100vh;
             background-color: #f5f5f5;
         }
+
         .container {
             background-color: white;
             padding: 20px;
@@ -33,22 +33,28 @@
             max-width: 600px;
             width: 100%;
         }
+
         h1 {
             text-align: center;
             color: #333;
         }
+
         .form-group {
             margin-bottom: 15px;
         }
+
         .form-group label {
             display: block;
         }
-        .form-group input, .form-group select {
+
+        .form-group input,
+        .form-group select {
             padding: 10px;
             width: 100%;
             border-radius: 5px;
             border: 1px solid #ddd;
         }
+
         button {
             padding: 10px;
             width: 100%;
@@ -60,59 +66,56 @@
             cursor: pointer;
             transition: background-color 0.3s;
         }
+
         button:disabled {
             background-color: #ccc;
         }
+
         button:hover:not(:disabled) {
             background-color: #0056b3;
         }
-        #ranking-btn {
-            display: none; /* Inicialmente escondido */
-        }
-        <div class="button-group spacing">
-    <button id="ranking-btn" onclick="mostrarRanking()" disabled>
-        Ver Ranking
-        <span class="tooltip hidden">Selecione para aparecer no ranking!</span>
-    </button>
+
         .tooltip {
-    visibility: hidden; /* Inicialmente escondido */
-    background-color: #555;
-    color: #fff;
-    text-align: center;
-    border-radius: 5px;
-    padding: 5px;
-    position: absolute;
-    z-index: 1;
-    bottom: 125%; /* Posiciona acima do botão */
-    left: 50%;
-    margin-left: -60px; /* Centraliza o tooltip */
-    opacity: 0; /* Começa invisível */
-    transition: opacity 0.3s;
-}
+            visibility: hidden;
+            background-color: #555;
+            color: #fff;
+            text-align: center;
+            border-radius: 5px;
+            padding: 5px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -60px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
 
-button:hover .tooltip {
-    visibility: visible; /* Exibe o tooltip ao passar o mouse */
-    opacity: 1; /* Torna visível */
-}
-
-</div>
+        button:hover .tooltip {
+            visibility: visible;
+            opacity: 1;
+        }
 
         .message {
             margin-top: 20px;
             text-align: center;
             font-weight: bold;
         }
+
         .error {
             color: red;
         }
+
         .hidden {
             display: none;
         }
+
         .button-group {
             margin-top: 20px;
         }
+
         .spacing {
-            margin-top: 10px; /* Espaço entre botões */
+            margin-top: 10px;
         }
     </style>
     
@@ -120,26 +123,27 @@ button:hover .tooltip {
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js"></script>
 </head>
+
 <body>
-<div class="container">
-    <h1>Sistema de Notas - Curso de Sargentos</h1>
+    <div class="container">
+        <h1>Sistema de Notas - Curso de Sargentos</h1>
 
-    <div id="login-form">
-        <div class="form-group">
-            <label for="matricula">Digite sua matrícula:</label>
-            <input type="text" id="matricula" placeholder="Digite sua matrícula">
+        <div id="login-form">
+            <div class="form-group">
+                <label for="matricula">Digite sua matrícula:</label>
+                <input type="text" id="matricula" placeholder="Digite sua matrícula">
+            </div>
+            <button onclick="login()">Entrar</button>
+            <div id="login-error" class="error hidden">Matrícula não encontrada. Por favor, tente novamente.</div>
         </div>
-        <button onclick="login()">Entrar</button>
-        <div id="login-error" class="error hidden">Matrícula não encontrada. Por favor, tente novamente.</div>
-    </div>
 
-    <div id="notas-form" class="hidden">
-        <h2 id="aluno-nome"></h2>
+        <div id="notas-form" class="hidden">
+            <h2 id="aluno-nome"></h2>
 
-        <div class="form-group">
-            <label for="disciplina">Selecione a Disciplina:</label>
-            <select id="disciplina" onchange="atualizarNota()">
-              <option value="ADP">Administração de Pessoal (ADP)</option>
+            <div class="form-group">
+                <label for="disciplina">Selecione a Disciplina:</label>
+                <select id="disciplina" onchange="atualizarNota()">
+                    <option value="ADP">Administração de Pessoal (ADP)</option>
               <option value="ALF">Administração Logística Financeira (ALF)</option>
               <option value="AMTP">Armamento, Munição e Tiro Policial (AMTP)</option>
               <option value="APHT">Atendimento Pré-Hospitalar Tático (APH)</option>
@@ -159,44 +163,49 @@ button:hover .tooltip {
               <option value="SCOH">Sistema de Comando e Operações de Ajuda Humanitária (SCOH)</option>
               <option value="TPO">Técnicas E Operações De Polícia Militar (TPO)</option>
               <option value="TELA">Tópicos Especiais de Legislação Aplicáveis à Atividade (TELA)</option>
-            </select>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="nota">Insira sua nota (entre 1 e 10):</label>
+                <input type="number" id="nota" min="1" max="10" step="0.01">
+            </div>
+
+            <div class="form-group">
+                <label for="rank">Permitir exibir no ranking:</label>
+                <input type="checkbox" id="rank" onchange="toggleRankingButton()">
+            </div>
+
+            <div class="button-group">
+                <button id="salvarNotaBtn" onclick="salvarNota()">Salvar Nota</button>
+            </div>
+
+            <div class="button-group spacing">
+                <button onclick="carregarNotas()">Ver Todas as Notas</button>
+            </div>
+
+            <div class="button-group spacing">
+                <button id="ranking-btn" onclick="mostrarRanking()" disabled>Ver Ranking
+                    <span class="tooltip hidden">Selecione para aparecer no ranking!</span>
+                </button>
+            </div>
+
+            <div class="button-group">
+                <button id="media-btn" onclick="calcularMedia()">Calcular Média</button>
+            </div>
+
+            <div id="notas-container" class="message"></div>
+            <div id="nota-success" class="message hidden">Nota salva com sucesso!</div>
+            <div id="nota-error" class="error hidden">A nota deve estar entre 1 e 10.</div>
         </div>
 
-        <div class="form-group">
-            <label for="nota">Insira sua nota (entre 1 e 10):</label>
-            <input type="number" id="nota" min="1" max="10" step="0.01">
-        </div>
+        <div id="loading" class="hidden">Salvando...</div>
 
-        <div class="form-group">
-            <label for="rank">Permitir exibir no ranking:</label>
-            <input type="checkbox" id="rank" onchange="toggleRankingButton()">
-        </div>
-
-        <div class="button-group">
-            <button id="salvarNotaBtn" onclick="salvarNota()">Salvar Nota</button>
-        </div>
-
-        <div class="button-group spacing">
-            <button onclick="carregarNotas()">Ver Todas as Notas</button>
-        </div>
-
-        <div class="button-group spacing">
-            <button id="ranking-btn" onclick="mostrarRanking()" disabled>Ver Ranking</button>
-        </div>
-
-        <div class="button-group">
-            <button id="media-btn" onclick="calcularMedia()">Calcular Média</button>
-        </div>
-
-        <div id="notas-container" class="message"></div>
-        <div id="nota-success" class="message hidden">Nota salva com sucesso!</div>
-        <div id="nota-error" class="error hidden">A nota deve estar entre 1 e 10.</div>
     </div>
-</div>
 
-<script>
-    const alunos = {
-        "9287027": "ELIENAR FARIAS",
+    <script>
+        const alunos = {
+             "9287027": "ELIENAR FARIAS",
         "9306820": "NAZARETH LIMA GOEDERT",
         "9303219": "CARLA DE LUCA LINHARES",
         "9287124": "LEANDRO GHELLERE",
@@ -232,88 +241,81 @@ button:hover .tooltip {
         "9329056": "VINICIUS JOVELINO COSTA",
         "9339477": "DANIEL SERAFIM PESSI"
     };
+        };
 
-    // Configuração do Firebase
+        // Configuração do Firebase
+
 const firebaseConfig = {
-    apiKey: "AIzaSyDEvCDdX0LGjDMFpyxljj-4JTjZKtgooDM",
-    authDomain: "notas-cfs.firebaseapp.com",
-    projectId: "notas-cfs",
-    storageBucket: "notas-cfs.appspot.com",
-    messagingSenderId: "91086463856",
-    appId: "1:91086463856:web:6a16fb0b3abe04bbc425b5"
+  apiKey: "AIzaSyDEvCDdX0LGjDMFpyxljj-4JTjZKtgooDM",
+  authDomain: "notas-cfs.firebaseapp.com",
+  projectId: "notas-cfs",
+  storageBucket: "notas-cfs.appspot.com",
+  messagingSenderId: "91086463856",
+  appId: "1:91086463856:web:6a16fb0b3abe04bbc425b5"
 };
 
 const app = firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore(app);
+        
+        let matriculaAtual = null;
 
-    let matriculaAtual = null;
-
-    function login() {
-        const matricula = document.getElementById('matricula').value;
-        if (alunos[matricula]) {
-            matriculaAtual = matricula;
-            document.getElementById('aluno-nome').textContent = alunos[matricula];
-            document.getElementById('login-form').classList.add('hidden');
-            document.getElementById('notas-form').classList.remove('hidden');
-            carregarNotas();
-        } else {
-            document.getElementById('login-error').classList.remove('hidden');
+        function login() {
+            const matricula = document.getElementById('matricula').value;
+            if (alunos[matricula]) {
+                matriculaAtual = matricula;
+                document.getElementById('aluno-nome').textContent = alunos[matricula];
+                document.getElementById('login-form').classList.add('hidden');
+                document.getElementById('notas-form').classList.remove('hidden');
+                carregarNotas();
+            } else {
+                document.getElementById('login-error').classList.remove('hidden');
+            }
         }
-    }
 
-    function atualizarNota() {
-        const disciplina = document.getElementById('disciplina').value;
-        document.getElementById('nota').value = ''; // Limpa o campo de nota ao selecionar nova disciplina
-        carregarNotaSalva(disciplina);
-    }
-
-    async function carregarNotaSalva(disciplina) {
-        const doc = await db.collection('notas').doc(`${matriculaAtual}_${disciplina}`).get();
-        if (doc.exists) {
-            document.getElementById('nota').value = doc.data().nota;
-        } else {
-            document.getElementById('nota').value = ''; // Se não houver nota, limpa o campo
+        function atualizarNota() {
+            const disciplina = document.getElementById('disciplina').value;
+            document.getElementById('nota').value = ''; // Limpa o campo de nota ao selecionar nova disciplina
+            carregarNotaSalva(disciplina);
         }
-    }
 
-    #loading {
-    text-align: center;
-    font-weight: bold;
-    color: #007bff;
-    margin-top: 10px;
-}
+        async function carregarNotaSalva(disciplina) {
+            const doc = await db.collection('notas').doc(`${matriculaAtual}_${disciplina}`).get();
+            if (doc.exists) {
+                document.getElementById('nota').value = doc.data().nota;
+            } else {
+                document.getElementById('nota').value = ''; // Se não houver nota, limpa o campo
+            }
+        }
 
-    }
+        function toggleRankingButton() {
+            const checkbox = document.getElementById('rank');
+            document.getElementById('ranking-btn').disabled = !checkbox.checked;
+        }
 
-    function toggleRankingButton() {
-        const checkbox = document.getElementById('rank');
-        document.getElementById('ranking-btn').disabled = !checkbox.checked;
-    }
+        async function mostrarRanking() {
+            const rankingContainer = document.createElement('div');
+            const querySnapshot = await db.collection('notas').get();
+            const rankings = [];
 
-    async function mostrarRanking() {
-    const rankingContainer = document.createElement('div');
-    const querySnapshot = await db.collection('notas').get();
-    const rankings = [];
+            querySnapshot.forEach(doc => {
+                const data = doc.data();
+                rankings.push({ disciplina: doc.id.split('_')[1], nota: data.nota });
+            });
 
-    querySnapshot.forEach(doc => {
-        const data = doc.data();
-        rankings.push({ disciplina: doc.id.split('_')[1], nota: data.nota });
-    });
+            // Ordenar pelo valor da nota
+            rankings.sort((a, b) => b.nota - a.nota);
 
-    // Ordenar pelo valor da nota
-    rankings.sort((a, b) => b.nota - a.nota);
+            rankingContainer.innerHTML = '<h2>Ranking</h2>';
+            rankings.forEach(ranking => {
+                rankingContainer.innerHTML += `<p>${ranking.disciplina}: ${ranking.nota}</p>`;
+            });
 
-    rankingContainer.innerHTML = '<h2>Ranking</h2>';
-    rankings.forEach(ranking => {
-        rankingContainer.innerHTML += `<p>${ranking.disciplina}: ${ranking.nota}</p>`;
-    });
+            document.body.appendChild(rankingContainer);
+        }
 
-    document.body.appendChild(rankingContainer);
-}
-
-
-    async function calcularMedia() {
-        const querySnapshot = await db.collection('notas').where('matricula', '==', matriculaAtual).get();
+        async function calcularMedia() {
+            const querySnapshot = await db.collection('notas').where('matricula',
+ '==', matriculaAtual).get();
         let totalNotas = 0;
         let contador = 0;
         querySnapshot.forEach(doc => {
