@@ -211,14 +211,12 @@
     <script>
         // Configurações do Firebase
         const firebaseConfig = {
-  apiKey: "AIzaSyDEvCDdX0LGjDMFpyxljj-4JTjZKtgooDM",
-  authDomain: "notas-cfs.firebaseapp.com",
-  projectId: "notas-cfs",
-  storageBucket: "notas-cfs.appspot.com",
-  messagingSenderId: "91086463856",
-  appId: "1:91086463856:web:6a16fb0b3abe04bbc425b5"
-}
-            // suas credenciais do Firebase aqui
+            apiKey: "AIzaSyDEvCDdX0LGjDMFpyxljj-4JTjZKtgooDM",
+            authDomain: "notas-cfs.firebaseapp.com",
+            projectId: "notas-cfs",
+            storageBucket: "notas-cfs.appspot.com",
+            messagingSenderId: "91086463856",
+            appId: "1:91086463856:web:6a16fb0b3abe04bbc425b5"
         };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
@@ -261,111 +259,158 @@
         "9339477": "DANIEL SERAFIM PESSI"
         };
 
-        let matriculaAtual = null;
+        let alunoAtual = null;
+        let disciplinas = {};
 
         function login() {
-            const matricula = document.getElementById("matricula").value;
-            if (alunos[matricula]) {
-                matriculaAtual = matricula;
-                document.getElementById("aluno-nome").innerText = alunos[matricula];
+            const matricula = document.getElementById("matricula").value.trim();
+            const alunoNome = alunos[matricula];
+
+            if (alunoNome) {
+                alunoAtual = matricula;
+                document.getElementById("aluno-nome").innerText = alunoNome;
                 document.getElementById("login-form").classList.add("hidden");
                 document.getElementById("notas-form").classList.remove("hidden");
                 carregarNotas();
+                carregarPreferencias();
             } else {
                 document.getElementById("login-error").classList.remove("hidden");
             }
         }
 
-        function atualizarNota() {
-            const disciplina = document.getElementById("disciplina").value;
-            const notaInput = document.getElementById("nota");
-            const notasSalvas = JSON.parse(localStorage.getItem(`notas_${matriculaAtual}`)) || {};
-
-            notaInput.value = notasSalvas[disciplina] || '';
-        }
-
         function salvarNota() {
             const disciplina = document.getElementById("disciplina").value;
-            const notaInput = document.getElementById("nota");
-            const nota = parseFloat(notaInput.value);
-            const notasSalvas = JSON.parse(localStorage.getItem(`notas_${matriculaAtual}`)) || {};
+            const nota = parseFloat(document.getElementById("nota").value);
 
             if (nota < 0 || nota > 10) {
                 document.getElementById("nota-error").classList.remove("hidden");
-                setTimeout(() => {
-                    document.getElementById("nota-error").classList.add("hidden");
-                }, 3000);
                 return;
             }
 
-            notasSalvas[disciplina] = nota;
-            localStorage.setItem(`notas_${matriculaAtual}`, JSON.stringify(notasSalvas));
-            document.getElementById("nota-success").classList.remove("hidden");
-            setTimeout(() => {
-                document.getElementById("nota-success").classList.add("hidden");
-            }, 3000);
+            document.getElementById("loading").classList.remove("hidden");
             document.getElementById("nota-error").classList.add("hidden");
-
-            atualizarNota();
-            mostrarNotas();
-            toggleRankingButton();
+            db.collection("notas").doc(alunoAtual).set({
+                [disciplina]: nota
+            }, { merge: true }).then(() => {
+                document.getElementById("loading").classList.add("hidden");
+                document.getElementById("nota-success").classList.remove("hidden");
+                setTimeout(() => {
+                    document.getElementById("nota-success").classList.add("hidden");
+                }, 3000);
+                carregarNotas();
+            }).catch((error) => {
+                console.error("Erro ao salvar nota: ", error);
+            });
         }
 
         function excluirNota() {
             const disciplina = document.getElementById("disciplina").value;
-            const notasSalvas = JSON.parse(localStorage.getItem(`notas_${matriculaAtual}`)) || {};
+            document.getElementById("loading").classList.remove("hidden");
 
-            delete notasSalvas[disciplina];
-            localStorage.setItem(`notas_${matriculaAtual}`, JSON.stringify(notasSalvas));
-            document.getElementById("nota-success").classList.remove("hidden");
-            setTimeout(() => {
-                document.getElementById("nota-success").classList.add("hidden");
-            }, 3000);
-            mostrarNotas();
-            atualizarNota();
-            toggleRankingButton();
+            db.collection("notas").doc(alunoAtual).update({
+                [disciplina]: firebase.firestore.FieldValue.delete()
+            }).then(() => {
+                document.getElementById("loading").classList.add("hidden");
+                carregarNotas();
+            }).catch((error) => {
+                console.error("Erro ao excluir nota: ", error);
+            });
         }
 
         function carregarNotas() {
-            const notasSalvas = JSON.parse(localStorage.getItem(`notas_${matriculaAtual}`)) || {};
-            mostrarNotas(notasSalvas);
-        }
-
-        function mostrarNotas() {
-            const notasContainer = document.getElementById("notas-container");
-            const notasSalvas = JSON.parse(localStorage.getItem(`notas_${matriculaAtual}`)) || {};
-            notasContainer.innerHTML = "";
-
-            for (const disciplina in notasSalvas) {
-                notasContainer.innerHTML += `${disciplina}: ${notasSalvas[disciplina]}<br>`;
-            }
+            db.collection("notas").doc(alunoAtual).get().then((doc) => {
+                if (doc.exists) {
+                    disciplinas = doc.data();
+                    const notasContainer = document.getElementById("notas-container");
+                    notasContainer.innerHTML = "<h3>Notas Salvas:</h3>";
+                    for (let disciplina in disciplinas) {
+                        notasContainer.innerHTML += `${disciplina}: ${disciplinas[disciplina]}<br>`;
+                    }
+                } else {
+                    document.getElementById("notas-container").innerHTML = "Nenhuma nota salva.";
+                }
+            });
         }
 
         function calcularMedia() {
-            const notasSalvas = JSON.parse(localStorage.getItem(`notas_${matriculaAtual}`)) || {};
-            const totalNotas = Object.values(notasSalvas).reduce((total, nota) => total + nota, 0);
-            const media = totalNotas / Object.keys(notasSalvas).length;
+            if (Object.keys(disciplinas).length === 0) {
+                alert("Nenhuma nota salva para calcular a média.");
+                return;
+            }
 
-            alert(`A média das suas notas é: ${media.toFixed(2)}`);
+            const media = Object.values(disciplinas).reduce((a, b) => a + b, 0) / Object.values(disciplinas).length;
+            alert(`A média é: ${media.toFixed(2)}`);
         }
 
         function mostrarRanking() {
-            const notasSalvas = JSON.parse(localStorage.getItem(`notas_${matriculaAtual}`)) || {};
-            const rank = [];
+            db.collection("notas").get().then((snapshot) => {
+                let ranking = [];
+                snapshot.forEach((doc) => {
+                    const notas = doc.data();
+                    const nome = alunos[doc.id];
+                    const media = Object.values(notas).reduce((a, b) => a + b, 0) / Object.values(notas).length;
+                    const mostrarRanking = doc.data().mostrarRanking;
 
-            if (document.getElementById("rank").checked) {
-                const media = Object.values(notasSalvas).reduce((total, nota) => total + nota, 0) / Object.keys(notasSalvas).length;
-                rank.push({ matricula: matriculaAtual, nome: alunos[matriculaAtual], media });
-            }
+                    if (mostrarRanking) {
+                        ranking.push({ nome, media });
+                    }
+                });
 
-            rank.sort((a, b) => b.media - a.media);
-            const rankingContainer = document.createElement('div');
-            rankingContainer.innerHTML = rank.map(aluno => `${aluno.nome}: ${aluno.media.toFixed(2)}`).join("<br>");
-            document.body.appendChild(rankingContainer);
+                ranking.sort((a, b) => b.media - a.media); // Ordena pelo média
+                const rankingContainer = document.createElement("div");
+                rankingContainer.innerHTML = "<h3>Ranking Geral:</h3>";
+                ranking.forEach(aluno => {
+                    rankingContainer.innerHTML += `${aluno.nome}: ${aluno.media.toFixed(2)}<br>`;
+                });
+
+                document.body.appendChild(rankingContainer);
+            });
         }
 
         function toggleRankingButton() {
-            document.getElementById("ranking-btn").disabled = !document.getElementById("rank").checked;
+            const rankCheckbox = document.getElementById("rank");
+            const rankingBtn = document.getElementById("ranking-btn");
+
+            if (rankCheckbox.checked) {
+                if (confirm("Seu nome será exibido para todos no ranking. Deseja continuar?")) {
+                    salvarPreferenciaRanking(true);
+                    rankingBtn.disabled = false;
+                } else {
+                    rankCheckbox.checked = false;
+                }
+            } else {
+                if (confirm("Você deseja remover seu nome do ranking?")) {
+                    salvarPreferenciaRanking(false);
+                    rankingBtn.disabled = true;
+                } else {
+                    rankCheckbox.checked = true; // Reverter a ação se o usuário cancelar
+                }
+            }
+        }
+
+        function salvarPreferenciaRanking(mostrarRanking) {
+            db.collection("notas").doc(alunoAtual).set({
+                mostrarRanking: mostrarRanking
+            }, { merge: true });
+        }
+
+        function carregarPreferencias() {
+            db.collection("notas").doc(alunoAtual).get().then((doc) => {
+                if (doc.exists && doc.data().mostrarRanking) {
+                    document.getElementById("rank").checked = true;
+                    toggleRankingButton();
+                }
+            });
+        }
+
+        function atualizarNota() {
+            const disciplina = document.getElementById("disciplina").value;
+            const notaInput = document.getElementById("nota");
+            if (disciplinas[disciplina]) {
+                notaInput.value = disciplinas[disciplina];
+            } else {
+                notaInput.value = '';
+            }
         }
     </script>
 </body>
