@@ -98,6 +98,12 @@
         .button-group button {
             width: 48%; /* Largura dos botões lado a lado */
         }
+        /* Animação ao clicar nos botões */
+button:active {
+  transform: scale(0.95);
+  transition: transform 0.1s;
+}
+
     </style>
 
     <!-- Importar as bibliotecas do Firebase -->
@@ -200,21 +206,45 @@
                 console.error("Erro ao salvar nota: ", error);
             });
         }
+// Função para habilitar/desabilitar o botão de salvar nota
+function toggleSalvarNotaButton() {
+    const disciplina = document.getElementById("disciplina").value;
+    const nota = document.getElementById("nota").value;
+    const salvarNotaButton = document.getElementById("salvarNota");
 
-        window.excluirNota = function () {
-            const disciplina = document.getElementById("disciplina").value;
-            document.getElementById("loading").classList.remove("hidden");
+    // Desabilita o botão se qualquer campo estiver vazio
+    if (disciplina === "" || nota === "") {
+        salvarNotaButton.disabled = true;
+    } else {
+        salvarNotaButton.disabled = false;
+    }
+}
 
-            updateDoc(doc(db, "notas", alunoAtual), {
-                [disciplina]: deleteField()
-            }).then(() => {
-                document.getElementById("loading").classList.add("hidden");
-                carregarNotas();
-                calcularMedia(); // Atualiza a média ao excluir a nota
-            }).catch((error) => {
-                console.error("Erro ao excluir nota: ", error);
+// Chama essa função toda vez que o campo de disciplina ou nota mudar
+document.getElementById("disciplina").addEventListener("input", toggleSalvarNotaButton);
+document.getElementById("nota").addEventListener("input", toggleSalvarNotaButton);
+
+// Inicia a página com o botão desabilitado, caso os campos estejam vazios
+window.onload = toggleSalvarNotaButton;
+
+        // Função para excluir nota com confirmação
+function excluirNota(disciplina, matricula) {
+    const confirmacao = confirm("Você tem certeza que deseja excluir essa nota?");
+    
+    if (confirmacao) {
+        // Exclui a nota somente se o usuário confirmar
+        firebase.firestore().collection('notas').doc(`${matricula}-${disciplina}`).delete()
+            .then(() => {
+                alert("Nota excluída com sucesso!");
+                // Atualizar UI após a exclusão
+                atualizarMedia();
+                atualizarRanking();
+            })
+            .catch((error) => {
+                console.error("Erro ao excluir a nota: ", error);
             });
-        }
+    }
+}
 
         window.carregarNotas = function () {
             getDoc(doc(db, "notas", alunoAtual)).then((docSnap) => {
