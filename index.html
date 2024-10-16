@@ -11,8 +11,6 @@
             color: #007bff;
             margin-top: 10px;
         }
-        <div id="media-container">Média: N/A</div>
-
 
         body {
             font-family: Arial, sans-serif;
@@ -209,69 +207,63 @@
             });
         }
 
-       window.carregarNotas = function () {
+        wwindow.carregarNotas = function () {
     getDoc(doc(db, "notas", alunoAtual)).then((doc) => {
+        const notasContainer = document.getElementById("notas-container");
+        notasContainer.innerHTML = "<h3>Notas Salvas:</h3>"; // Reinicia o conteúdo do container
+
         if (doc.exists()) {
             disciplinas = doc.data();
-            const notasContainer = document.getElementById("notas-container");
-            notasContainer.innerHTML = "<h3>Notas Salvas:</h3>";
-            for (let disciplina in disciplinas) {
-                if (disciplina !== "mostrarRanking") { // Adicione esta linha
-                    notasContainer.innerHTML += `${disciplina}: ${disciplinas[disciplina]}<br>`;
+            for (const [disciplina, nota] of Object.entries(disciplinas)) {
+                // Evita exibir a chave mostrarRanking
+                if (disciplina !== "mostrarRanking") {
+                    notasContainer.innerHTML += `<p>${disciplina}: ${nota}</p>`;
                 }
             }
-            calcularMedia(); // Atualiza a média sempre que as notas são carregadas
         } else {
-            document.getElementById("notas-container").innerHTML = "Nenhuma nota salva.";
+            notasContainer.innerHTML += "<p>Nenhuma nota salva.</p>";
         }
+    }).catch((error) => {
+        console.error("Erro ao carregar notas: ", error);
     });
 }
 
 
 
+        window.calcularMedia = function () {
+            if (Object.keys(disciplinas).length === 0) {
+                alert("Nenhuma nota salva para calcular a média.");
+                return;
+            }
 
-       window.calcularMedia = function () {
-    if (Object.keys(disciplinas).length === 0) {
-        document.getElementById("media-container").innerText = "Média: N/A"; // Atualiza o texto da média
-        return;
-    }
-
-    const media = Object.values(disciplinas).reduce((a, b) => a + b, 0) / Object.values(disciplinas).length;
-    document.getElementById("media-container").innerText = `Média: ${media.toFixed(2)}`; // Atualiza a média na tela
-}
-
+            const media = Object.values(disciplinas).reduce((a, b) => a + b, 0) / Object.values(disciplinas).length;
+            alert(`A média é: ${media.toFixed(2)}`);
+        }
 
         window.mostrarRanking = function () {
-    // Verifica se já existe um ranking na tela
-    if (document.getElementById("ranking-container")) {
-        return; // Se já existe, não faz nada
-    }
+            getDocs(collection(db, "notas")).then((snapshot) => {
+                let ranking = [];
+                snapshot.forEach((doc) => {
+                    const notas = doc.data();
+                    const nome = alunos[doc.id];
+                    const media = Object.values(notas).reduce((a, b) => a + b, 0) / Object.values(notas).length;
+                    const mostrarRanking = doc.data().mostrarRanking;
 
-    getDocs(collection(db, "notas")).then((snapshot) => {
-        let ranking = [];
-        snapshot.forEach((doc) => {
-            const notas = doc.data();
-            const nome = alunos[doc.id];
-            const media = Object.values(notas).reduce((a, b) => a + b, 0) / Object.values(notas).length;
-            const mostrarRanking = notas.mostrarRanking;
+                    if (mostrarRanking) {
+                        ranking.push({ nome, media });
+                    }
+                });
 
-            if (mostrarRanking) {
-                ranking.push({ nome, media });
-            }
-        });
+                ranking.sort((a, b) => b.media - a.media); // Ordena pelo média
+                const rankingContainer = document.createElement("div");
+                rankingContainer.innerHTML = "<h3>Ranking Geral:</h3>";
+                ranking.forEach(aluno => {
+                    rankingContainer.innerHTML += `${aluno.nome}: ${aluno.media.toFixed(2)}<br>`;
+                });
 
-        ranking.sort((a, b) => b.media - a.media); // Ordena pelo média
-        const rankingContainer = document.createElement("div");
-        rankingContainer.id = "ranking-container"; // Adiciona um ID ao container
-        rankingContainer.innerHTML = "<h3>Ranking Geral:</h3>";
-        ranking.forEach(aluno => {
-            rankingContainer.innerHTML += `${aluno.nome}: ${aluno.media.toFixed(2)}<br>`;
-        });
-
-        document.body.appendChild(rankingContainer);
-    });
-}
-
+                document.body.appendChild(rankingContainer);
+            });
+        }
 
         window.toggleRankingButton = function () {
             const rankCheckbox = document.getElementById("rank");
