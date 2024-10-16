@@ -282,7 +282,21 @@
                 console.error("Erro ao carregar preferências: ", error);
             });
         }
-
+window.atualizarNota = function() {
+    const disciplina = document.getElementById("disciplina").value;
+    getDoc(doc(db, "notas", alunoAtual)).then((docSnap) => {
+        if (docSnap.exists()) {
+            const notas = docSnap.data();
+            if (notas[disciplina] !== undefined) {
+                document.getElementById("nota").value = notas[disciplina].toFixed(2);
+            } else {
+                document.getElementById("nota").value = ''; // Limpa o campo se não houver nota
+            }
+        }
+    }).catch((error) => {
+        console.error("Erro ao carregar nota: ", error);
+    });
+}
         window.atualizarPreferencias = function () {
             const mostrarRanking = document.getElementById("mostrar-ranking").checked;
             const mensagens = mostrarRanking ? "Você deseja ser exibido no ranking?" : "Você não deseja mais aparecer no ranking?";
@@ -323,7 +337,6 @@
             <div class="form-group">
                 <label for="disciplina">Disciplina:</label>
                 <select id="disciplina">
-                    <label for="disciplina">Disciplina:</label>
             <select id="disciplina" onchange="atualizarNota()">
                 <option value="ADP">Administração de Pessoal (ADP)</option>
                 <option value="ALF">Administração Logística Financeira (ALF)</option>
