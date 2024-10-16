@@ -254,21 +254,17 @@ function excluirNota(matricula, disciplina) {
 }
 
 
-        window.carregarNotas = function () {
-            getDoc(doc(db, "notas", alunoAtual)).then((docSnap) => {
-                if (docSnap.exists()) {
-                    const notas = docSnap.data();
-                    let notasDisplay = "";
-                    let totalNotas = 0;
-                    let quantidadeNotas = 0;
+       window.carregarNotas = function () {
+    if (!alunoAtual) return; // Verifica se alunoAtual está definido
 
-                    for (const [disciplina, nota] of Object.entries(notas)) {
-                        if (disciplina !== "mostrarRanking") { // Remove a exibição da mensagem
-                            notasDisplay += `${disciplina}: ${nota.toFixed(2)}<br>`;
-                            totalNotas += nota;
-                            quantidadeNotas++;
-                        }
-                    }
+    getDoc(doc(db, "notas", alunoAtual)).then((docSnap) => {
+        // (restante do código permanece o mesmo)
+    }).catch((error) => {
+        console.error("Erro ao carregar notas: ", error);
+    });
+}
+
+
 
                     document.getElementById("notas-salvas").innerHTML = notasDisplay;
                     document.getElementById("notas-vazias").classList.toggle("hidden", notasDisplay.length > 0);
@@ -310,16 +306,20 @@ function excluirNota(matricula, disciplina) {
         }
 
         window.carregarPreferencias = function () {
-            getDoc(doc(db, "preferencias", alunoAtual)).then((docSnap) => {
-                if (docSnap.exists()) {
-                    const preferencias = docSnap.data();
-                    document.getElementById("mostrar-ranking").checked = preferencias.mostrarRanking || false;
-                    rankingExibido = preferencias.mostrarRanking || false;
-                }
-            }).catch((error) => {
-                console.error("Erro ao carregar preferências: ", error);
-            });
+    getDoc(doc(db, "preferencias", alunoAtual)).then((docSnap) => {
+        if (docSnap.exists()) {
+            const preferencias = docSnap.data();
+            document.getElementById("mostrar-ranking").checked = preferencias.mostrarRanking || false;
+            rankingExibido = preferencias.mostrarRanking || false;
+        } else {
+            document.getElementById("mostrar-ranking").checked = false; // Define padrão se não houver preferências
         }
+    }).catch((error) => {
+        console.error("Erro ao carregar preferências: ", error);
+    });
+}
+
+
 window.atualizarNota = function() {
     const disciplina = document.getElementById("disciplina").value;
     getDoc(doc(db, "notas", alunoAtual)).then((docSnap) => {
@@ -412,27 +412,28 @@ function atualizarRanking() {
     atualizarPreferencias();
 }
 
-        window.atualizarPreferencias = function () {
-            const mostrarRanking = document.getElementById("mostrar-ranking").checked;
-            const mensagens = mostrarRanking ? "Você deseja ser exibido no ranking?" : "Você não deseja mais aparecer no ranking?";
+       window.atualizarPreferencias = function () {
+    const mostrarRanking = document.getElementById("mostrar-ranking").checked;
+    const mensagens = mostrarRanking ? 
+        "Você deseja ser exibido no ranking?" : 
+        "Você não deseja mais aparecer no ranking?";
 
-            if (confirm(mensagens)) {
-                rankingExibido = mostrarRanking;
-                setDoc(doc(db, "preferencias", alunoAtual), { mostrarRanking }, { merge: true })
-                    .then(() => {
-                        alert(`Preferência de ranking ${mostrarRanking ? "salva" : "removida"} com sucesso!`);
-                        if (mostrarRanking) {
-                            calcularMedia(); // Atualiza a média ao exibir o ranking
-                        } else {
-                            // Limpar qualquer exibição anterior do ranking se necessário
-                        }
-                    }).catch((error) => {
-                        console.error("Erro ao salvar preferências: ", error);
-                    });
-            } else {
-                // Se o usuário não confirmar, restaura o estado anterior
-                document.getElementById("mostrar-ranking").checked = !mostrarRanking;
-            }
+    if (confirm(mensagens)) {
+        rankingExibido = mostrarRanking;
+        setDoc(doc(db, "preferencias", alunoAtual), {
+            mostrarRanking: rankingExibido
+        }, { merge: true })
+        .then(() => {
+            atualizarRanking(); // Atualiza o ranking após salvar preferências
+        })
+        .catch((error) => {
+            console.error("Erro ao atualizar preferências: ", error);
+        });
+    } else {
+        document.getElementById("mostrar-ranking").checked = !mostrarRanking; // Restaura o checkbox
+    }
+}
+
             <label>
     <input type="checkbox" id="opcaoRanking" onchange="verificarMostrarRanking(this.checked)">
     Desejo aparecer no ranking
