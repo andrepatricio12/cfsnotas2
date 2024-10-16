@@ -512,10 +512,20 @@ function atualizarRanking() {
     ocultarRankingBtn.addEventListener('click', function() {
         rankingContainer.style.display = 'none';  // Oculta o ranking
         ocultarRankingBtn.style.display = 'none';  // Oculta o botão de ocultar
+
+    document.addEventListener('DOMContentLoaded', function () {
+    const loginButton = document.getElementById('loginButton');
+    if (loginButton) {
+        loginButton.addEventListener('click', login);
+    }
+});
+
     });
 </script>
 
+            
         </div>
+        
     </div>
-</body>
+</body> 
 </html>
