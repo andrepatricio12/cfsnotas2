@@ -103,6 +103,7 @@ button:active {
   transform: scale(0.95);
   transition: transform 0.1s;
 }
+        
 
     </style>
 
@@ -415,6 +416,10 @@ function atualizarRanking() {
                 // Se o usuário não confirmar, restaura o estado anterior
                 document.getElementById("mostrar-ranking").checked = !mostrarRanking;
             }
+            <label>
+    <input type="checkbox" id="opcaoRanking" onchange="verificarMostrarRanking(this.checked)">
+    Desejo aparecer no ranking
+</label>
         }
     </script>
 </head>
@@ -476,6 +481,40 @@ function atualizarRanking() {
                 <label for="mostrar-ranking">Mostrar no ranking:</label>
                 <input type="checkbox" id="mostrar-ranking" onchange="atualizarPreferencias()">
             </div>
+            <script>
+    // Referências para os botões
+    const visualizarRankingBtn = document.getElementById('visualizarRanking');
+    const ocultarRankingBtn = document.getElementById('ocultarRanking');
+    const rankingContainer = document.getElementById('rankingContainer');
+
+    // Evento que verifica se o aluno escolheu aparecer no ranking
+    function verificarMostrarRanking(opcao) {
+        if (opcao) {
+            // Habilita o botão de visualizar ranking se a pessoa optar por aparecer no ranking
+            visualizarRankingBtn.disabled = false;
+            visualizarRankingBtn.style.opacity = '1';  // Torna o botão visível
+        } else {
+            // Desabilita o botão se a pessoa não quiser aparecer no ranking
+            visualizarRankingBtn.disabled = true;
+            visualizarRankingBtn.style.opacity = '0.5';  // Torna o botão apagado
+            rankingContainer.style.display = 'none';  // Oculta o ranking se estiver visível
+            ocultarRankingBtn.style.display = 'none';  // Oculta o botão de ocultar ranking
+        }
+    }
+
+    // Evento para exibir o ranking quando clicar no botão
+    visualizarRankingBtn.addEventListener('click', function() {
+        rankingContainer.style.display = 'block';  // Exibe o ranking
+        ocultarRankingBtn.style.display = 'inline';  // Exibe o botão para ocultar o ranking
+    });
+
+    // Evento para ocultar o ranking
+    ocultarRankingBtn.addEventListener('click', function() {
+        rankingContainer.style.display = 'none';  // Oculta o ranking
+        ocultarRankingBtn.style.display = 'none';  // Oculta o botão de ocultar
+    });
+</script>
+
         </div>
     </div>
 </body>
