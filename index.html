@@ -163,7 +163,7 @@
 
 <script>
     const alunos = {
-        "9287027": "ELIENAR FARIAS",
+       "9287027": "ELIENAR FARIAS",
             "9306820": "NAZARETH LIMA GOEDERT",
             "9303219": "CARLA DE LUCA LINHARES",
            "9287124": "LEANDRO GHELLERE",
@@ -204,7 +204,7 @@
     let notas = {};
     let rankingOptIn = false;
 
-    // Inicializar Firestore
+    // Inicializar Firestore (Certifique-se de que o Firebase está corretamente configurado)
     const db = firebase.firestore();
 
     // Função de login
@@ -230,6 +230,8 @@
             db.collection('notas').doc(matriculaAtual).set(notas).then(() => {
                 atualizarNotas();
                 atualizarMedia();
+                document.getElementById('nota-success').classList.remove('hidden');
+                setTimeout(() => document.getElementById('nota-success').classList.add('hidden'), 3000);
             });
         } else {
             document.getElementById('nota-error').classList.remove('hidden');
@@ -260,39 +262,71 @@
     function atualizarMedia() {
         const mediaValue = document.getElementById('media-value');
         const valoresNotas = Object.values(notas);
-        const soma = valoresNotas.reduce((a, b) => a + b, 0);
-        const media = (soma / valoresNotas.length) || 0;
-        mediaValue.innerText = media.toFixed(2);
+        if (valoresNotas.length > 0) {
+            const media = valoresNotas.reduce((acc, nota) => acc + nota, 0) / valoresNotas.length;
+            mediaValue.textContent = media.toFixed(2);
+        } else {
+            mediaValue.textContent = '0.00';
+        }
     }
 
-    // Função para exibir o ranking
+    // Função para mostrar o ranking
     function mostrarRanking() {
-        db.collection('notas').get().then(snapshot => {
-            const rankingAlunos = [];
+        const rankingContainer = document.getElementById('ranking-container');
+        const rankingList = document.getElementById('ranking-list');
+        rankingList.innerHTML = '';
+
+        db.collection('ranking').get().then(snapshot => {
             snapshot.forEach(doc => {
-                const alunoNotas = doc.data();
-                const soma = Object.values(alunoNotas).reduce((a, b) => a + b, 0);
-                const media = soma / Object.values(alunoNotas).length;
-                rankingAlunos.push({ nome: alunos[doc.id], media });
+                const alunoRanking = doc.data();
+                rankingList.innerHTML += `<p>${alunoRanking.nome}: ${alunoRanking.media}</p>`;
             });
-            rankingAlunos.sort((a, b) => b.media - a.media);
-            const rankingList = document.getElementById('ranking-list');
-            rankingList.innerHTML = '';
-            rankingAlunos.forEach(aluno => {
-                rankingList.innerHTML += `<p>${aluno.nome}: ${aluno.media.toFixed(2)}</p>`;
-            });
-            document.getElementById('ranking-container').classList.remove('hidden');
         });
+
+        rankingContainer.classList.remove('hidden');
     }
 
+    // Função para ocultar o ranking
     function ocultarRanking() {
         document.getElementById('ranking-container').classList.add('hidden');
     }
-</script>
- 
 
-<!-- Adicione a biblioteca do Firebase antes de fechar o body -->
-<script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore.js"></script>
+    // Função para atualizar se o aluno deseja aparecer no ranking
+    function atualizarRankingCheckbox() {
+        rankingOptIn = document.getElementById('ranking-checkbox').checked;
+        if (rankingOptIn) {
+            document.getElementById('ranking-confirmacao').classList.remove('hidden');
+        } else {
+            document.getElementById('ranking-confirmacao').classList.add('hidden');
+        }
+    }
+
+    // Função para excluir a nota
+    function excluirNota() {
+        const disciplina = document.getElementById('disciplina').value;
+        delete notas[disciplina];
+        db.collection('notas').doc(matriculaAtual).set(notas).then(() => {
+            atualizarNotas();
+            atualizarMedia();
+        });
+    }
+</script>
+
+<!-- Inclua o script do Firebase -->
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js"></script>
+<script>
+    const firebaseConfig = {
+  apiKey: "AIzaSyDEvCDdX0LGjDMFpyxljj-4JTjZKtgooDM",
+  authDomain: "notas-cfs.firebaseapp.com",
+  projectId: "notas-cfs",
+  storageBucket: "notas-cfs.appspot.com",
+  messagingSenderId: "91086463856",
+  appId: "1:91086463856:web:6a16fb0b3abe04bbc425b5"
+};
+    };
+    firebase.initializeApp(firebaseConfig);
+</script>
+
 </body>
 </html>
