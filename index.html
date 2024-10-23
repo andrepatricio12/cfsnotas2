@@ -309,7 +309,68 @@
             atualizarNotas();
             atualizarMedia();
         });
+    } function atualizarMedia() {
+        const notasArray = Object.values(notas);
+        if (notasArray.length > 0) {
+            const soma = notasArray.reduce((acc, nota) => acc + nota, 0);
+            const media = (soma / notasArray.length).toFixed(2);
+            document.getElementById('media-value').innerText = media;
+        } else {
+            document.getElementById('media-value').innerText = 'N/A';
+        }
     }
+
+    // Função para excluir uma nota
+    function excluirNota() {
+        const disciplina = document.getElementById('disciplina').value;
+        if (notas.hasOwnProperty(disciplina)) {
+            delete notas[disciplina];
+            db.collection('notas').doc(matriculaAtual).set(notas).then(() => {
+                atualizarNotas();
+                atualizarMedia();
+            });
+        }
+    }
+
+    // Função para atualizar o checkbox de ranking
+    function atualizarRankingCheckbox() {
+        rankingOptIn = document.getElementById('ranking-checkbox').checked;
+        const confirmacao = document.getElementById('ranking-confirmacao');
+        if (rankingOptIn) {
+            confirmacao.classList.remove('hidden');
+        } else {
+            confirmacao.classList.add('hidden');
+        }
+    }
+
+    // Função para mostrar o ranking
+    function mostrarRanking() {
+        db.collection('ranking').get().then(querySnapshot => {
+            const rankingList = document.getElementById('ranking-list');
+            rankingList.innerHTML = '';
+            querySnapshot.forEach(doc => {
+                const alunoRanking = doc.data();
+                rankingList.innerHTML += `<p>${alunoRanking.nome}: Média ${alunoRanking.media}</p>`;
+            });
+            document.getElementById('ranking-container').classList.remove('hidden');
+        });
+    }
+
+    // Função para ocultar o ranking
+    function ocultarRanking() {
+        document.getElementById('ranking-container').classList.add('hidden');
+    }
+
+    // Função para atualizar o campo de nota ao selecionar uma disciplina
+    function atualizarCampoNota() {
+        const disciplina = document.getElementById('disciplina').value;
+        if (notas.hasOwnProperty(disciplina)) {
+            document.getElementById('nota').value = notas[disciplina];
+        } else {
+            document.getElementById('nota').value = '';
+        }
+    }
+</script>
 </script>
 
 <!-- Inclua o script do Firebase -->
