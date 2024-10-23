@@ -246,23 +246,35 @@
     const nota = parseFloat(document.getElementById("nota").value);
     const ranking = document.getElementById("ranking-checkbox").checked;
 
+    // Validação da nota
     if (isNaN(nota) || nota < 0 || nota > 10) {
         document.getElementById("nota-error").classList.remove("hidden");
         return;
     }
 
+    document.getElementById("nota-error").classList.add("hidden");
+
     try {
+        // Salvando a nota no Firestore
         await db.collection("notas").doc(alunoAtual).set({
-            [disciplina]: { nota, ranking },
+            [disciplina]: {
+                nota: nota,
+                ranking: ranking
+            }
         }, { merge: true });
-        
+
+        // Exibe mensagem de sucesso
         document.getElementById("nota-success").classList.remove("hidden");
-        document.getElementById("nota-error").classList.add("hidden");
-        carregarNotas(); // Atualiza a lista de notas após salvar
+        setTimeout(() => {
+            document.getElementById("nota-success").classList.add("hidden");
+        }, 2000);
+
+        carregarNotas();
     } catch (error) {
-        console.error("Erro ao salvar a nota:", error);
+        console.error("Erro ao salvar nota: ", error);
     }
 }
+
 
 
     async function excluirNota() {
@@ -283,22 +295,29 @@
     async function carregarNotas() {
     try {
         const doc = await db.collection("notas").doc(alunoAtual).get();
+
         if (doc.exists) {
             const data = doc.data();
-            let notasTexto = '';
-            for (const disciplina in data) {
-                if (data[disciplina].nota !== undefined) {
-                    notasTexto += `${disciplina}: ${data[disciplina].nota} <br>`;
-                }
-            }
-            document.getElementById("notas-container").innerHTML = notasTexto;
-            calcularMedia(data);
+            const disciplinas = Object.keys(data);
+            let totalNota = 0;
+            let count = 0;
+
+            disciplinas.forEach((disciplina) => {
+                const nota = data[disciplina].nota;
+                totalNota += nota;
+                count++;
+            });
+
+            const media = (totalNota / count).toFixed(2);
+            document.getElementById("media-value").innerText = media;
         } else {
-            document.getElementById("notas-container").innerText = "Nenhuma nota encontrada.";
+            document.getElementById("media-value").innerText = "N/A";
         }
     } catch (error) {
-        console.error("Erro ao carregar as notas:", error);
+        console.error("Erro ao carregar notas: ", error);
     }
+}
+
 
   function calcularMedia(notas) {
     let total = 0;
