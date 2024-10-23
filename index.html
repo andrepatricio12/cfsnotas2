@@ -299,10 +299,6 @@
     } catch (error) {
         console.error("Erro ao carregar as notas:", error);
     }
-}
-
-        }
-    }
 
   function calcularMedia(notas) {
     let total = 0;
@@ -346,8 +342,7 @@
                         disciplina: disciplina,
                         nota: info.nota
                     });
-                }
-            }
+            
         });
 
         ranking.sort((a, b) => b.nota - a.nota); // Ordenar por nota decrescente
