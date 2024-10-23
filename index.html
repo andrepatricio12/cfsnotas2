@@ -1,82 +1,171 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-br">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gerenciamento de Notas</title>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+    <title>Sistema de Notas - Curso de Sargentos</title>
     <style>
-        .hidden { display: none; }
-        .error { color: red; }
-        .success { color: green; }
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            width: 100%;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+        }
+        .form-group input, .form-group select {
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            width: 100%;
+        }
+        button {
+            padding: 10px;
+            width: 100%;
+            background-color: #007bff;
+            border: none;
+            border-radius: 5px;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.3s;
+        }
+        button:hover:not(:disabled) {
+            background-color: #0056b3;
+            transform: scale(1.05);
+        }
+        button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        .message {
+            margin-top: 20px;
+            text-align: center;
+            font-weight: bold;
+        }
+        .error {
+            color: red;
+        }
+        .hidden {
+            display: none;
+        }
+        .button-group {
+            margin-top: 20px;
+            display: flex;
+            justify-content: space-between;
+        }
+        .button-small {
+            width: 48%;
+        }
+        .spacing {
+            margin-top: 10px;
+        }
     </style>
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.1.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.1.0/firebase-firestore.js"></script>
 </head>
 <body>
-    <h1>Gerenciamento de Notas</h1>
+<div class="container">
+    <h1>Sistema de Notas - Curso de Sargentos</h1>
 
-    <!-- Login Form -->
     <div id="login-form">
-        <h2>Login do Aluno</h2>
-        <label for="matricula">Matrícula:</label>
-        <input type="text" id="matricula">
+        <div class="form-group">
+            <label for="matricula">Digite sua matrícula:</label>
+            <input type="text" id="matricula" placeholder="Digite sua matrícula" style="width: 80%;">
+        </div>
         <button onclick="login()">Entrar</button>
-        <p id="login-error" class="error hidden">Matrícula inválida!</p>
+        <div id="login-error" class="error hidden">Matrícula não encontrada. Por favor, tente novamente.</div>
     </div>
 
-    <!-- Notas Form -->
     <div id="notas-form" class="hidden">
         <h2 id="aluno-nome"></h2>
 
-        <label for="disciplina">Selecione a Disciplina:</label>
-        <select id="disciplina" onchange="atualizarCampoNota()">
-             <option value="ADP">Administração de Pessoal (ADP)</option>
+        <div class="form-group">
+            <label for="disciplina">Selecione a Disciplina:</label>
+            <select id="disciplina" onchange="atualizarCampoNota()">
+                <option value="ADP">Administração de Pessoal (ADP)</option>
                 <option value="ALF">Administração Logística Financeira (ALF)</option>
-                <option value="AMTP">Armamento, Munição e Tiro Policial (AMTP)</option>
-                <option value="APHT">Atendimento Pré-Hospitalar Tático (APH)</option>
-                <option value="CCL">Comando Chefia e Liderança (CCL)</option>
-                <option value="DPE">Defesa Pessoal Policial (DPE)</option>
+                <option value="AMT">Armamento, Munição e Tiro Policial (AMT)</option>
+                <option value="APHP">Atendimento Pré-Hospitalar Tático (APHP)</option>
+                <option value="CCL">Comando, Chefia e Liderança (CCL)</option>
+                <option value="DPP">Defesa Pessoal Policial (DPP)</option>
                 <option value="DAD">Direito Administrativo Disciplinar (DAD)</option>
                 <option value="DPPM">Direito Penal Militar, Processual Penal Militar (DPPM)</option>
                 <option value="EFPM">Educação Física Policial Militar (EFPM)</option>
-                <option value="DDPH">Ética e Direitos Humanos na Atividade Policial (DDPH)</option>
+                <option value="EDH">Ética e Direitos Humanos na Atividade Policial (EDH)</option>
                 <option value="GAO">Gerenciamento de Atividade Operacional (GAO)</option>
-                <option value="INP">Inteligência Policial (INP)</option>
-                <option value="LET">Legislação de Trânsito e Operações (LET)</option>
-                <option value="LEI">Legislação Institucional (LEI)</option>
-                <option value="OUD">Ordem Unida (OUD)</option>
-                <option value="PDP">Polícia de Proximidade (PDP)</option>
-                <option value="POS">Polícia Ostensiva (POS)</option>
-                <option value="SCOH">Sistema de Comando e Operações de Ajuda Humanitária (SCOH)</option>
-                <option value="TPO">Técnicas E Operações De Polícia Militar (TPO)</option>
-                <option value="TELA">Tópicos Especiais de Legislação Aplicáveis à Atividade (TELA)</option>
-        </select>
+                <option value="IP">Inteligência Policial (IP)</option>
+                <option value="LTO">Legislação de Trânsito e Operações (LTO)</option>
+                <option value="LI">Legislação Institucional (LI)</option>
+                <option value="OU">Ordem Unida (OU)</option>
+                <option value="PP">Polícia de Proximidade (PP)</option>
+                <option value="PO">Polícia Ostensiva (PO)</option>
+                <option value="SCO">Sistema de Comando e Operações e Ajuda Humanitária (SCO)</option>
+                <option value="TSOP">Técnicas de Sobrevivência Policial (TSOP)</option>
+                <option value="TOP">Técnicas e Operações de Polícia Militar (TOP)</option>
+                <option value="TEL">Tópicos Especiais de Legislação Aplicáveis à Atividade Policial (TEL)</option>
+            </select>
+        </div>
 
-        <label for="nota">Nota:</label>
-        <input type="number" id="nota" min="0" max="10">
-        <button onclick="salvarNota()">Salvar Nota</button>
-        <button onclick="excluirNota()">Excluir Nota</button>
-        <p id="nota-error" class="error hidden">Por favor, insira uma nota válida (0-10).</p>
-        <p id="nota-success" class="success hidden">Nota salva com sucesso!</p>
+        <div class="form-group">
+            <label for="nota">Insira sua nota (entre 0 e 10):</label>
+            <input type="number" id="nota" min="0" max="10" step="0.01">
+        </div>
 
-        <!-- Ranking -->
-        <label for="ranking-checkbox">Mostrar Ranking</label>
-        <input type="checkbox" id="ranking-checkbox" onclick="atualizarRankingCheckbox()">
-        <div id="ranking-confirmacao" class="hidden">
-            <button onclick="mostrarRanking()">Ver Ranking</button>
+        <div class="form-group">
+            <label>
+                <input type="checkbox" id="ranking-checkbox" onchange="atualizarRankingCheckbox()"> Desejo aparecer no ranking
+            </label>
+            <div id="ranking-confirmacao" class="hidden">Seu nome ficará visível para todos que optarem pelo ranking.</div>
+        </div>
+
+        <div class="button-group">
+            <button class="button-small" onclick="salvarNota()">Salvar Nota</button>
+            <button class="button-small" onclick="excluirNota()">Excluir Nota</button>
+        </div>
+
+        <div id="notas-container" class="message"></div>
+        <div class="message hidden" id="nota-success">Nota salva com sucesso!</div>
+        <div class="error hidden" id="nota-error">A nota deve estar entre 0 e 10.</div>
+
+        <div class="message" id="media-container">Sua média é: <span id="media-value"></span></div>
+
+        <div class="button-group spacing">
+            <button id="ranking-button" onclick="mostrarRanking()">Ver Ranking</button>
+        </div>
+
+        <div class="message hidden" id="ranking-container">
+            <h3>Ranking de Alunos</h3>
+            <div id="ranking-list"></div>
             <button onclick="ocultarRanking()">Ocultar Ranking</button>
         </div>
-
-        <!-- Ranking List -->
-        <div id="ranking-container" class="hidden">
-            <h3>Ranking de Notas</h3>
-            <div id="ranking-list"></div>
-        </div>
     </div>
+</div>
 
-    <script>
-        // Firebase initialization
-        const firebaseConfig = {
+<script>
+    // Firebase config
+    const firebaseConfig = {
   apiKey: "AIzaSyDEvCDdX0LGjDMFpyxljj-4JTjZKtgooDM",
   authDomain: "notas-cfs.firebaseapp.com",
   projectId: "notas-cfs",
@@ -84,12 +173,14 @@
   messagingSenderId: "91086463856",
   appId: "1:91086463856:web:6a16fb0b3abe04bbc425b5"
 };
-        };
-        firebase.initializeApp(firebaseConfig);
-        var db = firebase.firestore();
+    };
 
-        const alunos = {
-            "9287027": "ELIENAR FARIAS",
+    // Initialize Firebase
+    const app = firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    const alunos = {
+       "9287027": "ELIENAR FARIAS",
             "9306820": "NAZARETH LIMA GOEDERT",
             "9303219": "CARLA DE LUCA LINHARES",
            "9287124": "LEANDRO GHELLERE",
@@ -124,99 +215,116 @@
         "3847446": "DAIANA PEREIRA",
         "9329056": "VINICIUS JOVELINO COSTA",
         "9339477": "DANIEL SERAFIM PESSI"
-        };
+    };
 
-        // Função de login
-        function login() {
-            const matricula = document.getElementById('matricula').value;
-            const alunoNome = alunos[matricula];
+    let matriculaAtual;
+    let notas = {};
+    let rankingOptIn = false;
 
-            if (alunoNome) {
-                document.getElementById('login-form').classList.add('hidden');
-                document.getElementById('notas-form').classList.remove('hidden');
-                document.getElementById('aluno-nome').innerText = `Bem-vindo(a), ${alunoNome}!`;
-            } else {
-                document.getElementById('login-error').classList.remove('hidden');
-            }
+    // Função de login
+    function login() {
+        const matricula = document.getElementById('matricula').value;
+        if (alunos.hasOwnProperty(matricula)) {
+            matriculaAtual = matricula;
+            document.getElementById('login-form').classList.add('hidden');
+            document.getElementById('notas-form').classList.remove('hidden');
+            document.getElementById('aluno-nome').innerText = alunos[matricula];
+            carregarNotas();
+        } else {
+            document.getElementById('login-error').classList.remove('hidden');
         }
+    }
 
-        // Atualiza campo de nota ao trocar de disciplina
-        function atualizarCampoNota() {
-            document.getElementById('nota').value = ""; // Limpa o campo de nota
-        }
-
-        // Salva a nota no Firestore
-        function salvarNota() {
-            const nota = parseFloat(document.getElementById('nota').value);
-            const disciplina = document.getElementById('disciplina').value;
-            const matricula = document.getElementById('matricula').value;
-
-            if (isNaN(nota) || nota < 0 || nota > 10) {
-                document.getElementById('nota-error').classList.remove('hidden');
-                return;
-            }
-
-            db.collection('notas').add({
-                matricula: matricula,
-                disciplina: disciplina,
-                nota: nota
-            }).then(() => {
+    // Função para salvar nota
+    function salvarNota() {
+        const disciplina = document.getElementById('disciplina').value;
+        const nota = parseFloat(document.getElementById('nota').value);
+        if (nota >= 0 && nota <= 10) {
+            notas[disciplina] = nota;
+            db.collection('notas').doc(matriculaAtual).set(notas).then(() => {
+                atualizarNotas();
+                atualizarMedia();
                 document.getElementById('nota-success').classList.remove('hidden');
-                document.getElementById('nota-error').classList.add('hidden');
-            }).catch((error) => {
-                console.error("Erro ao salvar nota: ", error);
+                setTimeout(() => document.getElementById('nota-success').classList.add('hidden'), 3000);
             });
+        } else {
+            document.getElementById('nota-error').classList.remove('hidden');
+            setTimeout(() => document.getElementById('nota-error').classList.add('hidden'), 3000);
         }
+    }
 
-        // Exclui a nota no Firestore
-        function excluirNota() {
-            const matricula = document.getElementById('matricula').value;
-            const disciplina = document.getElementById('disciplina').value;
-
-            db.collection('notas').where("matricula", "==", matricula)
-                .where("disciplina", "==", disciplina)
-                .get().then((querySnapshot) => {
-                    querySnapshot.forEach((doc) => {
-                        doc.ref.delete();
-                    });
-                }).catch((error) => {
-                    console.error("Erro ao excluir nota: ", error);
-                });
-        }
-
-        // Atualiza o campo de ranking
-        function atualizarRankingCheckbox() {
-            const rankingCheckbox = document.getElementById('ranking-checkbox').checked;
-            if (rankingCheckbox) {
-                document.getElementById('ranking-confirmacao').classList.remove('hidden');
-            } else {
-                document.getElementById('ranking-confirmacao').classList.add('hidden');
+    // Função para atualizar notas na tela
+    function atualizarNotas() {
+        const notasContainer = document.getElementById('notas-container');
+        notasContainer.innerHTML = ''; // Limpa a lista atual
+        for (const disciplina in notas) {
+            if (notas.hasOwnProperty(disciplina)) {
+                notasContainer.innerHTML += `<p>${disciplina}: ${notas[disciplina]}</p>`;
             }
         }
+    }
 
-        // Mostra o ranking de notas
-        function mostrarRanking() {
-            const rankingContainer = document.getElementById('ranking-container');
-            rankingContainer.classList.remove('hidden');
+    // Função para atualizar média
+    function atualizarMedia() {
+        const mediaValue = document.getElementById('media-value');
+        const totalNotas = Object.values(notas);
+        const media = totalNotas.length > 0 ? totalNotas.reduce((a, b) => a + b) / totalNotas.length : 0;
+        mediaValue.innerText = media.toFixed(2);
+    }
 
-            const rankingList = document.getElementById('ranking-list');
-            rankingList.innerHTML = ''; // Limpa o ranking anterior
-
-            db.collection('notas').get().then((querySnapshot) => {
-                querySnapshot.forEach((doc) => {
-                    const data = doc.data();
-                    const alunoNome = alunos[data.matricula] || 'Aluno desconhecido';
-                    const notaItem = document.createElement('div');
-                    notaItem.textContent = `${alunoNome}: ${data.nota} (${data.disciplina})`;
-                    rankingList.appendChild(notaItem);
-                });
+    // Função para excluir nota
+    function excluirNota() {
+        const disciplina = document.getElementById('disciplina').value;
+        if (notas[disciplina] !== undefined) {
+            delete notas[disciplina];
+            db.collection('notas').doc(matriculaAtual).set(notas).then(() => {
+                atualizarNotas();
+                atualizarMedia();
+                document.getElementById('nota-success').innerText = 'Nota excluída com sucesso!';
+                document.getElementById('nota-success').classList.remove('hidden');
+                setTimeout(() => document.getElementById('nota-success').classList.add('hidden'), 3000);
             });
         }
+    }
 
-        // Oculta o ranking
-        function ocultarRanking() {
-            document.getElementById('ranking-container').classList.add('hidden');
-        }
-    </script>
+    // Função para atualizar campo de nota
+    function atualizarCampoNota() {
+        const disciplina = document.getElementById('disciplina').value;
+        document.getElementById('nota').value = notas[disciplina] || '';
+    }
+
+    // Função para ativar/desativar ranking
+    function atualizarRankingCheckbox() {
+        rankingOptIn = document.getElementById('ranking-checkbox').checked;
+        document.getElementById('ranking-confirmacao').classList.toggle('hidden', !rankingOptIn);
+    }
+
+    // Função para mostrar ranking
+    function mostrarRanking() {
+        const rankingContainer = document.getElementById('ranking-container');
+        rankingContainer.classList.remove('hidden');
+        carregarRanking();
+    }
+
+    // Função para ocultar ranking
+    function ocultarRanking() {
+        document.getElementById('ranking-container').classList.add('hidden');
+    }
+
+    // Função para carregar o ranking dos alunos
+    function carregarRanking() {
+        const rankingList = document.getElementById('ranking-list');
+        rankingList.innerHTML = ''; // Limpa a lista atual
+        db.collection('notas').get().then(snapshot => {
+            snapshot.forEach(doc => {
+                if (doc.exists) {
+                    const aluno = alunos[doc.id];
+                    const notaMedia = Object.values(doc.data()).reduce((sum, nota) => sum + nota, 0) / Object.keys(doc.data()).length;
+                    rankingList.innerHTML += `<p>${aluno}: ${notaMedia.toFixed(2)}</p>`;
+                }
+            });
+        });
+    }
+</script>
 </body>
 </html>
