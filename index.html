@@ -242,33 +242,35 @@
     }
 
     async function salvarNota() {
-        const disciplina = document.getElementById("disciplina").value;
-        const nota = parseFloat(document.getElementById("nota").value);
-        const ranking = document.getElementById("ranking-checkbox").checked;
+    const disciplina = document.getElementById("disciplina").value;
+    const nota = parseFloat(document.getElementById("nota").value);
+    const ranking = document.getElementById("ranking-checkbox").checked;
 
-        if (isNaN(nota) || nota < 0 || nota > 10) {
-            document.getElementById("nota-error").classList.remove("hidden");
-            return;
-        }
-
-        document.getElementById("nota-error").classList.add("hidden");
-
-        try {
-            await db.collection("notas").doc(alunoAtual).set({
-                [disciplina]: {
-                    nota: nota,
-                    ranking: ranking
-                }
-            }, { merge: true });
-
-            document.getElementById("nota-success").classList.remove("hidden");
-            document.getElementById("media-container").classList.remove("hidden");
-            calcularMedia();
-            carregarNotas();
-        } catch (error) {
-            console.error("Erro ao salvar a nota: ", error);
-        }
+    if (isNaN(nota) || nota < 0 || nota > 10) {
+        document.getElementById("nota-error").classList.remove("hidden");
+        return; // Saia da função se a nota for inválida
     }
+
+    try {
+        // Salvar a nota no Firestore
+        await db.collection('notas').add({
+            matricula: alunoAtual,
+            disciplina: disciplina,
+            nota: nota,
+            ranking: ranking,
+            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        });
+
+        document.getElementById("nota-success").classList.remove("hidden");
+        document.getElementById("nota-error").classList.add("hidden");
+        carregarNotas(); // Atualiza as notas exibidas
+    } catch (error) {
+        console.error("Erro ao salvar a nota: ", error);
+        document.getElementById("nota-error").innerText = "Erro ao salvar a nota. Tente novamente.";
+        document.getElementById("nota-error").classList.remove("hidden");
+    }
+}
+
 
     async function excluirNota() {
         const disciplina = document.getElementById("disciplina").value;
