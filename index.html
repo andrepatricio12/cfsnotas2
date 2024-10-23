@@ -241,34 +241,29 @@
         notaInput.value = ""; // Limpar o campo nota ao trocar de disciplina
     }
 
-    async function salvarNota() {
-        const disciplina = document.getElementById("disciplina").value;
-        const nota = parseFloat(document.getElementById("nota").value);
-        const ranking = document.getElementById("ranking-checkbox").checked;
+   async function salvarNota() {
+    const disciplina = document.getElementById("disciplina").value;
+    const nota = parseFloat(document.getElementById("nota").value);
+    const ranking = document.getElementById("ranking-checkbox").checked;
 
-        if (isNaN(nota) || nota < 0 || nota > 10) {
-            document.getElementById("nota-error").classList.remove("hidden");
-            return;
-        }
-
-        document.getElementById("nota-error").classList.add("hidden");
-
-        try {
-            await db.collection("notas").doc(alunoAtual).set({
-                [disciplina]: {
-                    nota: nota,
-                    ranking: ranking
-                }
-            }, { merge: true });
-
-            document.getElementById("nota-success").classList.remove("hidden");
-            document.getElementById("media-container").classList.remove("hidden");
-            calcularMedia();
-            carregarNotas();
-        } catch (error) {
-            console.error("Erro ao salvar a nota: ", error);
-        }
+    if (isNaN(nota) || nota < 0 || nota > 10) {
+        document.getElementById("nota-error").classList.remove("hidden");
+        return;
     }
+
+    try {
+        await db.collection("notas").doc(alunoAtual).set({
+            [disciplina]: { nota, ranking },
+        }, { merge: true });
+        
+        document.getElementById("nota-success").classList.remove("hidden");
+        document.getElementById("nota-error").classList.add("hidden");
+        carregarNotas(); // Atualiza a lista de notas após salvar
+    } catch (error) {
+        console.error("Erro ao salvar a nota:", error);
+    }
+}
+
 
     async function excluirNota() {
         const disciplina = document.getElementById("disciplina").value;
@@ -286,32 +281,43 @@
     }
 
     async function carregarNotas() {
-        const notasContainer = document.getElementById("notas-container");
-        notasContainer.innerHTML = ""; // Limpar as notas existentes
-
+    try {
         const doc = await db.collection("notas").doc(alunoAtual).get();
         if (doc.exists) {
-            const notas = doc.data();
-            for (const [disciplina, info] of Object.entries(notas)) {
-                notasContainer.innerHTML += `${disciplina}: ${info.nota}<br>`;
+            const data = doc.data();
+            let notasTexto = '';
+            for (const disciplina in data) {
+                if (data[disciplina].nota !== undefined) {
+                    notasTexto += `${disciplina}: ${data[disciplina].nota} <br>`;
+                }
             }
+            document.getElementById("notas-container").innerHTML = notasTexto;
+            calcularMedia(data);
+        } else {
+            document.getElementById("notas-container").innerText = "Nenhuma nota encontrada.";
+        }
+    } catch (error) {
+        console.error("Erro ao carregar as notas:", error);
+    }
+}
+
         }
     }
 
-    async function calcularMedia() {
-        const doc = await db.collection("notas").doc(alunoAtual).get();
-        if (doc.exists) {
-            const notas = doc.data();
-            let totalNotas = 0;
-            let quantidadeNotas = 0;
+  function calcularMedia(notas) {
+    let total = 0;
+    let count = 0;
 
-            for (const info of Object.values(notas)) {
-                totalNotas += info.nota;
-                quantidadeNotas++;
-            }
+    for (const disciplina in notas) {
+        if (notas[disciplina].nota !== undefined) {
+            total += notas[disciplina].nota;
+            count++;
+        }
+    }
 
-            const media = quantidadeNotas ? (totalNotas / quantidadeNotas).toFixed(2) : 0;
-            document.getElementById("media-value").innerText = media;
+    const media = count ? (total / count).toFixed(2) : 0;
+    document.getElementById("media-value").innerText = media;
+
         }
     }
 
