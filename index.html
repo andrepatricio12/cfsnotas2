@@ -248,14 +248,25 @@ async function carregarNotas() {
 }
     }
 
-   function salvarNota() {
-    const nota = parseFloat(document.getElementById('nota').value);
+   async function salvarNota() {
     const disciplina = document.getElementById('disciplina').value;
-    
-    if (nota < 0 || nota > 10 || isNaN(nota)) {
+    const nota = parseFloat(document.getElementById('nota').value);
+
+    if (isNaN(nota) || nota < 0 || nota > 10) {
         document.getElementById('nota-error').classList.remove('hidden');
         return;
     }
+
+    const notasRef = db.collection('notas').doc(alunoAtivo);
+    await notasRef.set({
+        [disciplina]: nota
+    }, { merge: true });
+
+    document.getElementById('nota-success').classList.remove('hidden');
+    setTimeout(() => {
+        document.getElementById('nota-success').classList.add('hidden');
+    }, 3000);
+}
 
     const notasRef = db.collection('notas').doc(alunoAtivo);
 
@@ -291,10 +302,18 @@ async function carregarNotas() {
 
         // Atualize a interface para refletir a exclusão da nota
     }
-function calcularMedia(notas) {
-    if (notas.length === 0) return 0;
-    const soma = notas.reduce((acc, nota) => acc + nota, 0);
-    return (soma / notas.length).toFixed(2);
+async function calcularMedia() {
+    const notasRef = db.collection('notas').doc(alunoAtivo);
+    const docSnap = await notasRef.get();
+
+    if (docSnap.exists) {
+        const notas = docSnap.data();
+        const valoresNotas = Object.values(notas);
+        const soma = valoresNotas.reduce((acc, nota) => acc + nota, 0);
+        const media = soma / valoresNotas.length;
+
+        document.getElementById('media-value').innerText = media.toFixed(2);
+    }
 }
 
 async function carregarNotas() {
