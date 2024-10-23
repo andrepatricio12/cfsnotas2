@@ -166,12 +166,10 @@
 </div>
 
 <script>
-    // Import the functions you need from the SDKs you need
+   // Importação e configuração correta do Firebase para a versão 9
 import { initializeApp } from "firebase/app";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
+import { getFirestore, doc, getDoc } from "firebase/firestore";
 
-// Your web app's Firebase configuration
 const firebaseConfig = {
   apiKey: "AIzaSyDEvCDdX0LGjDMFpyxljj-4JTjZKtgooDM",
   authDomain: "notas-cfs.firebaseapp.com",
@@ -181,14 +179,22 @@ const firebaseConfig = {
   appId: "1:91086463856:web:6a16fb0b3abe04bbc425b5"
 };
 
-// Initialize Firebase
+// Inicializando o Firebase
 const app = initializeApp(firebaseConfig);
-  const app = initializeApp(firebaseConfig);
-    };
+const db = getFirestore(app);
 
-    // Initialize Firebase
-    const app = firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
+async function carregarNotas() {
+  const notasRef = doc(db, 'notas', alunoAtivo);  // Corrige a chamada para obter o documento do aluno
+  const docSnap = await getDoc(notasRef);
+
+  if (docSnap.exists()) {
+    const notasData = docSnap.data();
+    // Manipule as notas recuperadas
+  } else {
+    console.log("Nenhuma nota encontrada");
+  }
+}
+
 
     const alunos = {
        "9287027": "ELIENAR FARIAS",
