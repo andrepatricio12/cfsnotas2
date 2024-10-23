@@ -136,7 +136,8 @@
 
         <div class="form-group">
             <label>
-                <input type="checkbox" id="ranking-checkbox" onchange="atualizarRankingCheckbox()"> Desejo aparecer no ranking
+                <<input type="checkbox" id="ranking-checkbox" onchange="atualizarRankingCheckbox()"> Exibir Nome no Ranking
+
             </label>
             <div id="ranking-confirmacao" class="hidden">Seu nome ficará visível para todos que optarem pelo ranking.</div>
         </div>
@@ -299,24 +300,53 @@
     }
 
     function mostrarRanking() {
-        if (rankingAtivo) return;
+    const rankingContainer = document.getElementById('ranking-container');
+    const rankingList = document.getElementById('ranking-list');
+    rankingList.innerHTML = '';
 
-        rankingAtivo = true;
-        const rankingList = document.getElementById("ranking-list");
-        rankingList.innerHTML = "";
-        db.collection("notas")
-            .where("ranking", "==", true)
-            .orderBy("nota", "desc")
-            .get()
-            .then((querySnapshot) => {
+    db.collection("notas").where("ranking", "==", true).get()
+        .then((querySnapshot) => {
+            if (querySnapshot.empty) {
+                const noData = document.createElement('div');
+                noData.textContent = 'Nenhum aluno com nota em ranking.';
+                rankingList.appendChild(noData);
+            } else {
                 querySnapshot.forEach((doc) => {
-                    const data = doc.data();
-                    const alunoNome = alunos[data.matricula] || "Nome não encontrado";
-                    rankingList.innerHTML += `${alunoNome}: ${data.nota.toFixed(2)}<br>`;
+                    const notaData = doc.data();
+                    const listItem = document.createElement('div');
+                    listItem.textContent = `${alunos[notaData.matricula]}: ${notaData.nota}`;
+                    rankingList.appendChild(listItem);
                 });
-                document.getElementById("ranking-container").classList.remove("hidden");
-            });
+            }
+            rankingContainer.classList.remove('hidden');
+        })
+        .catch((error) => {
+            console.error("Erro ao carregar o ranking: ", error);
+        });
+}
+    function confirmarRanking() {
+    const checkbox = document.getElementById('ranking-checkbox');
+    const rankingConfirmacao = document.getElementById('ranking-confirmacao');
+
+    if (checkbox.checked) {
+        // Exibe um alert de confirmação
+        const confirmacao = confirm("Seu nome ficará visível para todos que optarem pelo ranking. Deseja continuar?");
+        
+        if (confirmacao) {
+            rankingConfirmacao.classList.remove('hidden'); // Mostra a mensagem se o usuário clicar em OK
+            atualizarRankingCheckbox(); // Atualiza o estado do botão
+        } else {
+            checkbox.checked = false; // Desmarca o checkbox se o usuário clicar em Cancelar
+            rankingConfirmacao.classList.add('hidden'); // Esconde a mensagem
+            atualizarRankingCheckbox(); // Atualiza o estado do botão
+        }
+    } else {
+        rankingConfirmacao.classList.add('hidden'); // Esconde a mensagem se o checkbox for desmarcado
+        atualizarRankingCheckbox(); // Atualiza o estado do botão
     }
+}
+
+
 
     function ocultarRanking() {
         rankingAtivo = false;
