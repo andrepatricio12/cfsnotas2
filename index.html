@@ -234,17 +234,18 @@
             document.getElementById('login-error').classList.remove('hidden');
         }
     }
+async function carregarNotas() {
+    const notasRef = db.collection('notas').doc(alunoAtivo);
+    const docSnap = await notasRef.get();
 
-    async function carregarNotas() {
-        const notasRef = db.collection('notas').doc(alunoAtivo);
-        const docSnap = await notasRef.get();
-
-        if (docSnap.exists) {
-            const notasData = docSnap.data();
-            // Exiba as notas recuperadas conforme necessário
-        } else {
-            console.log("Nenhuma nota encontrada");
-        }
+    if (docSnap.exists) {
+        const notasData = docSnap.data();
+        // Exibir as notas do Firestore
+        document.getElementById('nota').value = notasData[disciplina] || '';
+    } else {
+        console.log("Nenhuma nota encontrada");
+    }
+}
     }
 
    function salvarNota() {
