@@ -215,18 +215,16 @@
         "9330356": "BRUNA DA SILVA PIRES",
         "3847446": "DAIANA PEREIRA",
         "9329056": "VINICIUS JOVELINO COSTA",
-        "9339477": "DANIEL SERAFIM PESSI"
-    };
+        "9339477": "DANIEL SERAFIM PESSI"    };
 
-    let alunoAtual = null;
+    let matriculaAtual = null;
+    let rankingAtivo = false;
 
     function login() {
-        const matricula = document.getElementById("matricula").value;
-        const alunoNome = alunos[matricula];
-
-        if (alunoNome) {
-            alunoAtual = matricula;
-            document.getElementById("aluno-nome").innerText = alunoNome;
+        const matriculaInput = document.getElementById("matricula").value;
+        if (alunos[matriculaInput]) {
+            matriculaAtual = matriculaInput;
+            document.getElementById("aluno-nome").innerText = alunos[matriculaInput];
             document.getElementById("login-form").classList.add("hidden");
             document.getElementById("notas-form").classList.remove("hidden");
             carregarNotas();
@@ -236,125 +234,93 @@
     }
 
     function atualizarCampoNota() {
+        document.getElementById("nota").value = '';
+    }
+
+    function salvarNota() {
         const disciplina = document.getElementById("disciplina").value;
-        const notaInput = document.getElementById("nota");
-        notaInput.value = ""; // Limpar o campo nota ao trocar de disciplina
-    }
+        const nota = parseFloat(document.getElementById("nota").value);
+        const rankingCheckbox = document.getElementById("ranking-checkbox").checked;
 
-    async function salvarNota() {
-    const disciplina = document.getElementById("disciplina").value;
-    const nota = parseFloat(document.getElementById("nota").value);
-    const ranking = document.getElementById("ranking-checkbox").checked;
+        if (nota < 0 || nota > 10) {
+            document.getElementById("nota-error").classList.remove("hidden");
+            return;
+        }
 
-    if (isNaN(nota) || nota < 0 || nota > 10) {
-        document.getElementById("nota-error").classList.remove("hidden");
-        return; // Saia da função se a nota for inválida
-    }
-
-    try {
-        // Salvar a nota no Firestore
-        await db.collection('notas').add({
-            matricula: alunoAtual,
+        const notaData = {
+            matricula: matriculaAtual,
             disciplina: disciplina,
             nota: nota,
-            ranking: ranking,
-            timestamp: firebase.firestore.FieldValue.serverTimestamp()
-        });
+            ranking: rankingCheckbox
+        };
 
-        document.getElementById("nota-success").classList.remove("hidden");
-        document.getElementById("nota-error").classList.add("hidden");
-        carregarNotas(); // Atualiza as notas exibidas
-    } catch (error) {
-        console.error("Erro ao salvar a nota: ", error);
-        document.getElementById("nota-error").innerText = "Erro ao salvar a nota. Tente novamente.";
-        document.getElementById("nota-error").classList.remove("hidden");
-    }
-}
-
-
-    async function excluirNota() {
-        const disciplina = document.getElementById("disciplina").value;
-
-        try {
-            await db.collection("notas").doc(alunoAtual).update({
-                [disciplina]: firebase.firestore.FieldValue.delete()
+        db.collection("notas").add(notaData)
+            .then(() => {
+                document.getElementById("nota-success").classList.remove("hidden");
+                document.getElementById("nota-error").classList.add("hidden");
+                carregarNotas();
+            })
+            .catch((error) => {
+                console.error("Erro ao salvar a nota: ", error);
             });
-            carregarNotas();
-            calcularMedia();
-            document.getElementById("nota-success").classList.remove("hidden");
-        } catch (error) {
-            console.error("Erro ao excluir a nota: ", error);
-        }
     }
 
-    async function carregarNotas() {
-        const notasContainer = document.getElementById("notas-container");
-        notasContainer.innerHTML = ""; // Limpar as notas existentes
-
-        const doc = await db.collection("notas").doc(alunoAtual).get();
-        if (doc.exists) {
-            const notas = doc.data();
-            for (const [disciplina, info] of Object.entries(notas)) {
-                notasContainer.innerHTML += `${disciplina}: ${info.nota}<br>`;
-            }
-        }
+    function excluirNota() {
+        // Implementar a lógica de exclusão de notas se necessário.
     }
 
-    function calcularMedia(notas) {
-    let total = 0;
-    let count = 0;
+    function carregarNotas() {
+        db.collection("notas")
+            .where("matricula", "==", matriculaAtual)
+            .get()
+            .then((querySnapshot) => {
+                let notasHtml = "";
+                let totalNotas = 0;
+                let numNotas = 0;
 
-    for (const disciplina in notas) {
-        if (notas[disciplina].nota !== undefined) {
-            total += notas[disciplina].nota;
-            count++;
-        }
-    }
+                querySnapshot.forEach((doc) => {
+                    const data = doc.data();
+                    notasHtml += `${data.disciplina}: ${data.nota.toFixed(2)}<br>`;
+                    totalNotas += data.nota;
+                    numNotas++;
+                });
 
-    const media = count ? (total / count).toFixed(2) : 0;
-    document.getElementById("media-value").innerText = media;
-}
+                document.getElementById("notas-container").innerHTML = notasHtml;
 
-    function mostrarRanking() {
-        document.getElementById("ranking-container").classList.remove("hidden");
-        carregarRanking();
-    }
-
-    function ocultarRanking() {
-        document.getElementById("ranking-container").classList.add("hidden");
-    }
-
-    async function carregarRanking() {
-        const rankingList = document.getElementById("ranking-list");
-        rankingList.innerHTML = ""; // Limpar a lista existente
-
-        const snapshot = await db.collection("notas").get();
-        const ranking = [];
-
-        snapshot.forEach(doc => {
-            const dados = doc.data();
-            for (const [disciplina, info] of Object.entries(dados)) {
-                if (info.ranking) {
-                    ranking.push({
-                        matricula: doc.id,
-                        disciplina: disciplina,
-                        nota: info.nota
-                    });
-                }
-            }
-        });
-
-        ranking.sort((a, b) => b.nota - a.nota); // Ordenar por nota decrescente
-
-        ranking.forEach((aluno) => {
-            rankingList.innerHTML += `${aluno.matricula}: ${aluno.disciplina} - Nota: ${aluno.nota}<br>`;
-        });
+                const media = numNotas > 0 ? (totalNotas / numNotas).toFixed(2) : 0;
+                document.getElementById("media-value").innerText = media;
+                document.getElementById("media-container").classList.remove("hidden");
+            });
     }
 
     function atualizarRankingCheckbox() {
         const rankingCheckbox = document.getElementById("ranking-checkbox");
-        const rankingConfirmacao = document.getElementById("ranking-confirmacao");
-        rankingConfirmacao.classList.toggle("hidden", !rankingCheckbox.checked);
+        document.getElementById("ranking-confirmacao").classList.toggle("hidden", !rankingCheckbox.checked);
+    }
+
+    function mostrarRanking() {
+        if (rankingAtivo) return;
+
+        rankingAtivo = true;
+        const rankingList = document.getElementById("ranking-list");
+        rankingList.innerHTML = "";
+        db.collection("notas")
+            .where("ranking", "==", true)
+            .orderBy("nota", "desc")
+            .get()
+            .then((querySnapshot) => {
+                querySnapshot.forEach((doc) => {
+                    const data = doc.data();
+                    const alunoNome = alunos[data.matricula] || "Nome não encontrado";
+                    rankingList.innerHTML += `${alunoNome}: ${data.nota.toFixed(2)}<br>`;
+                });
+                document.getElementById("ranking-container").classList.remove("hidden");
+            });
+    }
+
+    function ocultarRanking() {
+        rankingAtivo = false;
+        document.getElementById("ranking-container").classList.add("hidden");
     }
 </script>
 </body>
