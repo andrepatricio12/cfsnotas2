@@ -233,7 +233,20 @@
             document.getElementById("login-error").classList.remove("hidden");
         }
     }
+function calcularMedia(notas) {
+    let total = 0;
+    let count = 0;
 
+    for (const disciplina in notas) {
+        if (notas[disciplina].nota !== undefined) {
+            total += notas[disciplina].nota;
+            count++;
+        }
+    }
+
+    const media = count ? (total / count).toFixed(2) : 0;
+    document.getElementById("media-value").innerText = media;
+}
     function atualizarCampoNota() {
         document.getElementById("nota").value = '';
     }
