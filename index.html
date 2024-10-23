@@ -1,11 +1,11 @@
-<!DOCTYPE html> 
+<!DOCTYPE html>
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistema de Notas - Curso de Sargentos</title>
     <style>
-        /* Seu estilo */
+        /* Estilos gerais */
         body {
             font-family: Arial, sans-serif;
             margin: 0;
@@ -81,14 +81,16 @@
         .spacing {
             margin-top: 10px;
         }
-        <label>
-  <input type="checkbox" id="showInRankingCheckbox" onclick="toggleRankingButton()"> Mostrar meu nome no ranking
-</label>
-<p id="rankingCheckboxAlert" style="display:none;">Seu nome será visível no ranking.</p>
-<button id="rankingButton" disabled>Visualizar Ranking</button>
-<input type="text" id="gradeInput" placeholder="Insira sua nota" />
-<button onclick="saveGrade()">Salvar Nota</button>
-
+        .message span {
+            font-weight: bold;
+        }
+        /* Estilos do checkbox e ranking */
+        #rankingButton {
+            opacity: 0.5;
+        }
+        #rankingCheckboxAlert {
+            color: green;
+        }
     </style>
     <!-- Firebase SDK (compatível com navegadores) -->
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
@@ -113,6 +115,7 @@
         <div class="form-group">
             <label for="disciplina">Selecione a Disciplina:</label>
             <select id="disciplina" onchange="atualizarCampoNota()">
+                <!-- Lista das disciplinas -->
                 <option value="ADP">Administração de Pessoal (ADP)</option>
                 <option value="ALF">Administração Logística Financeira (ALF)</option>
                 <option value="AMTP">Armamento, Munição e Tiro Policial (AMTP)</option>
@@ -133,6 +136,7 @@
                 <option value="SCOH">Sistema de Comando e Operações de Ajuda Humanitária (SCOH)</option>
                 <option value="TPO">Técnicas E Operações De Polícia Militar (TPO)</option>
                 <option value="TELA">Tópicos Especiais de Legislação Aplicáveis à Atividade (TELA)</option>
+                <!-- Mais opções -->
             </select>
         </div>
 
@@ -143,9 +147,9 @@
 
         <div class="form-group">
             <label>
-                <input type="checkbox" id="Quero aparecer no ranking" onchange="atualizarRankingCheckbox()"> Exibir Nome no Ranking
+                <input type="checkbox" id="showInRankingCheckbox" onclick="toggleRankingButton()"> Exibir Nome no Ranking
             </label>
-            <div id="ranking-confirmacao" class="hidden">Seu nome ficará visível para todos que optarem pelo ranking.</div>
+            <div id="rankingCheckboxAlert" class="hidden">Seu nome ficará visível para todos que optarem pelo ranking.</div>
         </div>
 
         <div class="button-group">
@@ -160,7 +164,7 @@
         <div class="message" id="media-container">Sua média é: <span id="media-value"></span></div>
 
         <div class="button-group spacing">
-            <button id="ranking-button" onclick="mostrarRanking()">Ver Ranking</button>
+            <button id="rankingButton" disabled onclick="mostrarRanking()">Ver Ranking</button>
         </div>
 
         <div class="message hidden" id="ranking-container">
@@ -188,7 +192,7 @@
 
     // Definindo os alunos
     const alunos = {
-        "9287027": "ELIENAR FARIAS",
+         "9287027": "ELIENAR FARIAS",
             "9306820": "NAZARETH LIMA GOEDERT",
             "9303219": "CARLA DE LUCA LINHARES",
            "9287124": "LEANDRO GHELLERE",
@@ -242,9 +246,28 @@
 
     // Função para atualizar o campo de nota
     function atualizarCampoNota() {
-        document.getElementById("nota").value = ""; // Limpa o campo de nota
+        const disciplina = document.getElementById("disciplina").value;
+        carregarNota(disciplina);
         document.getElementById("nota-success").classList.add("hidden");
         document.getElementById("nota-error").classList.add("hidden");
+    }
+
+    // Função para carregar a nota salva
+    function carregarNota(disciplina) {
+        const matricula = document.getElementById("matricula").value;
+
+        db.collection("notas").doc(matricula).get().then((doc) => {
+            if (doc.exists) {
+                const data = doc.data();
+                if (data[disciplina]) {
+                    document.getElementById("nota").value = data[disciplina].nota || '';
+                } else {
+                    document.getElementById("nota").value = '';
+                }
+            } else {
+                document.getElementById("nota").value = '';
+            }
+        });
     }
 
     // Função para salvar a nota
@@ -252,7 +275,7 @@
         const matricula = document.getElementById("matricula").value;
         const disciplina = document.getElementById("disciplina").value;
         const nota = parseFloat(document.getElementById("nota").value);
-        const rankingCheckbox = document.getElementById("Quero aparecer no ranking").checked;
+        const rankingCheckbox = document.getElementById("showInRankingCheckbox").checked;
 
         if (nota >= 0 && nota <= 10) {
             db.collection("notas").doc(matricula).set({
@@ -272,88 +295,6 @@
         } else {
             document.getElementById("nota-error").classList.remove("hidden");
         }
-    // Carregar nota salva quando a disciplina mudar
-function loadGradeForSubject(subjectId) {
-  const gradeInput = document.getElementById('gradeInput');
-
-  // Buscar a nota salva no Firebase
-  const studentId = 'SEU_ID_ESTUDANTE';  // Substitua pela sua forma de obter o ID do estudante
-  const subjectRef = firebase.firestore().collection('students').doc(studentId).collection('grades').doc(subjectId);
-
-  subjectRef.get().then((doc) => {
-    if (doc.exists) {
-      gradeInput.value = doc.data().grade || '';  // Carregar a nota salva ou manter vazio se não houver nota
-    } else {
-      gradeInput.value = '';  // Limpar o campo se não houver nota para a disciplina selecionada
-    }
-  }).catch((error) => {
-    console.log("Erro ao obter o documento:", error);
-  });
-}
-
-// Salvar a nota quando o botão for clicado
-function saveGrade() {
-  const gradeInput = document.getElementById('gradeInput').value;
-  const studentId = 'SEU_ID_ESTUDANTE';  // Substitua pela sua forma de obter o ID do estudante
-  const subjectId = 'ID_DA_DISCIPLINA_SELECIONADA';  // Substitua pela sua forma de obter o ID da disciplina
-
-  // Salvar a nota no Firebase
-  firebase.firestore().collection('students').doc(studentId).collection('grades').doc(subjectId).set({
-    grade: gradeInput
-  }).then(() => {
-    console.log('Nota salva com sucesso');
-  }).catch((error) => {
-    console.error("Erro ao salvar a nota: ", error);
-  });
-}
-}
-    
-    function toggleRankingButton() {
-  const checkbox = document.getElementById('showInRankingCheckbox');
-  const rankingButton = document.getElementById('rankingButton');
-  const alertMessage = document.getElementById('rankingCheckboxAlert');
-
-  if (checkbox.checked) {
-    rankingButton.disabled = false;
-    rankingButton.style.opacity = 1;  // Tornar o botão totalmente visível
-    alertMessage.style.display = 'block';  // Mostrar a mensagem de alerta
-  } else {
-    rankingButton.disabled = true;
-    rankingButton.style.opacity = 0.5;  // Deixar o botão mais claro quando desativado
-    alertMessage.style.display = 'none';  // Esconder a mensagem de alerta
-  }
-}
-
-
-    // Função para carregar as notas
-    function carregarNotas(matricula) {
-        db.collection("notas").doc(matricula).get().then((doc) => {
-            if (doc.exists) {
-                const data = doc.data();
-                let notasTexto = "Notas:\n";
-                let soma = 0;
-                let contagem = 0;
-
-                for (const disciplina in data) {
-                    const nota = data[disciplina].nota;
-                    if (nota != null) {
-                        notasTexto += `${disciplina}: ${nota}\n`;
-                        soma += nota;
-                        contagem++;
-                    }
-                }
-
-                document.getElementById("notas-container").innerText = notasTexto;
-                const media = contagem ? (soma / contagem).toFixed(2) : 0;
-                document.getElementById("media-value").innerText = media;
-
-            } else {
-                document.getElementById("notas-container").innerText = "Nenhuma nota registrada.";
-                document.getElementById("media-value").innerText = "N/A";
-            }
-        }).catch((error) => {
-            console.error("Erro ao carregar notas: ", error);
-        });
     }
 
     // Função para excluir a nota
@@ -363,46 +304,83 @@ function saveGrade() {
 
         db.collection("notas").doc(matricula).update({
             [disciplina]: firebase.firestore.FieldValue.delete()
-        })
-        .then(() => {
-            document.getElementById("nota-success").classList.remove("hidden");
-            carregarNotas(matricula);
-        })
-        .catch((error) => {
+        }).then(() => {
+            carregarNota(disciplina); // Limpar o campo de nota
+        }).catch((error) => {
             console.error("Erro ao excluir nota: ", error);
         });
     }
 
-    // Função para mostrar o ranking
-    function mostrarRanking() {
-        document.getElementById("ranking-container").classList.remove("hidden");
-        carregarRanking();
+    // Função para carregar todas as notas
+    function carregarNotas(matricula) {
+        db.collection("notas").doc(matricula).get().then((doc) => {
+            if (doc.exists) {
+                const data = doc.data();
+                let totalNotas = 0;
+                let numDisciplinas = 0;
+
+                for (const disciplina in data) {
+                    if (data[disciplina].nota) {
+                        totalNotas += data[disciplina].nota;
+                        numDisciplinas++;
+                    }
+                }
+
+                const media = numDisciplinas > 0 ? (totalNotas / numDisciplinas).toFixed(2) : 0;
+                document.getElementById("media-value").innerText = media;
+            }
+        });
     }
 
-    // Função para carregar o ranking
-    function carregarRanking() {
-        db.collection("notas").where("ranking", "==", true).get().then((snapshot) => {
-            const rankingList = document.getElementById("ranking-list");
-            rankingList.innerHTML = "";
-            snapshot.forEach((doc) => {
-                const aluno = alunos[doc.id];
-                const nota = doc.data().nota || "N/A";
-                rankingList.innerHTML += `<p>${aluno}: ${nota}</p>`;
+    // Função para mostrar/ocultar o botão de ranking
+    function toggleRankingButton() {
+        const checkbox = document.getElementById("showInRankingCheckbox");
+        const rankingButton = document.getElementById("rankingButton");
+        const alert = document.getElementById("rankingCheckboxAlert");
+
+        if (checkbox.checked) {
+            rankingButton.disabled = false;
+            rankingButton.style.opacity = 1;
+            alert.classList.remove("hidden");
+        } else {
+            rankingButton.disabled = true;
+            rankingButton.style.opacity = 0.5;
+            alert.classList.add("hidden");
+        }
+    }
+
+    // Função para mostrar o ranking
+    function mostrarRanking() {
+        db.collection("notas").get().then((querySnapshot) => {
+            let rankingList = [];
+            querySnapshot.forEach((doc) => {
+                const data = doc.data();
+                for (const disciplina in data) {
+                    if (data[disciplina].ranking) {
+                        rankingList.push({
+                            nome: alunos[doc.id],
+                            nota: data[disciplina].nota
+                        });
+                    }
+                }
             });
-        }).catch((error) => {
-            console.error("Erro ao carregar ranking: ", error);
+
+            rankingList.sort((a, b) => b.nota - a.nota); // Ordenar por nota
+
+            let rankingHTML = "<ul>";
+            rankingList.forEach((aluno, index) => {
+                rankingHTML += `<li>${index + 1}. ${aluno.nome} - ${aluno.nota}</li>`;
+            });
+            rankingHTML += "</ul>";
+
+            document.getElementById("ranking-list").innerHTML = rankingHTML;
+            document.getElementById("ranking-container").classList.remove("hidden");
         });
     }
 
     // Função para ocultar o ranking
     function ocultarRanking() {
         document.getElementById("ranking-container").classList.add("hidden");
-    }
-
-    // Função para atualizar o checkbox do ranking
-    function atualizarRankingCheckbox() {
-        const checkbox = document.getElementById("Quero aparecer no ranking");
-        document.getElementById("ranking-confirmacao").classList.toggle("hidden", !checkbox.checked);
     }
 </script>
 </body>
