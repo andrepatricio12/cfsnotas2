@@ -81,6 +81,14 @@
         .spacing {
             margin-top: 10px;
         }
+        <label>
+  <input type="checkbox" id="showInRankingCheckbox" onclick="toggleRankingButton()"> Mostrar meu nome no ranking
+</label>
+<p id="rankingCheckboxAlert" style="display:none;">Seu nome será visível no ranking.</p>
+<button id="rankingButton" disabled>Visualizar Ranking</button>
+<input type="text" id="gradeInput" placeholder="Insira sua nota" />
+<button onclick="saveGrade()">Salvar Nota</button>
+
     </style>
     <!-- Firebase SDK (compatível com navegadores) -->
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
@@ -264,7 +272,58 @@
         } else {
             document.getElementById("nota-error").classList.remove("hidden");
         }
+    // Carregar nota salva quando a disciplina mudar
+function loadGradeForSubject(subjectId) {
+  const gradeInput = document.getElementById('gradeInput');
+
+  // Buscar a nota salva no Firebase
+  const studentId = 'SEU_ID_ESTUDANTE';  // Substitua pela sua forma de obter o ID do estudante
+  const subjectRef = firebase.firestore().collection('students').doc(studentId).collection('grades').doc(subjectId);
+
+  subjectRef.get().then((doc) => {
+    if (doc.exists) {
+      gradeInput.value = doc.data().grade || '';  // Carregar a nota salva ou manter vazio se não houver nota
+    } else {
+      gradeInput.value = '';  // Limpar o campo se não houver nota para a disciplina selecionada
     }
+  }).catch((error) => {
+    console.log("Erro ao obter o documento:", error);
+  });
+}
+
+// Salvar a nota quando o botão for clicado
+function saveGrade() {
+  const gradeInput = document.getElementById('gradeInput').value;
+  const studentId = 'SEU_ID_ESTUDANTE';  // Substitua pela sua forma de obter o ID do estudante
+  const subjectId = 'ID_DA_DISCIPLINA_SELECIONADA';  // Substitua pela sua forma de obter o ID da disciplina
+
+  // Salvar a nota no Firebase
+  firebase.firestore().collection('students').doc(studentId).collection('grades').doc(subjectId).set({
+    grade: gradeInput
+  }).then(() => {
+    console.log('Nota salva com sucesso');
+  }).catch((error) => {
+    console.error("Erro ao salvar a nota: ", error);
+  });
+}
+}
+    
+    function toggleRankingButton() {
+  const checkbox = document.getElementById('showInRankingCheckbox');
+  const rankingButton = document.getElementById('rankingButton');
+  const alertMessage = document.getElementById('rankingCheckboxAlert');
+
+  if (checkbox.checked) {
+    rankingButton.disabled = false;
+    rankingButton.style.opacity = 1;  // Tornar o botão totalmente visível
+    alertMessage.style.display = 'block';  // Mostrar a mensagem de alerta
+  } else {
+    rankingButton.disabled = true;
+    rankingButton.style.opacity = 0.5;  // Deixar o botão mais claro quando desativado
+    alertMessage.style.display = 'none';  // Esconder a mensagem de alerta
+  }
+}
+
 
     // Função para carregar as notas
     function carregarNotas(matricula) {
