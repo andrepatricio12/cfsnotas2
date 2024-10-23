@@ -249,6 +249,24 @@ async function carregarNotas() {
     }
 
    async function salvarNota() {
+    const disciplina = document.getElementById('disciplina').value;
+    const nota = parseFloat(document.getElementById('nota').value);
+
+    if (nota < 0 || nota > 10) {
+        document.getElementById('nota-error').classList.remove('hidden');
+        return;
+    }
+
+    // Armazenar nota no Firestore
+    const notasRef = db.collection('notas').doc(alunoAtivo);
+    await notasRef.set({
+        [disciplina]: nota
+    }, { merge: true }); // merge para não sobrescrever notas existentes
+
+    document.getElementById('nota-success').classList.remove('hidden');
+    carregarNotas(); // Atualiza as notas exibidas
+}
+
         const matricula = document.getElementById('matricula').value;
         const disciplina = document.getElementById('disciplina').value;
         const nota = parseFloat(document.getElementById('nota').value);
@@ -279,12 +297,17 @@ async function carregarNotas() {
         }
     }
     async function excluirNota() {
-        const disciplina = document.getElementById('disciplina').value;
-        const alunoDoc = db.collection('notas').doc(alunoAtivo);
+    const disciplina = document.getElementById('disciplina').value;
 
-        await alunoDoc.update({
-            [disciplina]: firebase.firestore.FieldValue.delete()
-        });
+    const notasRef = db.collection('notas').doc(alunoAtivo);
+    await notasRef.update({
+        [disciplina]: firebase.firestore.FieldValue.delete()
+    });
+
+    document.getElementById('nota-success').classList.remove('hidden');
+    carregarNotas(); // Atualiza as notas exibidas
+}
+
 
         // Atualize a interface para refletir a exclusão da nota
     }
@@ -303,6 +326,18 @@ async function calcularMedia() {
 }
 
 async function carregarNotas() {
+    if (docSnap.exists) {
+    const notasData = docSnap.data();
+    // Exibe as notas
+    let notasTexto = '';
+    for (const [disciplina, nota] of Object.entries(notasData)) {
+        notasTexto += `${disciplina}: ${nota}<br>`;
+    }
+    document.getElementById('notas-container').innerHTML = notasTexto;
+} else {
+    document.getElementById('notas-container').innerText = "Nenhuma nota encontrada";
+}
+
     const notasRef = db.collection('notas').doc(alunoAtivo);
     const docSnap = await notasRef.get();
 
