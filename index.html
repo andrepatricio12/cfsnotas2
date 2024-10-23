@@ -249,49 +249,35 @@ async function carregarNotas() {
     }
 
    async function salvarNota() {
-    const disciplina = document.getElementById('disciplina').value;
-    const nota = parseFloat(document.getElementById('nota').value);
+        const matricula = document.getElementById('matricula').value;
+        const disciplina = document.getElementById('disciplina').value;
+        const nota = parseFloat(document.getElementById('nota').value);
+        const ranking = document.getElementById('ranking-checkbox').checked;
+        const notasRef = db.collection('notas').doc(matricula);
 
-    if (isNaN(nota) || nota < 0 || nota > 10) {
-        document.getElementById('nota-error').classList.remove('hidden');
-        return;
-    }
+        // Validação da nota
+        if (nota < 0 || nota > 10) {
+            document.getElementById('nota-error').classList.remove('hidden');
+            return;
+        }
 
-    const notasRef = db.collection('notas').doc(alunoAtivo);
-    await notasRef.set({
-        [disciplina]: nota
-    }, { merge: true });
-
-    document.getElementById('nota-success').classList.remove('hidden');
-    setTimeout(() => {
-        document.getElementById('nota-success').classList.add('hidden');
-    }, 3000);
-}
-
-    const notasRef = db.collection('notas').doc(alunoAtivo);
-
-    notasRef.set({
-        [disciplina]: nota
-    }, { merge: true }).then(() => {
-        document.getElementById('nota-success').classList.remove('hidden');
         document.getElementById('nota-error').classList.add('hidden');
-        setTimeout(() => {
-            document.getElementById('nota-success').classList.add('hidden');
-        }, 3000);
 
-        carregarNotas(); // Atualiza a média após salvar a nota
-    });
-}
+        try {
+            await notasRef.set({
+                notas: {
+                    ...(await notasRef.get()).data()?.notas,
+                    [disciplina]: nota
+                },
+                ranking: ranking
+            }, { merge: true });
 
-
-        await db.collection('notas').doc(alunoAtivo).set({
-            [disciplina]: nota
-        }, { merge: true });
-
-        document.getElementById('nota-success').classList.remove('hidden');
-        document.getElementById('nota-error').classList.add('hidden');
+            document.getElementById('nota-success').classList.remove('hidden');
+            carregarNotas(matricula);
+        } catch (error) {
+            console.error('Erro ao salvar nota:', error);
+        }
     }
-
     async function excluirNota() {
         const disciplina = document.getElementById('disciplina').value;
         const alunoDoc = db.collection('notas').doc(alunoAtivo);
