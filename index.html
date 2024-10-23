@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistema de Notas - Curso de Sargentos</title>
     <style>
+        /* Seu estilo */
         body {
             font-family: Arial, sans-serif;
             margin: 0;
@@ -83,8 +84,7 @@
     </style>
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore.js"></script>
-
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore.js"></script>
 </head>
 <body>
 <div class="container">
@@ -106,27 +106,26 @@
             <label for="disciplina">Selecione a Disciplina:</label>
             <select id="disciplina" onchange="atualizarCampoNota()">
                 <!-- Disciplinas -->
-                <option value="ADP">Administração de Pessoal (ADP)</option>
+                 <option value="ADP">Administração de Pessoal (ADP)</option>
                 <option value="ALF">Administração Logística Financeira (ALF)</option>
-                <option value="AMT">Armamento, Munição e Tiro Policial (AMT)</option>
-                <option value="APHP">Atendimento Pré-Hospitalar Tático (APHP)</option>
-                <option value="CCL">Comando, Chefia e Liderança (CCL)</option>
-                <option value="DPP">Defesa Pessoal Policial (DPP)</option>
+                <option value="AMTP">Armamento, Munição e Tiro Policial (AMTP)</option>
+                <option value="APHT">Atendimento Pré-Hospitalar Tático (APH)</option>
+                <option value="CCL">Comando Chefia e Liderança (CCL)</option>
+                <option value="DPE">Defesa Pessoal Policial (DPE)</option>
                 <option value="DAD">Direito Administrativo Disciplinar (DAD)</option>
                 <option value="DPPM">Direito Penal Militar, Processual Penal Militar (DPPM)</option>
                 <option value="EFPM">Educação Física Policial Militar (EFPM)</option>
-                <option value="EDH">Ética e Direitos Humanos na Atividade Policial (EDH)</option>
+                <option value="DDPH">Ética e Direitos Humanos na Atividade Policial (DDPH)</option>
                 <option value="GAO">Gerenciamento de Atividade Operacional (GAO)</option>
-                <option value="IP">Inteligência Policial (IP)</option>
-                <option value="LTO">Legislação de Trânsito e Operações (LTO)</option>
-                <option value="LI">Legislação Institucional (LI)</option>
-                <option value="OU">Ordem Unida (OU)</option>
-                <option value="PP">Polícia de Proximidade (PP)</option>
-                <option value="PO">Polícia Ostensiva (PO)</option>
-                <option value="SCO">Sistema de Comando e Operações e Ajuda Humanitária (SCO)</option>
-                <option value="TSOP">Técnicas de Sobrevivência Policial (TSOP)</option>
-                <option value="TOP">Técnicas e Operações de Polícia Militar (TOP)</option>
-                <option value="TEL">Tópicos Especiais de Legislação Aplicáveis à Atividade Policial (TEL)</option>
+                <option value="INP">Inteligência Policial (INP)</option>
+                <option value="LET">Legislação de Trânsito e Operações (LET)</option>
+                <option value="LEI">Legislação Institucional (LEI)</option>
+                <option value="OUD">Ordem Unida (OUD)</option>
+                <option value="PDP">Polícia de Proximidade (PDP)</option>
+                <option value="POS">Polícia Ostensiva (POS)</option>
+                <option value="SCOH">Sistema de Comando e Operações de Ajuda Humanitária (SCOH)</option>
+                <option value="TPO">Técnicas E Operações De Polícia Militar (TPO)</option>
+                <option value="TELA">Tópicos Especiais de Legislação Aplicáveis à Atividade (TELA)</option>
             </select>
         </div>
 
@@ -166,34 +165,22 @@
 </div>
 
 <script>
-   // Importação e configuração correta do Firebase para a versão 9
-import { initializeApp } from "firebase/app";
-import { getFirestore, doc, getDoc, setDoc, deleteDoc } from "firebase/firestore";
-const firebaseConfig = {
-  apiKey: "AIzaSyDEvCDdX0LGjDMFpyxljj-4JTjZKtgooDM",
-  authDomain: "notas-cfs.firebaseapp.com",
-  projectId: "notas-cfs",
-  storageBucket: "notas-cfs.appspot.com",
-  messagingSenderId: "91086463856",
-  appId: "1:91086463856:web:6a16fb0b3abe04bbc425b5"
-};
+    // Firebase Config
+    const firebaseConfig = {
+        apiKey: "AIzaSyDEvCDdX0LGjDMFpyxljj-4JTjZKtgooDM",
+        authDomain: "notas-cfs.firebaseapp.com",
+        projectId: "notas-cfs",
+        storageBucket: "notas-cfs.appspot.com",
+        messagingSenderId: "91086463856",
+        appId: "1:91086463856:web:6a16fb0b3abe04bbc425b5"
+    };
 
-
-async function carregarNotas() {
-  const notasRef = doc(db, 'notas', alunoAtivo);  // Corrige a chamada para obter o documento do aluno
-  const docSnap = await getDoc(notasRef);
-
-  if (docSnap.exists()) {
-    const notasData = docSnap.data();
-    // Manipule as notas recuperadas
-  } else {
-    console.log("Nenhuma nota encontrada");
-  }
-}
-
+    // Inicializando o Firebase
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
 
     const alunos = {
-       "9287027": "ELIENAR FARIAS",
+        "9287027": "ELIENAR FARIAS",
             "9306820": "NAZARETH LIMA GOEDERT",
             "9303219": "CARLA DE LUCA LINHARES",
            "9287124": "LEANDRO GHELLERE",
@@ -248,119 +235,39 @@ async function carregarNotas() {
     }
 
     async function carregarNotas() {
-    const notasRef = doc(db, 'notas', alunoAtivo);
-    const docSnap = await getDoc(notasRef);
+        const notasRef = doc(db, 'notas', alunoAtivo);
+        const docSnap = await getDoc(notasRef);
 
-    if (docSnap.exists()) {
-        const notasData = docSnap.data();
-        const disciplinaSelect = document.getElementById('disciplina');
-        const disciplinaSelecionada = disciplinaSelect.value;
-
-        if (notasData[disciplinaSelecionada]) {
-            document.getElementById('nota').value = notasData[disciplinaSelecionada].nota;
-            document.getElementById('ranking-checkbox').checked = notasData[disciplinaSelecionada].ranking || false;
+        if (docSnap.exists()) {
+            const notasData = docSnap.data();
+            // Exiba as notas recuperadas conforme necessário
+        } else {
+            console.log("Nenhuma nota encontrada");
         }
-    }
-}
-        calcularMedia();
     }
 
     async function salvarNota() {
-    const disciplina = document.getElementById('disciplina').value;
-    const nota = parseFloat(document.getElementById('nota').value);
-    const ranking = document.getElementById('ranking-checkbox').checked;
+        const disciplina = document.getElementById('disciplina').value;
+        const nota = parseFloat(document.getElementById('nota').value);
 
-    if (nota >= 0 && nota <= 10) {
+        if (nota < 0 || nota > 10) {
+            document.getElementById('nota-error').classList.remove('hidden');
+            return;
+        }
+
         await setDoc(doc(db, 'notas', alunoAtivo), {
-            [disciplina]: { nota: nota, ranking: ranking }
+            [disciplina]: nota
         }, { merge: true });
 
         document.getElementById('nota-success').classList.remove('hidden');
-    } else {
-        document.getElementById('nota-error').classList.remove('hidden');
-    }
-}
-
-async function excluirNota() {
-    const disciplina = document.getElementById('disciplina').value;
-    await setDoc(doc(db, 'notas', alunoAtivo), {
-        [disciplina]: firebase.firestore.FieldValue.delete()
-    }, { merge: true });
-
-    document.getElementById('nota').value = '';
-    document.getElementById('ranking-checkbox').checked = false;
-}
-
-
-            const incluirRanking = document.getElementById('ranking-checkbox').checked;
-            if (incluirRanking) {
-                const nomeAluno = alunos[alunoAtivo];
-                await alunoRankingRef.set({
-                    nome: nomeAluno,
-                    nota
-                });
-            } else {
-                await alunoRankingRef.delete();
-            }
-
-            document.getElementById('nota-success').classList.remove('hidden');
-            document.getElementById('nota-error').classList.add('hidden');
-        } else {
-            document.getElementById('nota-error').classList.remove('hidden');
-            document.getElementById('nota-success').classList.add('hidden');
-        }
-
-        calcularMedia();
+        document.getElementById('nota-error').classList.add('hidden');
     }
 
     async function excluirNota() {
         const disciplina = document.getElementById('disciplina').value;
-        const notasRef = db.collection('notas').doc(alunoAtivo);
-        await notasRef.update({
-            [disciplina]: firebase.firestore.FieldValue.delete()
-        });
-        document.getElementById('nota').value = '';
-        calcularMedia();
-    }
+        await deleteDoc(doc(db, 'notas', alunoAtivo, disciplina));
 
-    function calcularMedia() {
-        db.collection('notas').doc(alunoAtivo).get().then(doc => {
-            if (doc.exists) {
-                const notas = Object.values(doc.data());
-                const media = notas.reduce((acc, curr) => acc + curr, 0) / notas.length;
-                document.getElementById('media-value').innerText = media.toFixed(2);
-            } else {
-                document.getElementById('media-value').innerText = 'N/A';
-            }
-        });
-    }
-
-    function atualizarCampoNota() {
-        carregarNotas();
-    }
-
-    function atualizarRankingCheckbox() {
-        const checkbox = document.getElementById('ranking-checkbox');
-        const confirmacao = document.getElementById('ranking-confirmacao');
-        confirmacao.classList.toggle('hidden', !checkbox.checked);
-    }
-
-    function mostrarRanking() {
-        db.collection('ranking').orderBy('nota', 'desc').limit(10).get().then(snapshot => {
-            const rankingList = document.getElementById('ranking-list');
-            rankingList.innerHTML = '';
-            snapshot.forEach(doc => {
-                const data = doc.data();
-                const li = document.createElement('li');
-                li.textContent = `${data.nome}: ${data.nota}`;
-                rankingList.appendChild(li);
-            });
-            document.getElementById('ranking-container').classList.remove('hidden');
-        });
-    }
-
-    function ocultarRanking() {
-        document.getElementById('ranking-container').classList.add('hidden');
+        console.log(`Nota para a disciplina ${disciplina} excluída`);
     }
 </script>
 </body>
