@@ -82,9 +82,9 @@
             margin-top: 10px;
         }
     </style>
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore.js"></script>
+    <!-- Firebase SDK (compatível com navegadores) -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
 </head>
 <body>
 <div class="container">
@@ -106,7 +106,7 @@
             <label for="disciplina">Selecione a Disciplina:</label>
             <select id="disciplina" onchange="atualizarCampoNota()">
                 <!-- Disciplinas -->
-                 <option value="ADP">Administração de Pessoal (ADP)</option>
+                <option value="ADP">Administração de Pessoal (ADP)</option>
                 <option value="ALF">Administração Logística Financeira (ALF)</option>
                 <option value="AMTP">Armamento, Munição e Tiro Policial (AMTP)</option>
                 <option value="APHT">Atendimento Pré-Hospitalar Tático (APH)</option>
@@ -165,7 +165,7 @@
 </div>
 
 <script>
-    // Firebase Config
+    // Configuração do Firebase (ajuste para a versão compatível com navegadores)
     const firebaseConfig = {
         apiKey: "AIzaSyDEvCDdX0LGjDMFpyxljj-4JTjZKtgooDM",
         authDomain: "notas-cfs.firebaseapp.com",
@@ -176,11 +176,12 @@
     };
 
     // Inicializando o Firebase
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
 
+    // Definindo os alunos
     const alunos = {
-        "9287027": "ELIENAR FARIAS",
+         "9287027": "ELIENAR FARIAS",
             "9306820": "NAZARETH LIMA GOEDERT",
             "9303219": "CARLA DE LUCA LINHARES",
            "9287124": "LEANDRO GHELLERE",
@@ -235,10 +236,10 @@
     }
 
     async function carregarNotas() {
-        const notasRef = doc(db, 'notas', alunoAtivo);
-        const docSnap = await getDoc(notasRef);
+        const notasRef = db.collection('notas').doc(alunoAtivo);
+        const docSnap = await notasRef.get();
 
-        if (docSnap.exists()) {
+        if (docSnap.exists) {
             const notasData = docSnap.data();
             // Exiba as notas recuperadas conforme necessário
         } else {
@@ -255,7 +256,7 @@
             return;
         }
 
-        await setDoc(doc(db, 'notas', alunoAtivo), {
+        await db.collection('notas').doc(alunoAtivo).set({
             [disciplina]: nota
         }, { merge: true });
 
@@ -265,9 +266,36 @@
 
     async function excluirNota() {
         const disciplina = document.getElementById('disciplina').value;
-        await deleteDoc(doc(db, 'notas', alunoAtivo, disciplina));
+        const alunoDoc = db.collection('notas').doc(alunoAtivo);
 
-        console.log(`Nota para a disciplina ${disciplina} excluída`);
+        await alunoDoc.update({
+            [disciplina]: firebase.firestore.FieldValue.delete()
+        });
+
+        // Atualize a interface para refletir a exclusão da nota
+    }
+
+    function atualizarCampoNota() {
+        // Lógica para atualizar o campo de nota com base na disciplina selecionada
+    }
+
+    function atualizarRankingCheckbox() {
+        const rankingCheckbox = document.getElementById('ranking-checkbox');
+        const confirmacao = document.getElementById('ranking-confirmacao');
+
+        if (rankingCheckbox.checked) {
+            confirmacao.classList.remove('hidden');
+        } else {
+            confirmacao.classList.add('hidden');
+        }
+    }
+
+    function mostrarRanking() {
+        // Lógica para exibir o ranking
+    }
+
+    function ocultarRanking() {
+        // Lógica para ocultar o ranking
     }
 </script>
 </body>
