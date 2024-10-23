@@ -168,8 +168,7 @@
 <script>
    // Importação e configuração correta do Firebase para a versão 9
 import { initializeApp } from "firebase/app";
-import { getFirestore, doc, getDoc } from "firebase/firestore";
-
+import { getFirestore, doc, getDoc, setDoc, deleteDoc } from "firebase/firestore";
 const firebaseConfig = {
   apiKey: "AIzaSyDEvCDdX0LGjDMFpyxljj-4JTjZKtgooDM",
   authDomain: "notas-cfs.firebaseapp.com",
@@ -179,9 +178,6 @@ const firebaseConfig = {
   appId: "1:91086463856:web:6a16fb0b3abe04bbc425b5"
 };
 
-// Inicializando o Firebase
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
 
 async function carregarNotas() {
   const notasRef = doc(db, 'notas', alunoAtivo);  // Corrige a chamada para obter o documento do aluno
@@ -252,29 +248,49 @@ async function carregarNotas() {
     }
 
     async function carregarNotas() {
-        const notasRef = db.collection('notas').doc(alunoAtivo);
-        const doc = await notasRef.get();
+    const notasRef = doc(db, 'notas', alunoAtivo);
+    const docSnap = await getDoc(notasRef);
 
-        if (doc.exists) {
-            const notasData = doc.data();
-            const disciplinaSelect = document.getElementById('disciplina');
-            const disciplinaSelecionada = disciplinaSelect.value;
-            document.getElementById('nota').value = notasData[disciplinaSelecionada] || '';
+    if (docSnap.exists()) {
+        const notasData = docSnap.data();
+        const disciplinaSelect = document.getElementById('disciplina');
+        const disciplinaSelecionada = disciplinaSelect.value;
+
+        if (notasData[disciplinaSelecionada]) {
+            document.getElementById('nota').value = notasData[disciplinaSelecionada].nota;
+            document.getElementById('ranking-checkbox').checked = notasData[disciplinaSelecionada].ranking || false;
         }
+    }
+}
         calcularMedia();
     }
 
     async function salvarNota() {
-        const disciplina = document.getElementById('disciplina').value;
-        const nota = parseFloat(document.getElementById('nota').value);
+    const disciplina = document.getElementById('disciplina').value;
+    const nota = parseFloat(document.getElementById('nota').value);
+    const ranking = document.getElementById('ranking-checkbox').checked;
 
-        if (nota >= 0 && nota <= 10) {
-            const notasRef = db.collection('notas').doc(alunoAtivo);
-            const alunoRankingRef = db.collection('ranking').doc(alunoAtivo);
+    if (nota >= 0 && nota <= 10) {
+        await setDoc(doc(db, 'notas', alunoAtivo), {
+            [disciplina]: { nota: nota, ranking: ranking }
+        }, { merge: true });
 
-            await notasRef.set({
-                [disciplina]: nota
-            }, { merge: true });
+        document.getElementById('nota-success').classList.remove('hidden');
+    } else {
+        document.getElementById('nota-error').classList.remove('hidden');
+    }
+}
+
+async function excluirNota() {
+    const disciplina = document.getElementById('disciplina').value;
+    await setDoc(doc(db, 'notas', alunoAtivo), {
+        [disciplina]: firebase.firestore.FieldValue.delete()
+    }, { merge: true });
+
+    document.getElementById('nota').value = '';
+    document.getElementById('ranking-checkbox').checked = false;
+}
+
 
             const incluirRanking = document.getElementById('ranking-checkbox').checked;
             if (incluirRanking) {
