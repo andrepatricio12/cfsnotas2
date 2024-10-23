@@ -247,14 +247,30 @@
         }
     }
 
-    async function salvarNota() {
-        const disciplina = document.getElementById('disciplina').value;
-        const nota = parseFloat(document.getElementById('nota').value);
+   function salvarNota() {
+    const nota = parseFloat(document.getElementById('nota').value);
+    const disciplina = document.getElementById('disciplina').value;
+    
+    if (nota < 0 || nota > 10 || isNaN(nota)) {
+        document.getElementById('nota-error').classList.remove('hidden');
+        return;
+    }
 
-        if (nota < 0 || nota > 10) {
-            document.getElementById('nota-error').classList.remove('hidden');
-            return;
-        }
+    const notasRef = db.collection('notas').doc(alunoAtivo);
+
+    notasRef.set({
+        [disciplina]: nota
+    }, { merge: true }).then(() => {
+        document.getElementById('nota-success').classList.remove('hidden');
+        document.getElementById('nota-error').classList.add('hidden');
+        setTimeout(() => {
+            document.getElementById('nota-success').classList.add('hidden');
+        }, 3000);
+
+        carregarNotas(); // Atualiza a média após salvar a nota
+    });
+}
+
 
         await db.collection('notas').doc(alunoAtivo).set({
             [disciplina]: nota
@@ -274,9 +290,45 @@
 
         // Atualize a interface para refletir a exclusão da nota
     }
+function calcularMedia(notas) {
+    if (notas.length === 0) return 0;
+    const soma = notas.reduce((acc, nota) => acc + nota, 0);
+    return (soma / notas.length).toFixed(2);
+}
+
+async function carregarNotas() {
+    const notasRef = db.collection('notas').doc(alunoAtivo);
+    const docSnap = await notasRef.get();
+
+    if (docSnap.exists) {
+        const notasData = docSnap.data();
+        const todasNotas = Object.values(notasData);
+        const media = calcularMedia(todasNotas);
+        
+        document.getElementById('media-value').innerText = media;
+    } else {
+        document.getElementById('media-value').innerText = 'N/A';
+    }
+}
 
     function atualizarCampoNota() {
-        // Lógica para atualizar o campo de nota com base na disciplina selecionada
+    const disciplina = document.getElementById('disciplina').value;
+    const notasRef = db.collection('notas').doc(alunoAtivo);
+    
+    notasRef.get().then(docSnap => {
+        if (docSnap.exists) {
+            const notasData = docSnap.data();
+            if (notasData[disciplina] !== undefined) {
+                document.getElementById('nota').value = notasData[disciplina];
+            } else {
+                document.getElementById('nota').value = ''; // Limpar o campo
+            }
+        } else {
+            document.getElementById('nota').value = ''; // Limpar o campo se não houver notas
+        }
+    });
+}
+
     }
 
     function atualizarRankingCheckbox() {
@@ -290,12 +342,38 @@
         }
     }
 
-    function mostrarRanking() {
-        // Lógica para exibir o ranking
-    }
+    async function mostrarRanking() {
+    const rankingContainer = document.getElementById('ranking-container');
+    const rankingList = document.getElementById('ranking-list');
+    rankingList.innerHTML = ''; // Limpar lista anterior
 
-    function ocultarRanking() {
-        // Lógica para ocultar o ranking
+    const alunosComRanking = await db.collection('notas').where('ranking', '==', true).get();
+
+    let rankingData = [];
+    alunosComRanking.forEach(doc => {
+        const data = doc.data();
+        const alunoNome = alunos[doc.id];
+        const todasNotas = Object.values(data);
+        const media = calcularMedia(todasNotas);
+        rankingData.push({ nome: alunoNome, media });
+    });
+
+    rankingData.sort((a, b) => b.media - a.media); // Ordenar por média decrescente
+
+    rankingData.forEach(item => {
+        const listItem = document.createElement('div');
+        listItem.innerText = `${item.nome}: ${item.media}`;
+        rankingList.appendChild(listItem);
+    });
+
+    rankingContainer.classList.remove('hidden');
+}
+
+function ocultarRanking() {
+    document.getElementById('ranking-container').classList.add('hidden');
+}
+
+    
     }
 </script>
 </body>
