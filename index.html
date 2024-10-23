@@ -249,17 +249,111 @@
         calcularMedia();
     }
 
-    async function salvarNota() {
-        const disciplina = document.getElementById('disciplina').value;
-        const nota = parseFloat(document.getElementById('nota').value);
+    // Função para salvar a nota
+async function salvarNota() {
+    const disciplina = document.getElementById('disciplina').value;
+    const nota = parseFloat(document.getElementById('nota').value);
 
-        if (nota >= 0 && nota <= 10) {
-            const notasRef = db.collection('notas').doc(alunoAtivo);
-            const alunoRankingRef = db.collection('ranking').doc(alunoAtivo);
+    // Verifica se a nota está entre 0 e 10
+    if (nota >= 0 && nota <= 10) {
+        const notasRef = db.collection('notas').doc(alunoAtivo);
+        const alunoNotas = await notasRef.get();
 
-            await notasRef.set({
-                [disciplina]: nota
-            }, { merge: true });
+        let dados = {};
+        if (alunoNotas.exists) {
+            dados = alunoNotas.data();
+        }
+
+        dados[disciplina] = nota;
+
+        // Atualiza as notas no banco de dados
+        await notasRef.set(dados);
+        document.getElementById('nota-success').classList.remove('hidden');
+        document.getElementById('nota-error').classList.add('hidden');
+        carregarNotas(); // Recarrega as notas e recalcula a média
+    } else {
+        // Mostra erro se a nota não estiver no intervalo correto
+        document.getElementById('nota-error').classList.remove('hidden');
+        document.getElementById('nota-success').classList.add('hidden');
+    }
+}
+
+// Função para excluir a nota
+async function excluirNota() {
+    const disciplina = document.getElementById('disciplina').value;
+    const notasRef = db.collection('notas').doc(alunoAtivo);
+    const alunoNotas = await notasRef.get();
+
+    if (alunoNotas.exists) {
+        let dados = alunoNotas.data();
+        delete dados[disciplina]; // Remove a nota da disciplina
+
+        await notasRef.set(dados); // Atualiza o banco de dados
+        carregarNotas(); // Recarrega as notas e recalcula a média
+        document.getElementById('nota-success').classList.remove('hidden');
+        document.getElementById('nota-error').classList.add('hidden');
+    }
+}
+
+// Função para calcular a média das notas
+async function calcularMedia() {
+    const notasRef = db.collection('notas').doc(alunoAtivo);
+    const alunoNotas = await notasRef.get();
+
+    if (alunoNotas.exists) {
+        const notas = Object.values(alunoNotas.data());
+        const soma = notas.reduce((acc, val) => acc + val, 0);
+        const media = soma / notas.length;
+
+        document.getElementById('media-value').innerText = media.toFixed(2); // Exibe a média
+    } else {
+        document.getElementById('media-value').innerText = 'N/A';
+    }
+}
+
+// Função para alternar a exibição do ranking
+async function mostrarRanking() {
+    const rankingContainer = document.getElementById('ranking-container');
+    const rankingList = document.getElementById('ranking-list');
+
+    const alunosSnapshot = await db.collection('notas').get();
+    let ranking = [];
+
+    alunosSnapshot.forEach(doc => {
+        const notas = Object.values(doc.data());
+        const media = notas.reduce((acc, val) => acc + val, 0) / notas.length;
+        ranking.push({ nome: alunos[doc.id], media: media.toFixed(2) });
+    });
+
+    // Ordena por média (maior para menor)
+    ranking.sort((a, b) => b.media - a.media);
+
+    rankingList.innerHTML = ''; // Limpa o ranking anterior
+
+    ranking.forEach((aluno, index) => {
+        rankingList.innerHTML += `<p>${index + 1}. ${aluno.nome} - Média: ${aluno.media}</p>`;
+    });
+
+    rankingContainer.classList.remove('hidden');
+}
+
+// Função para ocultar o ranking
+function ocultarRanking() {
+    document.getElementById('ranking-container').classList.add('hidden');
+}
+
+// Função para alternar visibilidade da confirmação do ranking
+function atualizarRankingCheckbox() {
+    const rankingCheckbox = document.getElementById('ranking-checkbox');
+    const rankingConfirmacao = document.getElementById('ranking-confirmacao');
+
+    if (rankingCheckbox.checked) {
+        rankingConfirmacao.classList.remove('hidden');
+    } else {
+        rankingConfirmacao.classList.add('hidden');
+    }
+}
+
 
             const incluirRanking = document.getElementById('ranking-checkbox').checked;
             if (incluirRanking) {
