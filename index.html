@@ -234,15 +234,13 @@
         }
     }
 function calcularMedia(notas) {
-    let total = 0;
-    let count = 0;
+    const valoresNotas = Object.values(notas).filter(nota => typeof nota === 'number' && !isNaN(nota));
+    const total = valoresNotas.reduce((acc, nota) => acc + nota, 0);
+    const media = valoresNotas.length > 0 ? total / valoresNotas.length : 0; // Evitar divisão por zero
 
-    for (const disciplina in notas) {
-        if (notas[disciplina].nota !== undefined) {
-            total += notas[disciplina].nota;
-            count++;
-        }
-    }
+    document.getElementById("media-value").innerText = media.toFixed(2);
+    document.getElementById("media-container").classList.remove("hidden");
+}
 
     const media = count ? (total / count).toFixed(2) : 0;
     document.getElementById("media-value").innerText = media;
@@ -279,8 +277,48 @@ function calcularMedia(notas) {
             });
     }
 
-    function excluirNota() {
-        // Implementar a lógica de exclusão de notas se necessário.
+    // Função para excluir uma nota
+async function excluirNota(usuarioId, notaId) {
+    const usuarioRef = firebase.firestore().collection('usuarios').doc(usuarioId);
+
+    try {
+        // Obter as notas atuais
+        const usuarioDoc = await usuarioRef.get();
+        if (!usuarioDoc.exists) {
+            console.log("Usuário não encontrado!");
+            return;
+        }
+
+        const dadosUsuario = usuarioDoc.data();
+        const notas = dadosUsuario.notas;
+
+        // Verifica se a nota existe
+        if (notas.hasOwnProperty(notaId)) {
+            // Remove a nota
+            delete notas[notaId];
+
+            // Recalcula a média
+            const novasNotas = Object.values(notas);
+            const novaMedia = novasNotas.length > 0 ? (novasNotas.reduce((a, b) => a + b) / novasNotas.length) : 0;
+
+            // Atualiza a média no Firestore
+            await usuarioRef.update({
+                notas: notas,
+                media: novaMedia
+            });
+
+           
+
+            alert(`Nota com ID '${notaId}' excluída com sucesso!`);
+        } else {
+            alert(`Nota com ID '${notaId}' não encontrada!`);
+        }
+    } catch (error) {
+        console.error("Erro ao excluir a nota: ", error);
+        alert("Ocorreu um erro ao excluir a nota.");
+    }
+}
+
     }
 
     function carregarNotas() {
