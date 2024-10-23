@@ -242,7 +242,28 @@
     }
 
     function atualizarCampoNota() {
-        document.getElementById("nota").value = '';
+    const disciplina = document.getElementById("disciplina").value;
+    const matricula = Object.keys(alunos).find(key => alunos[key] === nomeAluno);
+    
+    // Limpa o campo de nota
+    document.getElementById("nota").value = '';
+
+    // Carrega a nota salva para a disciplina selecionada
+    db.collection("notas").doc(matricula).get().then(doc => {
+        if (doc.exists) {
+            const notas = doc.data();
+            const notaSalva = notas[disciplina];
+
+            // Se a nota estiver salva, preenche o campo
+            if (notaSalva !== undefined) {
+                document.getElementById("nota").value = notaSalva;
+            }
+        }
+    }).catch(error => {
+        console.error("Erro ao carregar a nota: ", error);
+    });
+}
+
     }
 
     function salvarNota() {
