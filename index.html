@@ -398,36 +398,6 @@
     function ocultarRanking() {
         document.getElementById('ranking-container').classList.add('hidden');
     }
-    document.getElementById('checkboxRanking').addEventListener('change', function() {
-    const isChecked = this.checked;
-    const studentId = document.getElementById('studentId').value; // Identifica o aluno
-    
-    if (isChecked) {
-        // Caso o checkbox seja marcado
-        firebase.firestore().collection('students').doc(studentId).update({
-            mostrarRanking: true
-        }).then(() => {
-            console.log('Nome adicionado ao ranking');
-            atualizarRanking();
-}
-
-// Função para recalcular o ranking
-function atualizarRanking() {
-    firebase.firestore().collection('students')
-        .where('mostrarRanking', '==', true) // Apenas os que querem mostrar o nome no ranking
-        .get().then((querySnapshot) => {
-            let ranking = [];
-            querySnapshot.forEach((doc) => {
-                let studentData = doc.data();
-                // Lógica para calcular a média e adicionar ao ranking
-                ranking.push({ name: studentData.name, average: calcularMedia(studentData.grades) });
-            });
-            // Ordenar o ranking por média
-            ranking.sort((a, b) => b.average - a.average);
-            // Atualizar a interface com o novo ranking
-            exibirRanking(ranking);
-        });
-}
 </script>
 </body>
 </html>
