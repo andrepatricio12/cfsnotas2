@@ -409,16 +409,6 @@
         }).then(() => {
             console.log('Nome adicionado ao ranking');
             atualizarRanking();
-        });
-    } else {
-        // Caso o checkbox seja desmarcado
-        firebase.firestore().collection('students').doc(studentId).update({
-            mostrarRanking: false
-        }).then(() => {
-            console.log('Nome removido do ranking');
-            atualizarRanking();
-        });
-    }
 });
 
 // Função para recalcular o ranking
