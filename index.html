@@ -318,7 +318,7 @@
    function carregarNotas() {
     const alunoRef = db.collection("alunos").doc(matriculaAtual);
     alunoRef.get().then((doc) => {
-        if (doc.exists)
+        if (doc.exists) {
             notasSalvas = doc.data();
             atualizarCampoNota();
             mostrarNotasSalvas();
