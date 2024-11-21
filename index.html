@@ -355,26 +355,18 @@
     }
 
     function toggleRankingButton() {
-    const checkbox = document.getElementById('showInRankingCheckbox');
+    const showInRankingCheckbox = document.getElementById('showInRankingCheckbox');
     const rankingButton = document.getElementById('rankingButton');
 
-    if (checkbox.checked) {
-        const confirma = confirm("Ao disponibilizar seu nome para o ranking, você poderá ver os alunos ranckeados, mas ele será exibido permanentemente. Não será possível removê-lo após a inclusão. Deseja continuar?");
-        
-        if (confirma) {
-            rankingButton.disabled = false;
-            rankingButton.style.opacity = 1;
-        } else {
-            // Desmarca o checkbox caso o usuário desista
-            checkbox.checked = false;
-            rankingButton.disabled = true;
-            rankingButton.style.opacity = 0.5;
-        }
+    if (showInRankingCheckbox.checked) {
+        // Ativa o botão de ranking se a caixa for marcada
+        rankingButton.disabled = false;
     } else {
-        rankingButton.disabled = true;
-        rankingButton.style.opacity = 0.5;
+        // Desabilita o botão de ranking se a caixa for desmarcada
+        // MAS NÃO PERMITE QUE SEJA DESMARCADE, COMO VOCÊ DESEJA
+        alert("Ao disponibilizar seu nome para o ranking, você poderá ver os alunos ranckeados, mas ele será exibido permanentemente. Não será possível removê-lo após a inclusão. Deseja continuar?");
+        showInRankingCheckbox.checked = true;
     }
-}
 
     }
 
