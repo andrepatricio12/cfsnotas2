@@ -276,6 +276,24 @@
             document.getElementById('login-error').classList.remove('hidden');
         }
     }
+    function verificarEstadoRanking() {
+  const checkbox = document.getElementById("exibirNoRankingCheckbox");
+  const userId = firebase.auth().currentUser.uid;
+
+  firebase.firestore().collection("usuarios").doc(userId).get()
+    .then((doc) => {
+      if (doc.exists && doc.data().exibirNoRanking) {
+        checkbox.checked = true;
+        checkbox.disabled = true; // Desabilitar se já escolheu
+      }
+    }).catch((error) => {
+      console.error("Erro ao verificar o estado do ranking:", error);
+    });
+}
+
+// Chame essa função ao carregar a página
+verificarEstadoRanking();
+
 
     function salvarNota() {
         const disciplina = document.getElementById('disciplina').value;
@@ -374,6 +392,29 @@
             rankingButton.style.opacity = 0.5;
         }
     }
+    function salvarEscolhaRanking() {
+  const checkbox = document.getElementById("exibirNoRankingCheckbox");
+  const userId = firebase.auth().currentUser.uid; // ID do usuário autenticado
+
+  if (checkbox.checked) {
+    const confirmacao = confirm("Ao optar por exibir seu nome no ranking, você não poderá reverter essa decisão. Deseja continuar?");
+    if (confirmacao) {
+      // Salva a escolha no Firebase
+      firebase.firestore().collection("usuarios").doc(userId).set(
+        { exibirNoRanking: true },
+        { merge: true }
+      ).then(() => {
+        alert("Sua escolha foi salva permanentemente.");
+        checkbox.disabled = true; // Desabilitar o checkbox
+      }).catch((error) => {
+        console.error("Erro ao salvar a escolha:", error);
+      });
+    } else {
+      checkbox.checked = false; // Reverter a seleção
+    }
+  }
+}
+
 
     function mostrarRanking() {
         db.collection("alunos").where("mostrarRanking", "==", true).get().then((querySnapshot) => {
