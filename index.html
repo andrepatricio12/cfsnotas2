@@ -109,7 +109,7 @@
     padding: 10px;
     border-radius: 5px;
 }
-
+        }
     </style>
     <!-- Firebase SDK (compatível com navegadores) -->
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
@@ -260,7 +260,7 @@
         if (alunos[matriculaInput]) {
             matriculaAtual = matriculaInput;
             nomeAlunoAtual = alunos[matriculaAtual];
-            document.getElementById('aluno-nome').textContent = Bem-vindo(a), ${nomeAlunoAtual};
+            document.getElementById('aluno-nome').textContent = `Bem-vindo(a), ${nomeAlunoAtual}`;
             document.getElementById('login-form').classList.add('hidden');
             document.getElementById('notas-form').classList.remove('hidden');
             carregarNotas();
@@ -332,7 +332,7 @@
         for (const disciplina in notasSalvas) {
             if (disciplina !== 'nome' && disciplina !== 'mostrarRanking') {
                 const li = document.createElement('li');
-                li.textContent = ${disciplina}: ${notasSalvas[disciplina]};
+                li.textContent = `${disciplina}: ${notasSalvas[disciplina]}`;
                 notasList.appendChild(li);
             }
         }
@@ -393,7 +393,7 @@
 
             alunosRanking.forEach((aluno) => {
                 const li = document.createElement('li');
-                li.textContent = ${aluno.nome}: Média ${aluno.media.toFixed(2)};
+                li.textContent = `${aluno.nome}: Média ${aluno.media.toFixed(2)}`;
                 rankingList.appendChild(li);
             });
 
