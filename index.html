@@ -389,6 +389,42 @@
 } else {
     console.log("Você não pode mais remover seu nome do ranking.");
 }
+// Função para exibir o ranking das notas
+function exibirRanking() {
+    const notasList = document.getElementById('notas-list');
+    notasList.innerHTML = ''; // Limpa a lista de notas exibida anteriormente
+
+    // Consulta o Firestore, ordenando as notas de forma decrescente
+    db.collection('notas').orderBy("nota", "desc").get().then(snapshot => {
+        snapshot.forEach(doc => {
+            const nota = doc.data();
+            const listItem = document.createElement('li');
+            listItem.textContent = `Matrícula: ${nota.matricula} - Disciplina: ${nota.disciplina} - Nota: ${nota.nota}`;
+            notasList.appendChild(listItem); // Adiciona o item à lista
+        });
+    });
+}
+
+// Exemplo de como pode chamar essa função ao salvar as notas
+function salvarNota() {
+    const matricula = document.getElementById('matricula').value;
+    const disciplina = document.getElementById('disciplina').value;
+    const nota = parseFloat(document.getElementById('nota').value);
+
+    if (nota >= 0 && nota <= 10) {
+        db.collection('notas').add({
+            matricula: matricula,
+            disciplina: disciplina,
+            nota: nota
+        }).then(() => {
+            alert('Nota salva com sucesso!');
+            atualizarNotasSalvas(); // Atualiza as notas específicas do aluno
+            exibirRanking(); // Atualiza o ranking de todas as notas
+        });
+    } else {
+        alert('Nota inválida. Por favor, insira um valor entre 0 e 10.');
+    }
+}
 
 
             querySnapshot.forEach((doc) => {
