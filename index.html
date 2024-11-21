@@ -129,6 +129,7 @@
     </div>
 
     <div id="notas-form" class="hidden">
+        
         <h2 id="aluno-nome"></h2>
 
         <div class="form-group">
@@ -413,6 +414,11 @@
   }
 }
 
+    function scrollToForm() {
+    const formElement = document.getElementById('notas-form');
+    formElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
 
     function mostrarRanking() {
         db.collection("alunos").where("mostrarRanking", "==", true).get().then((querySnapshot) => {
@@ -445,11 +451,13 @@
             });
 
             document.getElementById('ranking-container').classList.remove('hidden');
+             scrollToForm(); // Garante que o formulário fique visível
         });
     }
 
     function ocultarRanking() {
         document.getElementById('ranking-container').classList.add('hidden');
+        scrollToForm(); // Garante que o formulário fique visível novamente
     }
 </script>
 </body>
