@@ -149,7 +149,7 @@
                 <option value="SCOH">Sistema de Comando e Operações de Ajuda Humanitária (SCOH)</option>
                 <option value="TPO">Técnicas E Operações De Polícia Militar (TPO)</option>
                 <option value="TSP">Técnicas de sobrevivência Policial (TSP)</option>
-                <option value="TELA">Tópicos Especiais de Legislação Aplicáveis à Atividade (TEL)</option>
+                <option value="TELA">Tópicos Especiais de Legislação Aplicáveis à Atividade (TELA)</option>
             </select>
         </div>
 
@@ -254,7 +254,7 @@
         if (alunos[matriculaInput]) {
             matriculaAtual = matriculaInput;
             nomeAlunoAtual = alunos[matriculaAtual];
-            document.getElementById('aluno-nome').textContent = Bem-vindo(a), ${nomeAlunoAtual};
+            document.getElementById('aluno-nome').textContent = `Bem-vindo(a), ${nomeAlunoAtual}`;
             document.getElementById('login-form').classList.add('hidden');
             document.getElementById('notas-form').classList.remove('hidden');
             carregarNotas();
@@ -326,7 +326,7 @@
         for (const disciplina in notasSalvas) {
             if (disciplina !== 'nome' && disciplina !== 'mostrarRanking') {
                 const li = document.createElement('li');
-                li.textContent = ${disciplina}: ${notasSalvas[disciplina]};
+                li.textContent = `${disciplina}: ${notasSalvas[disciplina]}`;
                 notasList.appendChild(li);
             }
         }
@@ -387,7 +387,7 @@
 
             alunosRanking.forEach((aluno) => {
                 const li = document.createElement('li');
-                li.textContent = ${aluno.nome}: Média ${aluno.media.toFixed(2)};
+                li.textContent = `${aluno.nome}: Média ${aluno.media.toFixed(2)}`;
                 rankingList.appendChild(li);
             });
 
