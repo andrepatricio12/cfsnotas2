@@ -166,8 +166,16 @@
 
         <div class="form-group">
             <label>
-                <input type="checkbox" id="showInRankingCheckbox" onclick="toggleRankingButton()"> Exibir Nome no Ranking
-            </label>
+  <input 
+    type="checkbox" 
+    id="exibirNoRankingCheckbox" 
+    onchange="salvarEscolhaRanking()" 
+    disabled 
+  />
+  Exibir meu nome no ranking
+</label>
+<p id="mensagemConfirmacao"></p>
+
         </div>
 
         <div class="button-group">
