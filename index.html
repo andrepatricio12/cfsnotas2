@@ -423,10 +423,11 @@
     function mostrarRanking() {
     const rankingContainer = document.getElementById('ranking-container');
     rankingContainer.classList.remove('hidden');
- scrollToForm(); // Garante que o formulário fique visível
+
     // Role a página para garantir que o formulário completo esteja visível
     const notasForm = document.getElementById('notas-form');
     notasForm.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
 }
 
         db.collection("alunos").where("mostrarRanking", "==", true).get().then((querySnapshot) => {
