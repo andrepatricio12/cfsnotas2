@@ -317,17 +317,8 @@
 
    function carregarNotas() {
     const alunoRef = db.collection("alunos").doc(matriculaAtual);
-    alunoRef.get()
-  .then((doc) => {
-      if (doc.exists) {
-          console.log('Documento encontrado:', doc.data());
-      } else {
-          console.error('Nenhum documento encontrado para esta matrícula.');
-      }
-  })
-  .catch((error) => {
-      console.error('Erro ao acessar o Firestore:', error);
-  }); {
+    alunoRef.get().then((doc) => {
+        if (doc.exists)
             notasSalvas = doc.data();
             atualizarCampoNota();
             mostrarNotasSalvas();
