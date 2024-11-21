@@ -266,27 +266,31 @@
             document.getElementById('login-form').classList.add('hidden');
             document.getElementById('notas-form').classList.remove('hidden');
             carregarNotas();
+            verificarEstadoRanking();
         } else {
             document.getElementById('login-error').classList.remove('hidden');
         }
-    }
+    } 
+    
     function verificarEstadoRanking() {
-  const checkbox = document.getElementById("exibirNoRankingCheckbox");
-  const userId = firebase.auth().currentUser.uid;
+    const checkbox = document.getElementById("showInRankingCheckbox");
 
-  firebase.firestore().collection("usuarios").doc(userId).get()
-    .then((doc) => {
-      if (doc.exists && doc.data().exibirNoRanking) {
-        checkbox.checked = true;
-        checkbox.disabled = true; // Desabilitar se já escolheu
-      }
-    }).catch((error) => {
-      console.error("Erro ao verificar o estado do ranking:", error);
-    });
+    db.collection("usuarios").doc(matriculaAtual).get()
+        .then((doc) => {
+            if (doc.exists && doc.data().exibirNoRanking) {
+                checkbox.checked = true;
+                document.getElementById("rankingButton").disabled = false;
+                document.getElementById("rankingButton").style.opacity = "1";
+            } else {
+                checkbox.checked = false;
+                document.getElementById("rankingButton").disabled = true;
+                document.getElementById("rankingButton").style.opacity = "0.5";
+            }
+        })
+        .catch((error) => {
+            console.error("Erro ao verificar estado do ranking:", error);
+        });
 }
-
-// Chame essa função ao carregar a página
-verificarEstadoRanking();
 
 
     function salvarNota() {
