@@ -355,17 +355,27 @@
     }
 
     function toggleRankingButton() {
-        const checkbox = document.getElementById('showInRankingCheckbox');
-        const rankingButton = document.getElementById('rankingButton');
+    const checkbox = document.getElementById('showInRankingCheckbox');
+    const rankingButton = document.getElementById('rankingButton');
 
-        if (checkbox.checked) {
+    if (checkbox.checked) {
+        const confirma = confirm("Ao disponibilizar seu nome para o ranking, você poderá ver os alunos ranckeados, mas ele será exibido permanentemente. Não será possível removê-lo após a inclusão. Deseja continuar?");
+        
+        if (confirma) {
             rankingButton.disabled = false;
             rankingButton.style.opacity = 1;
-            alert('Seu nome estará visível no ranking para todos que aceitaram divulgar seus nomes no ranking.');
         } else {
+            // Desmarca o checkbox caso o usuário desista
+            checkbox.checked = false;
             rankingButton.disabled = true;
             rankingButton.style.opacity = 0.5;
         }
+    } else {
+        rankingButton.disabled = true;
+        rankingButton.style.opacity = 0.5;
+    }
+}
+
     }
 
     function mostrarRanking() {
@@ -373,6 +383,13 @@
             let rankingList = document.getElementById('ranking-list');
             rankingList.innerHTML = ''; // Limpa a lista antes de adicionar o ranking
             let alunosRanking = [];
+            if (exibir_no_ranking === true && !nomeJaIncluido) {
+    exibir_no_ranking = false;
+    // Lógica para remover o nome
+} else {
+    console.log("Você não pode mais remover seu nome do ranking.");
+}
+
 
             querySnapshot.forEach((doc) => {
                 const alunoData = doc.data();
