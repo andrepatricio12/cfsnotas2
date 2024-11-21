@@ -334,15 +334,29 @@
     }
 
     function carregarNotas() {
-        const alunoRef = db.collection("alunos").doc(matriculaAtual);
-        alunoRef.get().then((doc) => {
+    db.collection("usuarios").doc(matriculaAtual).get()
+        .then((doc) => {
             if (doc.exists) {
-                notasSalvas = doc.data();
-                atualizarCampoNota();
-                mostrarNotasSalvas();
-                calcularMedia();
+                notasSalvas = doc.data().notas || {};
+                atualizarNotasSalvas();
+                atualizarMedia();
             }
+        })
+        .catch((error) => {
+            console.error("Erro ao carregar notas: ", error);
         });
+}
+
+function atualizarNotasSalvas() {
+    const notasList = document.getElementById('notas-list');
+    notasList.innerHTML = ''; // Limpar a lista
+    Object.keys(notasSalvas).forEach((disciplina) => {
+        const li = document.createElement('li');
+        li.textContent = `${disciplina}: ${notasSalvas[disciplina]}`;
+        notasList.appendChild(li);
+    });
+}
+
     }
 
     function atualizarCampoNota() {
@@ -457,6 +471,7 @@
                 const li = document.createElement('li');
                 li.textContent = `${aluno.nome}: Média ${aluno.media.toFixed(2)}`;
                 rankingList.appendChild(li);
+                document.getElementById("rankingButton").disabled = !checkbox.checked;
             });
 
 
