@@ -92,22 +92,15 @@
             color: green;
         }
         #notas-salvas {
-    margin-top: 20px;
-    max-height: 300px; /* Defina a altura máxima que você deseja */
-    overflow-y: auto;  /* Adiciona a barra de rolagem vertical */
-    padding-right: 15px; /* Espaçamento para a barra de rolagem */
+    scrollbar-width: thin; /* Firefox */
 }
-
-#notas-salvas ul {
-    list-style-type: none;
-    padding-left: 0;
+#notas-salvas::-webkit-scrollbar {
+    width: 8px; /* Webkit Browsers */
 }
-
-#notas-salvas li {
-    background-color: #f0f0f0;
-    margin-bottom: 5px;
-    padding: 10px;
+#notas-salvas::-webkit-scrollbar-thumb {
+    background: #ddd;
     border-radius: 5px;
+
 }
 
     </style>
@@ -166,7 +159,10 @@
 
         <div class="form-group">
             <label>
-                <input type="checkbox" id="showInRankingCheckbox" onclick="toggleRankingButton()"> Exibir Nome no Ranking
+                <input type="checkbox" {
+    transform: scale(1.2);
+    margin-right: 5px;
+} id="showInRankingCheckbox" onclick="toggleRankingButton()"> Exibir Nome no Ranking
             </label>
         </div>
 
