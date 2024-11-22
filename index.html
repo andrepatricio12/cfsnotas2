@@ -270,31 +270,38 @@
     }
 
     function salvarNota() {
-        const disciplina = document.getElementById('disciplina').value;
-        const nota = parseFloat(document.getElementById('nota').value);
+    const disciplina = document.getElementById('disciplina').value;
+    const nota = parseFloat(document.getElementById('nota').value);
+    const mostrarRanking = document.getElementById('showInRankingCheckbox').checked;
 
-        if (isNaN(nota) || nota < 0 || nota > 10) {
-            document.getElementById('nota-error').classList.remove('hidden');
-            setTimeout(() => {
-                document.getElementById('nota-error').classList.add('hidden');
-            }, 2000);
-            return;
-        }
-
-        const alunoRef = db.collection("alunos").doc(matriculaAtual);
-        alunoRef.set({
-            [disciplina]: nota,
-            nome: nomeAlunoAtual,
-            mostrarRanking: document.getElementById('showInRankingCheckbox').checked
-        }, { merge: true }).then(() => {
-            document.getElementById('nota-success').classList.remove('hidden');
-            setTimeout(() => {
-                document.getElementById('nota-success').classList.add('hidden');
-            }, 2000);
-            carregarNotas();
-            calcularMedia();
-        });
+    if (isNaN(nota) || nota < 0 || nota > 10) {
+        document.getElementById('nota-error').classList.remove('hidden');
+        setTimeout(() => {
+            document.getElementById('nota-error').classList.add('hidden');
+        }, 2000);
+        return;
     }
+
+    const alunoRef = db.collection("alunos").doc(matriculaAtual);
+    alunoRef.set({
+        [disciplina]: nota,
+        nome: nomeAlunoAtual,
+        mostrarRanking: mostrarRanking
+    }, { merge: true }).then(() => {
+        document.getElementById('nota-success').classList.remove('hidden');
+        setTimeout(() => {
+            document.getElementById('nota-success').classList.add('hidden');
+        }, 2000);
+        carregarNotas();
+        calcularMedia();
+    });
+}
+    function salvarPreferenciaRanking(mostrarRanking) {
+    const alunoRef = db.collection("alunos").doc(matriculaAtual);
+    alunoRef.update({
+        mostrarRanking: mostrarRanking
+    });
+}
 
     function excluirNota() {
         const disciplina = document.getElementById('disciplina').value;
@@ -308,17 +315,34 @@
         });
     }
 
-    function carregarNotas() {
-        const alunoRef = db.collection("alunos").doc(matriculaAtual);
-        alunoRef.get().then((doc) => {
-            if (doc.exists) {
-                notasSalvas = doc.data();
-                atualizarCampoNota();
-                mostrarNotasSalvas();
-                calcularMedia();
+   function carregarNotas() {
+    const alunoRef = db.collection("alunos").doc(matriculaAtual);
+    alunoRef.get().then((doc) => {
+        if (doc.exists) {
+            notasSalvas = doc.data();
+            atualizarCampoNota();
+            mostrarNotasSalvas();
+            calcularMedia();
+
+            // Ajusta o estado do checkbox e botão de ranking
+            const checkbox = document.getElementById('showInRankingCheckbox');
+            const rankingButton = document.getElementById('rankingButton');
+
+            if (notasSalvas.mostrarRanking) {
+                checkbox.checked = true;
+                checkbox.disabled = true; // Uma vez optado, desabilitar
+                rankingButton.disabled = false;
+                rankingButton.style.opacity = 1;
+            } else {
+                checkbox.checked = false;
+                checkbox.disabled = false;
+                rankingButton.disabled = true;
+                rankingButton.style.opacity = 0.5;
             }
-        });
-    }
+        }
+    }); // <<< Remova qualquer chave extra aqui
+}
+
 
     function atualizarCampoNota() {
         const disciplina = document.getElementById('disciplina').value;
@@ -354,18 +378,22 @@
     }
 
     function toggleRankingButton() {
-        const checkbox = document.getElementById('showInRankingCheckbox');
-        const rankingButton = document.getElementById('rankingButton');
+    const checkbox = document.getElementById('showInRankingCheckbox');
+    const rankingButton = document.getElementById('rankingButton');
 
-        if (checkbox.checked) {
+    if (checkbox.checked) {
+        const confirmacao = confirm('Você deseja que seu nome seja exibido no ranking? Esta ação não pode ser desfeita.');
+        if (confirmacao) {
             rankingButton.disabled = false;
             rankingButton.style.opacity = 1;
-            alert('Seu nome estará visível no ranking para todos que aceitaram divulgar seus nomes no ranking.');
+            checkbox.disabled = true; // Desabilita o checkbox após confirmação
+            salvarPreferenciaRanking(true); // Salva a escolha no banco de dados
         } else {
-            rankingButton.disabled = true;
-            rankingButton.style.opacity = 0.5;
+            checkbox.checked = false; // Reverte a seleção se a confirmação for cancelada
         }
     }
+}
+
 
     function mostrarRanking() {
         db.collection("alunos").where("mostrarRanking", "==", true).get().then((querySnapshot) => {
