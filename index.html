@@ -109,6 +109,7 @@
     padding: 10px;
     border-radius: 5px;
 }
+        
         #ranking-table th, #ranking-table td {
     padding: 10px;
     border: 1px solid #ddd;
@@ -227,6 +228,19 @@
         </div>
     </div>
 </div>
+    <table id="tabelaRanking" border="1">
+  <thead>
+    <tr>
+      <th>Número de Notas Salvas</th>
+      <th>Nome do Aluno</th>
+      <th>Média</th>
+    </tr>
+  </thead>
+  <tbody>
+    <!-- As linhas serão preenchidas dinamicamente -->
+
+</table>
+
 
 <script>
     // Configuração do Firebase
@@ -284,6 +298,39 @@
     let matriculaAtual = "";
     let nomeAlunoAtual = "";
     let notasSalvas = {};
+    // Lista de alunos com notas
+let alunos = [
+  { nome: "João", notas: [8, 9, 7, 10] },
+  { nome: "Maria", notas: [7, 8, 6] },
+  { nome: "Pedro", notas: [] }, // Sem notas
+  { nome: "undefined", notas: [9, 10] }, // Nome não definido corretamente
+];
+
+// Seleciona a tabela
+let tabela = document.getElementById("tabelaRanking");
+
+// Itera pelos alunos
+alunos.forEach((aluno) => {
+  // Valida os dados do aluno
+  let nome = aluno.nome || "Nome não informado";
+  let numeroDeNotas = aluno.notas.length;
+
+  // Calcula a média, evitando divisão por zero
+  let media =
+    numeroDeNotas > 0
+      ? (aluno.notas.reduce((acc, nota) => acc + nota, 0) / numeroDeNotas).toFixed(2)
+      : "Sem notas";
+
+  // Adiciona a linha na tabela
+  tabela.innerHTML += `
+    <tr>
+      <td>${numeroDeNotas}</td>
+      <td>${nome}</td>
+      <td>${media}</td>
+    </tr>
+  `;
+});
+
 
     function login() {
         const matriculaInput = document.getElementById('matricula').value;
