@@ -110,6 +110,22 @@
     border-radius: 5px;
 }
         }
+        <div class="message hidden" id="ranking-container">
+    <h3>Ranking de Alunos</h3>
+    <table id="ranking-table">
+        <thead>
+            <tr>
+                <th>Posição</th>
+                <th>Nome</th>
+                <th>Nº de Notas</th>
+                <th>Média</th>
+            </tr>
+        </thead>
+        <tbody id="ranking-body">
+        </tbody>
+    </table>
+    <button id="hide-ranking-button" onclick="ocultarRanking()">Ocultar Ranking</button>
+</div>
     </style>
     <!-- Firebase SDK (compatível com navegadores) -->
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
@@ -197,6 +213,66 @@
         </div>
     </div>
 </div>
+    <style>
+    .ranking-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+.ranking-table th, .ranking-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: center;
+}
+
+.ranking-table th {
+    background-color: #007bff;
+    color: white;
+    font-weight: bold;
+}
+
+.ranking-table td {
+    background-color: #f9f9f9;
+}
+        <style>
+    /* Outros estilos existentes */
+
+    /* Ajustar largura da coluna "Número de Notas" */
+    #<style>
+    /* Ajustar largura da coluna "Número de Notas" */
+    #ranking-container table th:nth-child(3),
+    #ranking-container table td:nth-child(3) {
+        width: 80px; /* Menor largura para a coluna "Número de Notas" */
+        text-align: center;
+    }
+
+    /* Ajustar largura da coluna "Nome" */
+    #ranking-container table th:nth-child(2),
+    #ranking-container table td:nth-child(2) {
+        width: auto; /* Largura ajustável para o nome */
+        white-space: nowrap; /* Impede a quebra de linha */
+        text-align: left;
+    }
+
+    /* Outras colunas */
+    #ranking-container table th:nth-child(1),
+    #ranking-container table td:nth-child(1),
+    #ranking-container table th:nth-child(4),
+    #ranking-container table td:nth-child(4) {
+        text-align: center;
+    }
+
+    #ranking-container button {
+        margin-top: 20px;
+    }
+
+
+#ranking-container button {
+    margin-top: 20px;
+}
+
+</style>
 
 <script>
     // Configuração do Firebase
@@ -396,38 +472,88 @@
 
 
     function mostrarRanking() {
-        db.collection("alunos").where("mostrarRanking", "==", true).get().then((querySnapshot) => {
-            let rankingList = document.getElementById('ranking-list');
-            rankingList.innerHTML = ''; // Limpa a lista antes de adicionar o ranking
-            let alunosRanking = [];
+    db.collection("alunos").where("mostrarRanking", "==", true).get().then((querySnapshot) => {
+        let rankingList = document.getElementById('ranking-list');
+        rankingList.innerHTML = ''; // Limpa a lista antes de adicionar o ranking
+        let alunosRanking = [];
 
-            querySnapshot.forEach((doc) => {
-                const alunoData = doc.data();
-                let soma = 0;
-                let count = 0;
+        querySnapshot.forEach((doc) => {
+            const alunoData = doc.data();
+            let soma = 0;
+            let count = 0;
 
-                for (const disciplina in alunoData) {
-                    if (disciplina !== 'nome' && disciplina !== 'mostrarRanking') {
-                        soma += alunoData[disciplina];
-                        count++;
-                    }
+            for (const disciplina in alunoData) {
+                if (disciplina !== 'nome' && disciplina !== 'mostrarRanking') {
+                    soma += alunoData[disciplina];
+                    count++;
                 }
+            }
 
-                const media = count > 0 ? soma / count : 0;
-                alunosRanking.push({ nome: alunoData.nome, media });
-            });
-
-            alunosRanking.sort((a, b) => b.media - a.media);
-
-            alunosRanking.forEach((aluno) => {
-                const li = document.createElement('li');
-                li.textContent = `${aluno.nome}: Média ${aluno.media.toFixed(2)}`;
-                rankingList.appendChild(li);
-            });
-
-            document.getElementById('ranking-container').classList.remove('hidden');
+            const media = count > 0 ? soma / count : 0;
+            alunosRanking.push({ nome: alunoData.nome, media, notasSalvas: count });
         });
-    }
+
+        alunosRanking.sort((a, b) => b.media - a.media);
+
+        // Criando a tabela com as colunas separadas
+        const tabela = document.createElement('table');
+        tabela.classList.add('ranking-table'); // Classe para estilizar a tabela
+
+        // Cabeçalho da tabela
+        const thead = document.createElement('thead');
+        const headerRow = document.createElement('tr');
+
+        const thPosicao = document.createElement('th');
+        thPosicao.textContent = 'Posição';
+        headerRow.appendChild(thPosicao);
+
+        const thNome = document.createElement('th');
+        thNome.textContent = 'Nome';
+        headerRow.appendChild(thNome);
+
+        const thNotas = document.createElement('th');
+        thNotas.textContent = 'Nº de Notas';
+        headerRow.appendChild(thNotas);
+
+        const thMedia = document.createElement('th');
+        thMedia.textContent = 'Média';
+        headerRow.appendChild(thMedia);
+
+        thead.appendChild(headerRow);
+        tabela.appendChild(thead);
+
+        // Corpo da tabela
+        const tbody = document.createElement('tbody');
+        alunosRanking.forEach((aluno, index) => {
+            const row = document.createElement('tr');
+
+            const tdPosicao = document.createElement('td');
+            tdPosicao.textContent = `${index + 1}º`;
+            row.appendChild(tdPosicao);
+
+            const tdNome = document.createElement('td');
+            tdNome.textContent = aluno.nome;
+            row.appendChild(tdNome);
+
+            const tdNotas = document.createElement('td');
+            tdNotas.textContent = aluno.notasSalvas;
+            row.appendChild(tdNotas);
+
+            const tdMedia = document.createElement('td');
+            tdMedia.textContent = aluno.media.toFixed(2);
+            row.appendChild(tdMedia);
+
+            tbody.appendChild(row);
+        });
+
+        tabela.appendChild(tbody);
+        rankingList.appendChild(tabela);
+
+        document.getElementById('ranking-container').classList.remove('hidden');
+    });
+}
+
+
 
     function ocultarRanking() {
         document.getElementById('ranking-container').classList.add('hidden');
