@@ -109,25 +109,6 @@
     padding: 10px;
     border-radius: 5px;
 }
-        
-        #ranking-table th, #ranking-table td {
-    padding: 10px;
-    border: 1px solid #ddd;
-}
-
-#ranking-table th {
-    background-color: #f4f4f4;
-    font-weight: bold;
-}
-        #ranking-container {
-    text-align: center;
-}
-
-#ranking-table {
-    margin: 0 auto; /* Centraliza a tabela */
-}
-
-
         }
     </style>
     <!-- Firebase SDK (compatível com navegadores) -->
@@ -204,23 +185,11 @@
             <button id="rankingButton" disabled onclick="mostrarRanking()">Ver Ranking</button>
         </div>
 
-       <div class="message hidden" id="ranking-container">
-    <h3>Ranking de Alunos</h3>
-    <div id="ranking-list">
-        <table id="ranking-table" border="1" style="width: 100%; border-collapse: collapse; text-align: center;">
-            <thead>
-                <tr>
-                    <th>Número de Notas Salvas</th>
-                    <th>Nome do Aluno</th>
-                    <th>Média</th>
-                </tr>
-            </thead>
-            <tbody></tbody>
-        </table>
-    </div>
-    <button onclick="ocultarRanking()">Ocultar Ranking</button>
-</div>
-
+        <div class="message hidden" id="ranking-container">
+            <h3>Ranking de Alunos</h3>
+            <div id="ranking-list"></div>
+            <button onclick="ocultarRanking()">Ocultar Ranking</button>
+        </div>
 
         <div id="notas-salvas">
             <h3>Notas Salvas</h3>
@@ -228,19 +197,6 @@
         </div>
     </div>
 </div>
-    <table id="tabelaRanking" border="1">
-  <thead>
-    <tr>
-      <th>Número de Notas Salvas</th>
-      <th>Nome do Aluno</th>
-      <th>Média</th>
-    </tr>
-  </thead>
-  <tbody>
-    <!-- As linhas serão preenchidas dinamicamente -->
-
-</table>
-
 
 <script>
     // Configuração do Firebase
@@ -298,46 +254,13 @@
     let matriculaAtual = "";
     let nomeAlunoAtual = "";
     let notasSalvas = {};
-    // Lista de alunos com notas
-let alunos = [
-  { nome: "João", notas: [8, 9, 7, 10] },
-  { nome: "Maria", notas: [7, 8, 6] },
-  { nome: "Pedro", notas: [] }, // Sem notas
-  { nome: "undefined", notas: [9, 10] }, // Nome não definido corretamente
-];
-
-// Seleciona a tabela
-let tabela = document.getElementById("tabelaRanking");
-
-// Itera pelos alunos
-alunos.forEach((aluno) => {
-  // Valida os dados do aluno
-  let nome = aluno.nome || "Nome não informado";
-  let numeroDeNotas = aluno.notas.length;
-
-  // Calcula a média, evitando divisão por zero
-  let media =
-    numeroDeNotas > 0
-      ? (aluno.notas.reduce((acc, nota) => acc + nota, 0) / numeroDeNotas).toFixed(2)
-      : "Sem notas";
-
-  // Adiciona a linha na tabela
-  tabela.innerHTML += `
-    <tr>
-      <td>${numeroDeNotas}</td>
-      <td>${nome}</td>
-      <td>${media}</td>
-    </tr>
-  `;
-});
-
 
     function login() {
         const matriculaInput = document.getElementById('matricula').value;
         if (alunos[matriculaInput]) {
             matriculaAtual = matriculaInput;
             nomeAlunoAtual = alunos[matriculaAtual];
-            document.getElementById('aluno-nome').textContent = `Bem-vindo(a), ${nomeAlunoAtual}`;
+            document.getElementById('aluno-nome').textContent = Bem-vindo(a), ${nomeAlunoAtual};
             document.getElementById('login-form').classList.add('hidden');
             document.getElementById('notas-form').classList.remove('hidden');
             carregarNotas();
@@ -433,7 +356,7 @@ alunos.forEach((aluno) => {
         for (const disciplina in notasSalvas) {
             if (disciplina !== 'nome' && disciplina !== 'mostrarRanking') {
                 const li = document.createElement('li');
-                li.textContent = `${disciplina}: ${notasSalvas[disciplina]}`;
+                li.textContent = ${disciplina}: ${notasSalvas[disciplina]};
                 notasList.appendChild(li);
             }
         }
@@ -473,61 +396,41 @@ alunos.forEach((aluno) => {
 
 
     function mostrarRanking() {
-    const rankingContainer = document.getElementById('ranking-container');
-    const rankingTableBody = document.querySelector('#ranking-table tbody');
-
-    rankingTableBody.innerHTML = ''; // Limpa o conteúdo atual do ranking
-
-    db.collection('notas')
-        .get()
-        .then((querySnapshot) => {
-            const alunosRanking = {};
+        db.collection("alunos").where("mostrarRanking", "==", true).get().then((querySnapshot) => {
+            let rankingList = document.getElementById('ranking-list');
+            rankingList.innerHTML = ''; // Limpa a lista antes de adicionar o ranking
+            let alunosRanking = [];
 
             querySnapshot.forEach((doc) => {
-                const data = doc.data();
-                const alunoNome = data.aluno;
-                const nota = parseFloat(data.nota);
+                const alunoData = doc.data();
+                let soma = 0;
+                let count = 0;
 
-                if (!alunosRanking[alunoNome]) {
-                    alunosRanking[alunoNome] = { total: 0, soma: 0 };
+                for (const disciplina in alunoData) {
+                    if (disciplina !== 'nome' && disciplina !== 'mostrarRanking') {
+                        soma += alunoData[disciplina];
+                        count++;
+                    }
                 }
 
-                alunosRanking[alunoNome].total += 1;
-                alunosRanking[alunoNome].soma += nota;
+                const media = count > 0 ? soma / count : 0;
+                alunosRanking.push({ nome: alunoData.nome, media });
             });
 
-            const rankingArray = Object.keys(alunosRanking).map((nome) => {
-                const alunoData = alunosRanking[nome];
-                return {
-                    nome,
-                    media: (alunoData.soma / alunoData.total).toFixed(2),
-                    total: alunoData.total,
-                };
+            alunosRanking.sort((a, b) => b.media - a.media);
+
+            alunosRanking.forEach((aluno) => {
+                const li = document.createElement('li');
+                li.textContent = ${aluno.nome}: Média ${aluno.media.toFixed(2)};
+                rankingList.appendChild(li);
             });
 
-            rankingArray.sort((a, b) => b.media - a.media); // Ordena pelo maior média
-
-            rankingArray.forEach((aluno) => {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${aluno.total}</td>
-                    <td>${aluno.nome}</td>
-                    <td>${aluno.media}</td>
-                `;
-                rankingTableBody.appendChild(row);
-            });
-
-            rankingContainer.classList.remove('hidden');
-        })
-        .catch((error) => {
-            console.error('Erro ao carregar ranking:', error);
+            document.getElementById('ranking-container').classList.remove('hidden');
         });
-}
+    }
 
-function ocultarRanking() {
-    const rankingContainer = document.getElementById('ranking-container');
-    rankingContainer.classList.add('hidden');
-
+    function ocultarRanking() {
+        document.getElementById('ranking-container').classList.add('hidden');
     }
 </script>
 </body>
