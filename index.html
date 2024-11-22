@@ -109,6 +109,16 @@
     padding: 10px;
     border-radius: 5px;
 }
+        #ranking-table th, #ranking-table td {
+    padding: 10px;
+    border: 1px solid #ddd;
+}
+
+#ranking-table th {
+    background-color: #f4f4f4;
+    font-weight: bold;
+}
+
         }
     </style>
     <!-- Firebase SDK (compatível com navegadores) -->
@@ -185,11 +195,23 @@
             <button id="rankingButton" disabled onclick="mostrarRanking()">Ver Ranking</button>
         </div>
 
-        <div class="message hidden" id="ranking-container">
-            <h3>Ranking de Alunos</h3>
-            <div id="ranking-list"></div>
-            <button onclick="ocultarRanking()">Ocultar Ranking</button>
-        </div>
+       <div class="message hidden" id="ranking-container">
+    <h3>Ranking de Alunos</h3>
+    <div id="ranking-list">
+        <table id="ranking-table" border="1" style="width: 100%; border-collapse: collapse; text-align: center;">
+            <thead>
+                <tr>
+                    <th>Número de Notas Salvas</th>
+                    <th>Nome do Aluno</th>
+                    <th>Média</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+    <button onclick="ocultarRanking()">Ocultar Ranking</button>
+</div>
+
 
         <div id="notas-salvas">
             <h3>Notas Salvas</h3>
@@ -395,39 +417,47 @@
 }
 
 
-    function mostrarRanking() {
-        db.collection("alunos").where("mostrarRanking", "==", true).get().then((querySnapshot) => {
-            let rankingList = document.getElementById('ranking-list');
-            rankingList.innerHTML = ''; // Limpa a lista antes de adicionar o ranking
-            let alunosRanking = [];
+    async function mostrarRanking() {
+    const rankingContainer = document.getElementById("ranking-container");
+    const rankingTableBody = document.querySelector("#ranking-table tbody");
 
-            querySnapshot.forEach((doc) => {
-                const alunoData = doc.data();
-                let soma = 0;
-                let count = 0;
+    // Limpa o conteúdo anterior da tabela
+    rankingTableBody.innerHTML = "";
 
-                for (const disciplina in alunoData) {
-                    if (disciplina !== 'nome' && disciplina !== 'mostrarRanking') {
-                        soma += alunoData[disciplina];
-                        count++;
-                    }
-                }
+    // Obtenha os dados do ranking a partir do banco de dados Firebase
+    const rankingSnapshot = await db.collection("notas").get();
+    const rankingData = {};
 
-                const media = count > 0 ? soma / count : 0;
-                alunosRanking.push({ nome: alunoData.nome, media });
-            });
+    // Processa os dados do ranking
+    rankingSnapshot.forEach(doc => {
+        const data = doc.data();
+        const nome = alunos[doc.id]; // Nome do aluno baseado na matrícula
+        const notas = data.notas || [];
 
-            alunosRanking.sort((a, b) => b.media - a.media);
+        if (notas.length > 0) {
+            const media = (notas.reduce((sum, nota) => sum + nota, 0) / notas.length).toFixed(2);
+            rankingData[doc.id] = { nome, numeroNotas: notas.length, media };
+        }
+    });
 
-            alunosRanking.forEach((aluno) => {
-                const li = document.createElement('li');
-                li.textContent = `${aluno.nome}: Média ${aluno.media.toFixed(2)}`;
-                rankingList.appendChild(li);
-            });
+    // Ordena os dados pela média (descendente)
+    const sortedRanking = Object.values(rankingData).sort((a, b) => b.media - a.media);
 
-            document.getElementById('ranking-container').classList.remove('hidden');
-        });
-    }
+    // Preenche a tabela com os dados ordenados
+    sortedRanking.forEach(entry => {
+        const row = document.createElement("tr");
+        row.innerHTML = `
+            <td>${entry.numeroNotas}</td>
+            <td>${entry.nome}</td>
+            <td>${entry.media}</td>
+        `;
+        rankingTableBody.appendChild(row);
+    });
+
+    // Exibe o ranking
+    rankingContainer.classList.remove("hidden");
+}
+
 
     function ocultarRanking() {
         document.getElementById('ranking-container').classList.add('hidden');
