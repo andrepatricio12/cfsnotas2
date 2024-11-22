@@ -260,7 +260,7 @@
         if (alunos[matriculaInput]) {
             matriculaAtual = matriculaInput;
             nomeAlunoAtual = alunos[matriculaAtual];
-            document.getElementById('aluno-nome').textContent = Bem-vindo(a), ${nomeAlunoAtual};
+            document.getElementById('aluno-nome').textContent = `Bem-vindo(a), ${nomeAlunoAtual}`;
             document.getElementById('login-form').classList.add('hidden');
             document.getElementById('notas-form').classList.remove('hidden');
             carregarNotas();
@@ -270,38 +270,31 @@
     }
 
     function salvarNota() {
-    const disciplina = document.getElementById('disciplina').value;
-    const nota = parseFloat(document.getElementById('nota').value);
-    const mostrarRanking = document.getElementById('showInRankingCheckbox').checked;
+        const disciplina = document.getElementById('disciplina').value;
+        const nota = parseFloat(document.getElementById('nota').value);
 
-    if (isNaN(nota) || nota < 0 || nota > 10) {
-        document.getElementById('nota-error').classList.remove('hidden');
-        setTimeout(() => {
-            document.getElementById('nota-error').classList.add('hidden');
-        }, 2000);
-        return;
+        if (isNaN(nota) || nota < 0 || nota > 10) {
+            document.getElementById('nota-error').classList.remove('hidden');
+            setTimeout(() => {
+                document.getElementById('nota-error').classList.add('hidden');
+            }, 2000);
+            return;
+        }
+
+        const alunoRef = db.collection("alunos").doc(matriculaAtual);
+        alunoRef.set({
+            [disciplina]: nota,
+            nome: nomeAlunoAtual,
+            mostrarRanking: document.getElementById('showInRankingCheckbox').checked
+        }, { merge: true }).then(() => {
+            document.getElementById('nota-success').classList.remove('hidden');
+            setTimeout(() => {
+                document.getElementById('nota-success').classList.add('hidden');
+            }, 2000);
+            carregarNotas();
+            calcularMedia();
+        });
     }
-
-    const alunoRef = db.collection("alunos").doc(matriculaAtual);
-    alunoRef.set({
-        [disciplina]: nota,
-        nome: nomeAlunoAtual,
-        mostrarRanking: mostrarRanking
-    }, { merge: true }).then(() => {
-        document.getElementById('nota-success').classList.remove('hidden');
-        setTimeout(() => {
-            document.getElementById('nota-success').classList.add('hidden');
-        }, 2000);
-        carregarNotas();
-        calcularMedia();
-    });
-}
-    function salvarPreferenciaRanking(mostrarRanking) {
-    const alunoRef = db.collection("alunos").doc(matriculaAtual);
-    alunoRef.update({
-        mostrarRanking: mostrarRanking
-    });
-}
 
     function excluirNota() {
         const disciplina = document.getElementById('disciplina').value;
@@ -315,34 +308,17 @@
         });
     }
 
-   function carregarNotas() {
-    const alunoRef = db.collection("alunos").doc(matriculaAtual);
-    alunoRef.get().then((doc) => {
-        if (doc.exists) {
-            notasSalvas = doc.data();
-            atualizarCampoNota();
-            mostrarNotasSalvas();
-            calcularMedia();
-
-            // Ajusta o estado do checkbox e botão de ranking
-            const checkbox = document.getElementById('showInRankingCheckbox');
-            const rankingButton = document.getElementById('rankingButton');
-
-            if (notasSalvas.mostrarRanking) {
-                checkbox.checked = true;
-                checkbox.disabled = true; // Uma vez optado, desabilitar
-                rankingButton.disabled = false;
-                rankingButton.style.opacity = 1;
-            } else {
-                checkbox.checked = false;
-                checkbox.disabled = false;
-                rankingButton.disabled = true;
-                rankingButton.style.opacity = 0.5;
+    function carregarNotas() {
+        const alunoRef = db.collection("alunos").doc(matriculaAtual);
+        alunoRef.get().then((doc) => {
+            if (doc.exists) {
+                notasSalvas = doc.data();
+                atualizarCampoNota();
+                mostrarNotasSalvas();
+                calcularMedia();
             }
-        }
-    }); // <<< Remova qualquer chave extra aqui
-}
-
+        });
+    }
 
     function atualizarCampoNota() {
         const disciplina = document.getElementById('disciplina').value;
@@ -356,7 +332,7 @@
         for (const disciplina in notasSalvas) {
             if (disciplina !== 'nome' && disciplina !== 'mostrarRanking') {
                 const li = document.createElement('li');
-                li.textContent = ${disciplina}: ${notasSalvas[disciplina]};
+                li.textContent = `${disciplina}: ${notasSalvas[disciplina]}`;
                 notasList.appendChild(li);
             }
         }
@@ -378,22 +354,18 @@
     }
 
     function toggleRankingButton() {
-    const checkbox = document.getElementById('showInRankingCheckbox');
-    const rankingButton = document.getElementById('rankingButton');
+        const checkbox = document.getElementById('showInRankingCheckbox');
+        const rankingButton = document.getElementById('rankingButton');
 
-    if (checkbox.checked) {
-        const confirmacao = confirm('Você deseja que seu nome seja exibido no ranking? Esta ação não pode ser desfeita.');
-        if (confirmacao) {
+        if (checkbox.checked) {
             rankingButton.disabled = false;
             rankingButton.style.opacity = 1;
-            checkbox.disabled = true; // Desabilita o checkbox após confirmação
-            salvarPreferenciaRanking(true); // Salva a escolha no banco de dados
+            alert('Seu nome estará visível no ranking para todos que aceitaram divulgar seus nomes no ranking.');
         } else {
-            checkbox.checked = false; // Reverte a seleção se a confirmação for cancelada
+            rankingButton.disabled = true;
+            rankingButton.style.opacity = 0.5;
         }
     }
-}
-
 
     function mostrarRanking() {
         db.collection("alunos").where("mostrarRanking", "==", true).get().then((querySnapshot) => {
@@ -421,7 +393,7 @@
 
             alunosRanking.forEach((aluno) => {
                 const li = document.createElement('li');
-                li.textContent = ${aluno.nome}: Média ${aluno.media.toFixed(2)};
+                li.textContent = `${aluno.nome}: Média ${aluno.media.toFixed(2)}`;
                 rankingList.appendChild(li);
             });
 
