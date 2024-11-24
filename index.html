@@ -202,10 +202,12 @@
         </div>
 
         <div class="message hidden" id="ranking-container">
-            <h3>Ranking de Alunos</h3>
-            <div id="ranking-list"></div>
-            <button onclick="ocultarRanking()">Ocultar Ranking</button>
-        </div>
+    <h3>Ranking de Alunos</h3>
+    <div id="ranking-list"></div>
+    <div id="nao-exibir-container" style="margin-top: 10px; font-size: small;"></div>
+    <button onclick="ocultarRanking()">Ocultar Ranking</button>
+</div>
+
 
         <div id="notas-salvas">
             <h3>Notas Salvas</h3>
@@ -469,6 +471,97 @@
         }
     }
 }
+async function carregarRanking() {
+    const rankingContainer = document.getElementById('ranking-list');
+    const naoExibirContainer = document.getElementById('nao-exibir-container');
+    
+    try {
+        const querySnapshot = await firebase.firestore().collection('alunos').get();
+        let rankingData = [];
+        let naoExibirCount = 0;
+
+        querySnapshot.forEach((doc) => {
+            const data = doc.data();
+            if (data.mostrarRanking) {  // Certifique-se de usar a chave correta
+                // Calcular a média das notas
+                const grades = Object.keys(data).filter(key => key !== "nome" && key !== "mostrarRanking").map(key => data[key]);
+                const average = grades.reduce((sum, grade) => sum + grade, 0) / grades.length;
+                rankingData.push({ nome: data.nome, media: average, notasSalvas: grades.length });
+            } else {
+                naoExibirCount++;
+            }
+        });
+
+        // Ordenar o ranking por média decrescente
+        rankingData.sort((a, b) => b.media - a.media);
+
+        // Criando a tabela com as colunas separadas
+        const tabela = document.createElement('table');
+        tabela.classList.add('ranking-table'); // Classe para estilizar a tabela
+
+        // Cabeçalho da tabela
+        const thead = document.createElement('thead');
+        const headerRow = document.createElement('tr');
+
+        const thPosicao = document.createElement('th');
+        thPosicao.textContent = 'Posição';
+        headerRow.appendChild(thPosicao);
+
+        const thNome = document.createElement('th');
+        thNome.textContent = 'Nome';
+        headerRow.appendChild(thNome);
+
+        const thNotas = document.createElement('th');
+        thNotas.textContent = 'Nº de Notas';
+        headerRow.appendChild(thNotas);
+
+        const thMedia = document.createElement('th');
+        thMedia.textContent = 'Média';
+        headerRow.appendChild(thMedia);
+
+        thead.appendChild(headerRow);
+        tabela.appendChild(thead);
+
+        // Corpo da tabela
+        const tbody = document.createElement('tbody');
+        rankingData.forEach((item, index) => {
+            const row = document.createElement('tr');
+
+            const tdPosicao = document.createElement('td');
+            tdPosicao.textContent = `${index + 1}º`;
+            row.appendChild(tdPosicao);
+
+            const tdNome = document.createElement('td');
+            tdNome.textContent = item.nome;
+            row.appendChild(tdNome);
+
+            const tdNotas = document.createElement('td');
+            tdNotas.textContent = item.notasSalvas;
+            row.appendChild(tdNotas);
+
+            const tdMedia = document.createElement('td');
+            tdMedia.textContent = item.media.toFixed(2);
+            row.appendChild(tdMedia);
+
+            tbody.appendChild(row);
+        });
+
+        tabela.appendChild(tbody);
+        rankingContainer.innerHTML = '';
+        rankingContainer.appendChild(tabela);
+
+        // Atualizar mensagem de não exibição
+        naoExibirContainer.innerHTML = `
+            <span>Alunos que cadastraram suas notas mas optaram por não aparecer no ranking: <span style="color: red;">${naoExibirCount}</span></span>
+        `;
+    } catch (error) {
+        console.error('Erro ao carregar o ranking:', error);
+    }
+}
+document.getElementById('rankingButton').addEventListener('click', () => {
+    carregarRanking();
+});
+
 
 
     function mostrarRanking() {
