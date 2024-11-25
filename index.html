@@ -565,6 +565,11 @@ document.getElementById('rankingButton').addEventListener('click', () => {
 
 
     function mostrarRanking() {
+    if (Object.keys(notasSalvas).length <= 2) { // Somente 'nome' e 'mostrarRanking' são padrão
+        alert("É necessário cadastrar ao menos uma nota para visualizar o ranking.");
+        return;
+    }
+
     db.collection("alunos").where("mostrarRanking", "==", true).get().then((querySnapshot) => {
         let rankingList = document.getElementById('ranking-list');
         rankingList.innerHTML = ''; // Limpa a lista antes de adicionar o ranking
@@ -645,6 +650,7 @@ document.getElementById('rankingButton').addEventListener('click', () => {
         document.getElementById('ranking-container').classList.remove('hidden');
     });
 }
+
 
 
 
