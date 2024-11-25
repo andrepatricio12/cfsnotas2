@@ -552,7 +552,7 @@ async function carregarRanking() {
 
         // Atualizar mensagem de não exibição
         naoExibirContainer.innerHTML = `
-            <span>Alunos que cadastraram suas notas mas optaram por não aparecer no ranking: <span style="color: red;">${naoExibirCount}</span></span>
+            <span>Alunos que optaram por não aparecer no ranking: <span style="color: red;">${naoExibirCount}</span></span>
         `;
     } catch (error) {
         console.error('Erro ao carregar o ranking:', error);
