@@ -118,7 +118,6 @@
                 <th>Posição</th>
                 <th>Nome</th>
                 <th>Nº de Notas</th>
-                <th>Média</th>
             </tr>
         </thead>
         <tbody id="ranking-body">
@@ -515,10 +514,6 @@ async function carregarRanking() {
         thNotas.textContent = 'Nº de Notas';
         headerRow.appendChild(thNotas);
 
-        const thMedia = document.createElement('th');
-        thMedia.textContent = 'Média';
-        headerRow.appendChild(thMedia);
-
         thead.appendChild(headerRow);
         tabela.appendChild(thead);
 
@@ -538,10 +533,6 @@ async function carregarRanking() {
             const tdNotas = document.createElement('td');
             tdNotas.textContent = item.notasSalvas;
             row.appendChild(tdNotas);
-
-            const tdMedia = document.createElement('td');
-            tdMedia.textContent = item.media.toFixed(2);
-            row.appendChild(tdMedia);
 
             tbody.appendChild(row);
         });
@@ -613,9 +604,6 @@ document.getElementById('rankingButton').addEventListener('click', () => {
         thNotas.textContent = 'Nº de Notas';
         headerRow.appendChild(thNotas);
 
-        const thMedia = document.createElement('th');
-        thMedia.textContent = 'Média';
-        headerRow.appendChild(thMedia);
 
         thead.appendChild(headerRow);
         tabela.appendChild(thead);
@@ -637,9 +625,6 @@ document.getElementById('rankingButton').addEventListener('click', () => {
             tdNotas.textContent = aluno.notasSalvas;
             row.appendChild(tdNotas);
 
-            const tdMedia = document.createElement('td');
-            tdMedia.textContent = aluno.media.toFixed(2);
-            row.appendChild(tdMedia);
 
             tbody.appendChild(row);
         });
