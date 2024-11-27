@@ -381,18 +381,31 @@
 }
 
     function excluirNota() {
-        const disciplina = document.getElementById('disciplina').value;
+    const disciplina = document.getElementById('disciplina').value;
 
-        const alunoRef = db.collection("alunos").doc(matriculaAtual);
-        alunoRef.update({
-            [disciplina]: firebase.firestore.FieldValue.delete()
-        }).then(() => {
-            carregarNotas();
-            calcularMedia();
-        });
+    const totalNotas = contarNotasValidas(notasSalvas);
+    if (totalNotas <= 1) {
+        alert("Você não pode excluir todas as notas. Deve haver ao menos uma nota cadastrada.");
+        return;
     }
 
-   function carregarNotas() {
+    const alunoRef = db.collection("alunos").doc(matriculaAtual);
+    alunoRef.update({
+        [disciplina]: firebase.firestore.FieldValue.delete()
+    }).then(() => {
+        carregarNotas();
+        calcularMedia();
+
+        const updatedTotalNotas = totalNotas - 1;
+        if (updatedTotalNotas < 5) {
+            ocultarRanking();
+        }
+    });
+}
+
+
+
+  function carregarNotas() {
     const alunoRef = db.collection("alunos").doc(matriculaAtual);
     alunoRef.get().then((doc) => {
         if (doc.exists) {
@@ -401,24 +414,26 @@
             mostrarNotasSalvas();
             calcularMedia();
 
-            // Ajusta o estado do checkbox e botão de ranking
-            const checkbox = document.getElementById('showInRankingCheckbox');
-            const rankingButton = document.getElementById('rankingButton');
+            const totalNotas = contarNotasValidas(notasSalvas);
 
-            if (notasSalvas.mostrarRanking) {
-                checkbox.checked = true;
-                checkbox.disabled = true; // Uma vez optado, desabilitar
-                rankingButton.disabled = false;
-                rankingButton.style.opacity = 1;
-            } else {
-                checkbox.checked = false;
-                checkbox.disabled = false;
-                rankingButton.disabled = true;
-                rankingButton.style.opacity = 0.5;
+            const rankingButton = document.getElementById('rankingButton');
+            rankingButton.disabled = totalNotas < 5;
+            rankingButton.style.opacity = totalNotas >= 5 ? 1 : 0.5;
+
+            if (totalNotas < 5) {
+                ocultarRanking();
             }
         }
-    }); // <<< Remova qualquer chave extra aqui
+    }).catch((error) => {
+        console.error("Erro ao carregar notas:", error);
+    });
 }
+
+
+function contarNotasValidas(notas) {
+    return Object.keys(notas).filter(key => key !== 'nome' && key !== 'mostrarRanking').length;
+}
+
 
 
     function atualizarCampoNota() {
@@ -555,86 +570,84 @@ document.getElementById('rankingButton').addEventListener('click', () => {
 
 
 
-    function mostrarRanking() {
-    if (Object.keys(notasSalvas).length <= 2) { // Somente 'nome' e 'mostrarRanking' são padrão
-        alert("É necessário cadastrar ao menos uma nota para visualizar o ranking.");
+  function mostrarRanking() {
+    // Verifica se o aluno logado tem pelo menos 5 notas cadastradas
+    const totalNotas = contarNotasValidas(notasSalvas);
+    if (totalNotas < 5) {
+        alert("Você precisa ter pelo menos 5 notas cadastradas para visualizar o ranking.");
         return;
     }
 
-    db.collection("alunos").where("mostrarRanking", "==", true).get().then((querySnapshot) => {
-        let rankingList = document.getElementById('ranking-list');
-        rankingList.innerHTML = ''; // Limpa a lista antes de adicionar o ranking
-        let alunosRanking = [];
+    // Recupera os alunos que optaram por aparecer no ranking
+    db.collection("alunos").where("mostrarRanking", "==", true).get()
+        .then((querySnapshot) => {
+            const rankingList = document.getElementById('ranking-list');
+            rankingList.innerHTML = ''; // Limpa o ranking anterior
+            const alunosRanking = [];
 
-        querySnapshot.forEach((doc) => {
-            const alunoData = doc.data();
-            let soma = 0;
-            let count = 0;
+            // Processa os dados de cada aluno
+            querySnapshot.forEach((doc) => {
+                const alunoData = doc.data();
+                let soma = 0;
+                let count = 0;
 
-            for (const disciplina in alunoData) {
-                if (disciplina !== 'nome' && disciplina !== 'mostrarRanking') {
-                    soma += alunoData[disciplina];
-                    count++;
+                // Calcula a soma e conta as notas
+                for (const disciplina in alunoData) {
+                    if (disciplina !== 'nome' && disciplina !== 'mostrarRanking') {
+                        soma += alunoData[disciplina];
+                        count++;
+                    }
                 }
-            }
 
-            const media = count > 0 ? soma / count : 0;
-            alunosRanking.push({ nome: alunoData.nome, media, notasSalvas: count });
+                const media = count > 0 ? soma / count : 0;
+                alunosRanking.push({
+                    nome: alunoData.nome,
+                    media,
+                    notasSalvas: count
+                });
+            });
+
+            // Ordena o ranking pela média em ordem decrescente
+            alunosRanking.sort((a, b) => b.media - a.media);
+
+            // Cria a tabela para exibição do ranking
+            const tabela = document.createElement('table');
+            tabela.classList.add('ranking-table');
+
+            // Cabeçalho da tabela
+            const thead = document.createElement('thead');
+            thead.innerHTML = `
+                <tr>
+                    <th>Posição</th>
+                    <th>Nome</th>
+                    <th>Nº de Notas</th>
+                </tr>
+            `;
+            tabela.appendChild(thead);
+
+            // Corpo da tabela
+            const tbody = document.createElement('tbody');
+            alunosRanking.forEach((aluno, index) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${index + 1}º</td>
+                    <td>${aluno.nome}</td>
+                    <td>${aluno.notasSalvas}</td>
+                `;
+                tbody.appendChild(row);
+            });
+            tabela.appendChild(tbody);
+
+            // Exibe a tabela no ranking
+            rankingList.appendChild(tabela);
+            document.getElementById('ranking-container').classList.remove('hidden');
+        })
+        .catch((error) => {
+            console.error("Erro ao carregar o ranking:", error);
         });
-
-        alunosRanking.sort((a, b) => b.media - a.media);
-
-        // Criando a tabela com as colunas separadas
-        const tabela = document.createElement('table');
-        tabela.classList.add('ranking-table'); // Classe para estilizar a tabela
-
-        // Cabeçalho da tabela
-        const thead = document.createElement('thead');
-        const headerRow = document.createElement('tr');
-
-        const thPosicao = document.createElement('th');
-        thPosicao.textContent = 'Posição';
-        headerRow.appendChild(thPosicao);
-
-        const thNome = document.createElement('th');
-        thNome.textContent = 'Nome';
-        headerRow.appendChild(thNome);
-
-        const thNotas = document.createElement('th');
-        thNotas.textContent = 'Nº de Notas';
-        headerRow.appendChild(thNotas);
-
-
-        thead.appendChild(headerRow);
-        tabela.appendChild(thead);
-
-        // Corpo da tabela
-        const tbody = document.createElement('tbody');
-        alunosRanking.forEach((aluno, index) => {
-            const row = document.createElement('tr');
-
-            const tdPosicao = document.createElement('td');
-            tdPosicao.textContent = `${index + 1}º`;
-            row.appendChild(tdPosicao);
-
-            const tdNome = document.createElement('td');
-            tdNome.textContent = aluno.nome;
-            row.appendChild(tdNome);
-
-            const tdNotas = document.createElement('td');
-            tdNotas.textContent = aluno.notasSalvas;
-            row.appendChild(tdNotas);
-
-
-            tbody.appendChild(row);
-        });
-
-        tabela.appendChild(tbody);
-        rankingList.appendChild(tabela);
-
-        document.getElementById('ranking-container').classList.remove('hidden');
-    });
 }
+
+
 
 
 
