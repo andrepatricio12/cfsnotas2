@@ -414,15 +414,16 @@
             mostrarNotasSalvas();
             calcularMedia();
 
+            // Atualizar o estado do checkbox
+            const mostrarRanking = notasSalvas.mostrarRanking || false;
+            const checkbox = document.getElementById('showInRankingCheckbox');
+            checkbox.checked = mostrarRanking;
+            checkbox.disabled = mostrarRanking; // Desativa se já marcado
+
             const totalNotas = contarNotasValidas(notasSalvas);
-
             const rankingButton = document.getElementById('rankingButton');
-            rankingButton.disabled = totalNotas < 5;
-            rankingButton.style.opacity = totalNotas >= 5 ? 1 : 0.5;
-
-            if (totalNotas < 5) {
-                ocultarRanking();
-            }
+            rankingButton.disabled = !(totalNotas >= 5 && mostrarRanking);
+            rankingButton.style.opacity = rankingButton.disabled ? 0.5 : 1;
         }
     }).catch((error) => {
         console.error("Erro ao carregar notas:", error);
@@ -471,20 +472,24 @@ function contarNotasValidas(notas) {
 
     function toggleRankingButton() {
     const checkbox = document.getElementById('showInRankingCheckbox');
-    const rankingButton = document.getElementById('rankingButton');
-
     if (checkbox.checked) {
         const confirmacao = confirm('Você deseja que seu nome seja exibido no ranking? Esta ação não pode ser desfeita.');
         if (confirmacao) {
-            rankingButton.disabled = false;
-            rankingButton.style.opacity = 1;
-            checkbox.disabled = true; // Desabilita o checkbox após confirmação
-            salvarPreferenciaRanking(true); // Salva a escolha no banco de dados
+            checkbox.disabled = true; // Impede alteração após confirmação
+            salvarPreferenciaRanking(true); // Salva no Firebase
         } else {
-            checkbox.checked = false; // Reverte a seleção se a confirmação for cancelada
+            checkbox.checked = false; // Reverte a seleção se não confirmar
         }
     }
 }
+
+function salvarPreferenciaRanking(mostrarRanking) {
+    const alunoRef = db.collection("alunos").doc(matriculaAtual);
+    alunoRef.update({ mostrarRanking: mostrarRanking })
+        .then(() => console.log('Preferência salva no ranking'))
+        .catch(err => console.error('Erro ao salvar preferência:', err));
+}
+
 async function carregarRanking() {
     const rankingContainer = document.getElementById('ranking-list');
     const naoExibirContainer = document.getElementById('nao-exibir-container');
@@ -576,7 +581,11 @@ document.getElementById('rankingButton').addEventListener('click', () => {
     if (totalNotas < 5) {
         alert("Você precisa ter pelo menos 5 notas cadastradas para visualizar o ranking.");
         return;
+    } if (!notasSalvas.mostrarRanking) {
+        alert("Você não optou por aparecer no ranking.");
+        return;
     }
+    carregarRanking();
 
     // Recupera os alunos que optaram por aparecer no ranking
     db.collection("alunos").where("mostrarRanking", "==", true).get()
