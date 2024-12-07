@@ -545,6 +545,14 @@ async function carregarRanking() {
     rankingBody.innerHTML = ''; // Limpa o ranking existente
     naoExibirContainer.innerHTML = ''; // Limpa o contador existente
 
+    // Lista de matrículas em ordem conforme o almanaque
+    const ordemAlmanaque = [
+        "9287027", "9306820", "9303219", "9287124", "9300350", "9288350", "9320547", "9288520", "9320555", "9320601",
+        "9307800", "9300600", "9300341", "9316230", "9308652", "9333967", "9316221", "9333860", "9329730", "9316116",
+        "9329340", "9329382", "6606032", "9339558", "9339329", "9287205", "9307745", "9316159", "9320563", "6718680", "9330097",
+        "9330356", "3847446", "9329056", "9339477"
+    ];
+
     try {
         const querySnapshot = await db.collection('alunos').get();
         let rankingData = [];
@@ -552,7 +560,7 @@ async function carregarRanking() {
 
         querySnapshot.forEach((doc) => {
             const data = doc.data();
-            
+
             // Verifica se o aluno optou por aparecer no ranking
             if (data.mostrarRanking && data.nome) {
                 const notas = Object.keys(data)
@@ -565,6 +573,7 @@ async function carregarRanking() {
 
                 rankingData.push({
                     nome: data.nome,
+                    matricula: doc.id, // Usa a matrícula para desempate
                     notasSalvas: notas.length,
                     media: media
                 });
@@ -574,8 +583,17 @@ async function carregarRanking() {
             }
         });
 
-        // Ordena o ranking por média decrescente
-        rankingData.sort((a, b) => parseFloat(b.media) - parseFloat(a.media));
+        // Ordena o ranking por média (decrescente) e, em caso de empate, pela posição das matrículas fornecidas
+        rankingData.sort((a, b) => {
+            // Primeira ordenação: pela média (decrescente)
+            if (parseFloat(b.media) === parseFloat(a.media)) {
+                // Desempate pela ordem das matrículas no almanaque
+                const indexA = ordemAlmanaque.indexOf(a.matricula); // Posição do aluno A na ordem
+                const indexB = ordemAlmanaque.indexOf(b.matricula); // Posição do aluno B na ordem
+                return indexA - indexB; // Aquele que aparece primeiro na lista vai primeiro
+            }
+            return parseFloat(b.media) - parseFloat(a.media); // Ordena pela média (decrescente)
+        });
 
         // Preenche a tabela com os dados do ranking
         if (rankingData.length > 0) {
