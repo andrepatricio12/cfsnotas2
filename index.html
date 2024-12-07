@@ -112,19 +112,20 @@
         }
         <div class="message hidden" id="ranking-container">
     <h3>Ranking de Alunos</h3>
-    <table id="ranking-table">
+    <table id="ranking-table" class="ranking-table">
         <thead>
             <tr>
                 <th>Posição</th>
                 <th>Nome</th>
                 <th>Nº de Notas</th>
+                <th>Média</th>
             </tr>
         </thead>
-        <tbody id="ranking-body">
-        </tbody>
+        <tbody id="ranking-body"></tbody>
     </table>
     <button id="hide-ranking-button" onclick="ocultarRanking()">Ocultar Ranking</button>
 </div>
+
     </style>
     <!-- Firebase SDK (compatível com navegadores) -->
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
@@ -215,27 +216,32 @@
     </div>
 </div>
     <style>
-    .ranking-table {
+   #ranking-container {
+    max-height: 70vh;
+    overflow-y: auto; /* Adiciona rolagem vertical */
+    margin-top: 20px;
+    padding: 10px;
+}
+
+.ranking-table {
     width: 100%;
     border-collapse: collapse;
-    margin-top: 20px;
+    margin-top: 10px;
 }
 
 .ranking-table th, .ranking-table td {
     border: 1px solid #ddd;
     padding: 8px;
     text-align: center;
+    white-space: nowrap; /* Evita quebra de linha */
 }
 
 .ranking-table th {
     background-color: #007bff;
     color: white;
-    font-weight: bold;
 }
 
-.ranking-table td {
-    background-color: #f9f9f9;
-}
+
         <style>
     /* Outros estilos existentes */
 
@@ -255,6 +261,12 @@
         white-space: nowrap; /* Impede a quebra de linha */
         text-align: left;
     }
+        .ranking-table th:nth-child(4),
+.ranking-table td:nth-child(4) {
+    width: 100px; /* Define largura específica para a coluna de média */
+    text-align: center;
+}
+
 
     /* Outras colunas */
     #ranking-container table th:nth-child(1),
@@ -491,175 +503,150 @@ function salvarPreferenciaRanking(mostrarRanking) {
 }
 
 async function carregarRanking() {
-    const rankingContainer = document.getElementById('ranking-list');
-    const naoExibirContainer = document.getElementById('nao-exibir-container');
-    
+    const rankingBody = document.getElementById('ranking-body'); // Corpo da tabela
+    const naoExibirContainer = document.getElementById('nao-exibir-container'); // Contador de não exibidos
+    rankingBody.innerHTML = ''; // Limpa o ranking existente
+    naoExibirContainer.innerHTML = ''; // Limpa o contador existente
+
     try {
-        const querySnapshot = await firebase.firestore().collection('alunos').get();
+        const querySnapshot = await db.collection('alunos').get();
         let rankingData = [];
         let naoExibirCount = 0;
 
+        // Processa cada documento retornado do Firebase
         querySnapshot.forEach((doc) => {
             const data = doc.data();
-            if (data.mostrarRanking) {  // Certifique-se de usar a chave correta
-                // Calcular a média das notas
-                const grades = Object.keys(data).filter(key => key !== "nome" && key !== "mostrarRanking").map(key => data[key]);
-                const average = grades.reduce((sum, grade) => sum + grade, 0) / grades.length;
-                rankingData.push({ nome: data.nome, media: average, notasSalvas: grades.length });
+            if (data.mostrarRanking) {
+                const notas = Object.keys(data)
+                    .filter((key) => key !== 'nome' && key !== 'mostrarRanking') // Filtra apenas as notas
+                    .map((key) => data[key]);
+
+                const media = notas.reduce((sum, nota) => sum + nota, 0) / notas.length;
+
+                rankingData.push({
+                    nome: data.nome,
+                    media: media.toFixed(3), // Média com 3 casas decimais
+                    notasSalvas: notas.length,
+                });
             } else {
-                naoExibirCount++;
+                naoExibirCount++; // Contabiliza os alunos que não optaram por aparecer no ranking
             }
         });
 
-        // Ordenar o ranking por média decrescente
+        console.log("Alunos que optaram por não aparecer no ranking:", naoExibirCount);
+
+        // Ordena o ranking por média decrescente
         rankingData.sort((a, b) => b.media - a.media);
 
-        // Criando a tabela com as colunas separadas
-        const tabela = document.createElement('table');
-        tabela.classList.add('ranking-table'); // Classe para estilizar a tabela
-
-        // Cabeçalho da tabela
-        const thead = document.createElement('thead');
-        const headerRow = document.createElement('tr');
-
-        const thPosicao = document.createElement('th');
-        thPosicao.textContent = 'Posição';
-        headerRow.appendChild(thPosicao);
-
-        const thNome = document.createElement('th');
-        thNome.textContent = 'Nome';
-        headerRow.appendChild(thNome);
-
-        const thNotas = document.createElement('th');
-        thNotas.textContent = 'Nº de Notas';
-        headerRow.appendChild(thNotas);
-
-        thead.appendChild(headerRow);
-        tabela.appendChild(thead);
-
-        // Corpo da tabela
-        const tbody = document.createElement('tbody');
-        rankingData.forEach((item, index) => {
+        // Preenche o corpo da tabela com os dados processados
+        rankingData.forEach((aluno, index) => {
             const row = document.createElement('tr');
-
-            const tdPosicao = document.createElement('td');
-            tdPosicao.textContent = `${index + 1}º`;
-            row.appendChild(tdPosicao);
-
-            const tdNome = document.createElement('td');
-            tdNome.textContent = item.nome;
-            row.appendChild(tdNome);
-
-            const tdNotas = document.createElement('td');
-            tdNotas.textContent = item.notasSalvas;
-            row.appendChild(tdNotas);
-
-            tbody.appendChild(row);
+            row.innerHTML = `
+                <td>${index + 1}º</td>
+                <td>${aluno.nome}</td>
+                <td>${aluno.notasSalvas}</td>
+                <td>${aluno.media}</td>
+            `;
+            rankingBody.appendChild(row);
         });
 
-        tabela.appendChild(tbody);
-        rankingContainer.innerHTML = '';
-        rankingContainer.appendChild(tabela);
-
-        // Atualizar mensagem de não exibição
-        naoExibirContainer.innerHTML = `
-            <span>Alunos que optaram por não aparecer no ranking: <span style="color: red;">${naoExibirCount}</span></span>
-        `;
+        // Atualiza o contador de alunos que não apareceram no ranking
+        if (naoExibirCount > 0) {
+            naoExibirContainer.innerHTML = `
+                <span>Alunos que optaram por não aparecer no ranking: <span style="color: red;">${naoExibirCount}</span></span>
+            `;
+        } else {
+            naoExibirContainer.innerHTML = `
+                <span>Nenhum aluno optou por não aparecer no ranking.</span>
+            `;
+        }
     } catch (error) {
         console.error('Erro ao carregar o ranking:', error);
+        alert('Ocorreu um erro ao carregar o ranking. Por favor, tente novamente mais tarde.');
     }
 }
-document.getElementById('rankingButton').addEventListener('click', () => {
-    carregarRanking();
-});
 
 
 
   function mostrarRanking() {
-    // Verifica se o aluno logado tem pelo menos 5 notas cadastradas
-    const totalNotas = contarNotasValidas(notasSalvas);
-    if (totalNotas < 5) {
-        alert("Você precisa ter pelo menos 5 notas cadastradas para visualizar o ranking.");
-        return;
-    } if (!notasSalvas.mostrarRanking) {
-        alert("Você não optou por aparecer no ranking.");
-        return;
-    }
-    carregarRanking();
-
-    // Recupera os alunos que optaram por aparecer no ranking
-    db.collection("alunos").where("mostrarRanking", "==", true).get()
-        .then((querySnapshot) => {
-            const rankingList = document.getElementById('ranking-list');
-            rankingList.innerHTML = ''; // Limpa o ranking anterior
-            const alunosRanking = [];
-
-            // Processa os dados de cada aluno
-            querySnapshot.forEach((doc) => {
-                const alunoData = doc.data();
-                let soma = 0;
-                let count = 0;
-
-                // Calcula a soma e conta as notas
-                for (const disciplina in alunoData) {
-                    if (disciplina !== 'nome' && disciplina !== 'mostrarRanking') {
-                        soma += alunoData[disciplina];
-                        count++;
-                    }
-                }
-
-                const media = count > 0 ? soma / count : 0;
-                alunosRanking.push({
-                    nome: alunoData.nome,
-                    media,
-                    notasSalvas: count
-                });
-            });
-
-            // Ordena o ranking pela média em ordem decrescente
-            alunosRanking.sort((a, b) => b.media - a.media);
-
-            // Cria a tabela para exibição do ranking
-            const tabela = document.createElement('table');
-            tabela.classList.add('ranking-table');
-
-            // Cabeçalho da tabela
-            const thead = document.createElement('thead');
-            thead.innerHTML = `
-                <tr>
-                    <th>Posição</th>
-                    <th>Nome</th>
-                    <th>Nº de Notas</th>
-                </tr>
-            `;
-            tabela.appendChild(thead);
-
-            // Corpo da tabela
-            const tbody = document.createElement('tbody');
-            alunosRanking.forEach((aluno, index) => {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${index + 1}º</td>
-                    <td>${aluno.nome}</td>
-                    <td>${aluno.notasSalvas}</td>
-                `;
-                tbody.appendChild(row);
-            });
-            tabela.appendChild(tbody);
-
-            // Exibe a tabela no ranking
-            rankingList.appendChild(tabela);
-            document.getElementById('ranking-container').classList.remove('hidden');
+    const rankingContainer = document.getElementById('ranking-container');
+    carregarRanking()
+        .then(() => {
+            rankingContainer.classList.remove('hidden');
         })
         .catch((error) => {
-            console.error("Erro ao carregar o ranking:", error);
+            console.error('Erro ao carregar o ranking:', error);
+            alert('Não foi possível carregar o ranking. Tente novamente mais tarde.');
         });
-}
+}// Recupera os alunos que optaram por aparecer no ranking
+db.collection("alunos").where("mostrarRanking", "==", true).get()
+    .then((querySnapshot) => {
+        const rankingList = document.getElementById('ranking-list');
+        rankingList.innerHTML = ''; // Limpa o ranking anterior
+        const alunosRanking = [];
+
+        // Processa os dados de cada aluno
+        querySnapshot.forEach((doc) => {
+            const alunoData = doc.data();
+            const notas = Object.keys(alunoData)
+                .filter((key) => key !== "nome" && key !== "mostrarRanking")
+                .map((key) => alunoData[key]);
+
+            const media = notas.length > 0 
+                ? (notas.reduce((soma, nota) => soma + nota, 0) / notas.length).toFixed(3)
+                : 0;
+
+            alunosRanking.push({
+                nome: alunoData.nome,
+                media: parseFloat(media),
+                notasSalvas: notas.length,
+            });
+        });
+
+        // Ordena o ranking pela média em ordem decrescente
+        alunosRanking.sort((a, b) => b.media - a.media);
+
+        // Cria a tabela para exibição do ranking
+        const tabela = document.createElement('table');
+        tabela.classList.add('ranking-table');
+
+        // Cabeçalho da tabela
+        const thead = document.createElement('thead');
+        thead.innerHTML = `
+            <tr>
+                <th>Posição</th>
+                <th>Nome</th>
+                <th>Nº de Notas</th>
+                <th>Média</th>
+            </tr>
+        `;
+        tabela.appendChild(thead);
+
+        // Corpo da tabela
+        const tbody = document.createElement('tbody');
+        alunosRanking.forEach((aluno, index) => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${index + 1}º</td>
+                <td>${aluno.nome}</td>
+                <td>${aluno.notasSalvas}</td>
+                <td>${aluno.media}</td>
+            `;
+            tbody.appendChild(row);
+        });
+        tabela.appendChild(tbody);
+
+        // Exibe a tabela no ranking
+        rankingList.appendChild(tabela);
+        document.getElementById('ranking-container').classList.remove('hidden');
+    })
+    .catch((error) => {
+        console.error("Erro ao carregar o ranking:", error);
+        alert("Não foi possível carregar o ranking. Tente novamente mais tarde.");
+    });
 
 
-
-
-
+    
 
     function ocultarRanking() {
         document.getElementById('ranking-container').classList.add('hidden');
